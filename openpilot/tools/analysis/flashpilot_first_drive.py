@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Offline first-drive report for FlashPilot Lightning A/B2/C-shadow routes.
+"""Offline first-drive report for FlashPilot Lightning A/B2+C routes (B2 fallback supported).
 
 This tool only reads logs. It does not import or invoke control processes.
 """
@@ -321,7 +321,7 @@ def print_summary(report: dict[str, Any]) -> None:
 
 
 def print_comparison(reports: list[dict[str, Any]]) -> None:
-  print("\nA / B2 / C-shadow comparison")
+  print("\nA / B2+C comparison (B2 fallback / C-shadow alias supported)")
   print("state       steer RMS  osc Hz  saturation  below-set  max deficit  transitions  shadow")
   for report in reports:
     lat, lon, radar = report["lateral"], report["longitudinal"], report["radar"]
@@ -345,7 +345,7 @@ def main() -> None:
   parser.add_argument("--route", action="append", required=True, type=route_spec,
                       help="LABEL=route, connect URL, local rlog/qlog, or segment range")
   parser.add_argument("--json", type=Path, help="write machine-readable report")
-  parser.add_argument("--compare", action="store_true", help="print compact A/B2/C-shadow comparison")
+  parser.add_argument("--compare", action="store_true", help="compare A/B2+C; B2 and historical C-shadow labels also supported")
   args = parser.parse_args()
   reports = []
   for label, identifier in args.route:

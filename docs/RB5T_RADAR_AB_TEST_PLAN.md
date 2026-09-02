@@ -2,14 +2,38 @@
 
 ## Variants
 
-1. **A — Current StarPilot:** existing `Steer_Assist_Data` adapter.
-2. **B — Upstream FlashPilot:** untouched baseline, vision-only on Lightning.
-3. **B2 — Gated adapter:** FlashPilot with `ExperimentalFordSteerAssistRadar=true` and shadow false.
-4. **C-shadow — Adapter plus evaluation:** both development gates true; published behavior must equal B2.
-5. **C-active:** future short hold, only after explicit approval and correct estimate handling.
-6. **D:** future radar/vision handoff smoothing, only if C-active leaves a demonstrated problem.
+1. **A — FlashPilot vision-only:** path-angle ON, RB5T adapter OFF, shadow OFF.
+2. **B2+C — Combined test state:** path-angle ON, RB5T adapter ON, shadow ON.
+3. **B2 — Diagnostic fallback only:** path-angle ON, adapter ON, shadow OFF.
+4. **C-shadow — Historical alias for B2+C:** retained for older reports.
+5. **StarPilot reference:** historical adapter reference, not state A.
 
-B2 is required because comparing B directly with C would combine radar enablement with continuity.
+Normal sequence is A, then B2+C after accepting the lateral baseline. A separate
+B2-only drive is not required; use B2 to isolate diagnostic overhead if B2+C
+behaves unexpectedly. B2+C is a combined TEST STATE, not a new control mode.
+The independent gates and implementations remain unchanged. Shadow does not
+activate continuity, dropout hold, FP-RADAR-002, or any tuning changes.
+
+Shadow consumes scalar copies of the raw radar fields and returns a decision
+used only by event logging. The same point deletion/update code runs afterward.
+Lead-transition instrumentation reads leadOne/leadTwo after selection and does
+not write either lead. Thus B2 and B2+C have identical published data for the
+same inputs, apart from diagnostics and the shadow flag in CarParams.
+
+Runtime cost is constant-space/O(1), one small decision object per radar update
+(20 Hz), with logs only on events. Source-transition tracking already runs in
+B2; the extra gate enables its event logging. Logging is not hard-real-time:
+carlog uses a synchronous StreamHandler, so blocked stderr or extreme event churn
+could affect timing. Verify route timing on B2+C; use B2 fallback if necessary.
+
+Offline validation (2026-09-02): 1,050 synthetic radar frames spanning steady
+confidence, dropout/expiry, reacquisition, adjacent objects, and discontinuities
+produced identical published point fields, track IDs, and velocity histories
+with shadow on/off. The targeted union passed 133 tests plus 9,014 safety
+subtests (74 skips). A Mac microbenchmark over five 200,000-call runs measured
+0.304–0.316 microseconds/call steady and 0.543–0.550 microseconds/call under
+alternating confidence. This measures calculations only, not Comma scheduling
+or log I/O; it is not an on-device worst-case latency guarantee.
 
 ## Known replay candidates
 
