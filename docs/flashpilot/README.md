@@ -26,15 +26,16 @@ Every later FlashPilot/BluePilot-transplant commit should be diffable against th
 git diff flashpilot-baseline..flashpilot-dev -- opendbc/car/ford opendbc/safety/modes/ford.h
 ```
 
-## Status: Phase 0 — investigation & architecture
+## Status: Phase 0 done; Step 3 (fingerprint scaffolding) done
 
-No control code has been written yet. This phase is entirely offline research against upstream `openpilot`/`opendbc` and `BluePilotDev/bluepilot`, producing the documents below.
+No control, lateral, longitudinal, radar, or panda safety code has been written or modified. Work so far is offline research plus fingerprint-validation tooling that lives entirely outside `opendbc`/`openpilot`'s own source.
 
-## Phase 0 documents
+## Documents
 
 | Doc | Covers |
 |---|---|
 | [`FLASHLIGHTNING_UPSTREAM_AUDIT.md`](./FLASHLIGHTNING_UPSTREAM_AUDIT.md) | What upstream openpilot/opendbc already supports for the F-150 Lightning today, and what's missing. |
+| [`FLASHLIGHTNING_FIRMWARE_CAPTURE.md`](./FLASHLIGHTNING_FIRMWARE_CAPTURE.md) | Step 3: exact firmware capture procedure for the physical truck, required-vs-optional ECU analysis, and the pre-flight validator tool. |
 | [`FLASHLIGHTNING_FINGERPRINT_PLAN.md`](./FLASHLIGHTNING_FINGERPRINT_PLAN.md) | Exact trace of how a Ford is fingerprinted at startup, and exactly where real 2024 Lightning firmware will be added once captured. |
 | [`BLUEPILOT_LATERAL_AUDIT.md`](./BLUEPILOT_LATERAL_AUDIT.md) | Component-by-component (REQUIRED/OPTIONAL/NOT NEEDED) audit of BluePilot's Ford angle-control implementation. |
 | [`FLASHPILOT_ARCHITECTURE.md`](./FLASHPILOT_ARCHITECTURE.md) | The proposed minimal integration design, feature gate, branch structure, files to touch/not touch, blockers, and first commit sequence. |
@@ -55,12 +56,12 @@ FlashPilot deliberately does **not**:
 ## Planned commit sequence
 
 1. ~~Establish FlashPilot from upstream openpilot~~ — the `flashpilot-baseline` tag / `flashpilot-dev`'s starting commit *is* this step (a pristine upstream commit, not a FlashPilot-authored one).
-2. **Add FlashPilot architecture/audit documentation** — this commit.
-3. Add Lightning fingerprint test scaffolding.
-4. Port BluePilot lateral dependencies (no behavior enabled yet).
-5. Enable Lightning-only BluePilot angle control (behind the kill-switch described in `FLASHPILOT_ARCHITECTURE.md` §2).
+2. ~~Add FlashPilot architecture/audit documentation~~ — done.
+3. ~~Add Lightning fingerprint test scaffolding~~ — done (`FLASHLIGHTNING_FIRMWARE_CAPTURE.md` + `tools/validate_ford_fw_capture.py`). No firmware has been captured yet; this is preparation only, next dependency is truck access.
+4. Port BluePilot lateral dependencies (no behavior enabled yet). **Not started.**
+5. Enable Lightning-only BluePilot angle control (behind the kill-switch described in `FLASHPILOT_ARCHITECTURE.md` §2). **Not started.**
 
-Steps 3-5 are not yet started.
+Steps 4-5 are intentionally on hold until step 3 produces real, validated firmware data from the truck.
 
 ## Branch structure
 
