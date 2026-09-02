@@ -60,3 +60,20 @@ The analyzer was executed against nine already-local Lightning route-102 rlogs. 
 - Segment 68 was 90.8% radar-valid with five source switches.
 
 These results are characterization only. They do not validate the candidate thresholds for active use, and the shadow evaluator did not alter any published point.
+
+## Detailed replay result
+
+The analyzer was extended to report elapsed-time-normalized switches, invalid-confidence run distributions, transition jump percentiles, rejection reasons, and reacquisition residuals.
+
+- Segments 7 and 59 remained clean negative controls: 100% valid and zero source switches/minute.
+- Segment 9 had two invalid runs, both over 500 ms (median 10.18 s), and 26.0 switches/minute.
+- Segment 30 had one 9.34 s invalid run and 2.0 switches/minute.
+- Segment 34 had nine invalid runs: two at 250–500 ms and seven over 500 ms; median 0.95 s and 16.0 switches/minute.
+- Segment 38 had four invalid runs: three at 250–500 ms and one over 500 ms; median 0.41 s and 8.0 switches/minute. All four shadow reacquisitions were classified as new identities.
+- Segment 55 had one 1.00 s invalid run and 4.0 switches/minute.
+- Segment 66 had one 31.81 s invalid run and 2.0 switches/minute.
+- Segment 68 had two invalid runs over 500 ms, median 2.77 s, and 5.0 switches/minute.
+
+The source-change distance jumps were also material in several segments: median absolute `dRel` jumps were 30.06 m in segment 9, 9.61 m in segment 38, and 14.52 m in segment 68. This is inconsistent with blindly preserving object identity across the observed handoffs.
+
+Conclusion: the replay tooling and shadow diagnostics are useful, but the present data does not justify an active 250 ms hold. Most losses exceed the candidate hold window and every evaluated candidate reacquisition in these logs failed continuity. Keep behavior off until a route containing genuine brief, same-object dropouts demonstrates a measurable benefit and passes the identity and adjacent-object checks.
