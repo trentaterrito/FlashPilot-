@@ -12,6 +12,7 @@ from openpilot.common.params import Params
 from openpilot.common.realtime import DT_MDL, Priority, config_realtime_process
 from openpilot.common.swaglog import cloudlog
 from openpilot.common.simple_kalman import KF1D
+from openpilot.selfdrive.controls.lib.lead_source_transition import LeadSourceTransitionTracker
 
 
 # Default lead acceleration decay set to 50% at 1s
@@ -177,7 +178,7 @@ def get_lead(v_ego: float, ready: bool, tracks: dict[int, Track], lead_msg: capn
 
 
 class RadarD:
-  def __init__(self, delay: float = 0.0):
+  def __init__(self, delay: float = 0.0, log_lead_transitions: bool = False):
     self.tracks: dict[int, Track] = {}
     self.kalman_params = KalmanParams(DT_MDL)
     self.lead_prob_filters = [FirstOrderFilter(0.0, 0.2, DT_MDL) for _ in range(2)]
@@ -190,6 +191,19 @@ class RadarD:
     self.radar_state_valid = False
 
     self.ready = False
+    self.log_lead_transitions = log_lead_transitions
+    self.lead_transition_tracker = LeadSourceTransitionTracker()
+
+  def _log_source_transition(self, lead_index: int, lead) -> None:
+    event = self.lead_transition_tracker.update(
+      lead_index, present=bool(lead.present), radar=bool(lead.radar),
+      d_rel=float(lead.dRel), v_rel=float(lead.vRel), a_lead_k=float(lead.aLeadK),
+      radar_track_id=int(lead.radarTrackId), model_prob=float(lead.modelProb),
+    )
+    if self.log_lead_transitions and event is not None:
+      cloudlog.info("radar_lead_source_transition lead=%d old=%s new=%s dRel_jump=%s vRel_jump=%s aLeadK_jump=%s old_track=%d new_track=%d model_prob=%.3f",
+                    event["lead"], event["old"], event["new"], event["dRel_jump"], event["vRel_jump"], event["aLeadK_jump"],
+                    event["old_track"], event["new_track"], event["model_prob"])
 
   def update(self, sm: messaging.SubMaster, rr: car.RadarData):
     self.ready = sm.seen['modelV2']
@@ -240,6 +254,8 @@ class RadarD:
 
       self.radar_state.leadOne = get_lead(self.v_ego, self.ready, self.tracks, leads_v3[0], model_v_ego, self.lead_prob_filters[0].x, low_speed_override=True)
       self.radar_state.leadTwo = get_lead(self.v_ego, self.ready, self.tracks, leads_v3[1], model_v_ego, self.lead_prob_filters[1].x, low_speed_override=False)
+      self._log_source_transition(0, self.radar_state.leadOne)
+      self._log_source_transition(1, self.radar_state.leadTwo)
 
   def publish(self, pm: messaging.PubMaster):
     assert self.radar_state is not None
@@ -256,14 +272,15 @@ def main() -> None:
 
   # wait for stats about the car to come in from controls
   cloudlog.info("radard is waiting for CarParams")
-  CP = messaging.log_from_bytes(Params().get("CarParams", block=True), car.CarParams)
+  params = Params()
+  CP = messaging.log_from_bytes(params.get("CarParams", block=True), car.CarParams)
   cloudlog.info("radard got CarParams")
 
   # *** setup messaging
   sm = messaging.SubMaster(['modelV2', 'carState', 'radarTracks'], poll='modelV2')
   pm = messaging.PubMaster(['radarState'])
 
-  RD = RadarD(CP.radarDelay)
+  RD = RadarD(CP.radarDelay, log_lead_transitions=params.get_bool("ExperimentalFordSteerAssistRadarShadow"))
 
   while 1:
     sm.update()

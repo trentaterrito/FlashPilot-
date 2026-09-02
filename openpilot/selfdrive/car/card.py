@@ -99,6 +99,15 @@ class Car:
           cached_params = _cached_params
 
       self.CI = get_car(*self.can_callbacks, obd_callback(self.params), alpha_long_allowed, is_release, cached_params)
+      # Keep upstream Ford CAN-FD behavior unchanged unless this development-only
+      # adapter is explicitly selected before CarParams/RadarInterface publication.
+      if self.params.get_bool("ExperimentalFordSteerAssistRadar"):
+        from opendbc.car.ford.values import CAR as FORD_CAR, FordFlags
+        if self.CI.CP.carFingerprint == FORD_CAR.FORD_F_150_LIGHTNING_MK1:
+          self.CI.CP.flags |= FordFlags.STEER_ASSIST_RADAR
+          if self.params.get_bool("ExperimentalFordSteerAssistRadarShadow"):
+            self.CI.CP.flags |= FordFlags.STEER_ASSIST_RADAR_SHADOW
+          self.CI.CP.radarUnavailable = False
       self.RI = interfaces[self.CI.CP.carFingerprint].RadarInterface(self.CI.CP)
       self.CP = self.CI.CP
 
