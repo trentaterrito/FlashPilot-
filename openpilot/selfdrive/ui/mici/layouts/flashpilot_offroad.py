@@ -29,8 +29,19 @@ def request_next_mode():
 class FlashPilotOffroadToggle(BigMultiToggle):
   """Settings tile beside Network; display acknowledged state, not the request."""
   def __init__(self):
-    super().__init__("Vehicle State", list(MODES))
+    super().__init__("Vehicle\nState", list(MODES))
+    self._sub_label.set_font_size(28)
     self.set_enabled(False)
+
+  def _get_label_font_size(self):
+    return 44
+
+  def _title_width_hint(self):
+    # Reserve a separate column for the three state indicators.
+    return super()._title_width_hint() - 84
+
+  def _subtitle_width_hint(self):
+    return self._title_width_hint()
 
   def _handle_mouse_release(self, mouse_pos):
     # Recheck after the tap, not just when rendering. Backend independently
@@ -43,9 +54,11 @@ class FlashPilotOffroadToggle(BigMultiToggle):
     status = offroad_status()
     self.set_value(status["selection"])
     self.set_enabled(status.get("can_select", False))
-    title = {
-      "stopping": "Vehicle State: WAIT",
-      "fault": "Vehicle State: FAULT",
-      "unavailable": "Vehicle State: no data",
-    }.get(status["phase"], "Vehicle State")
-    self.set_text(title)
+    # Keep the heading stable; show transition/fault information below it.
+    # self.value remains the actual selection used by the three indicators.
+    detail = {
+      "stopping": f"{status['selection']}: WAIT",
+      "fault": f"{status['selection']}: FAULT",
+      "unavailable": "no data",
+    }.get(status["phase"], status["selection"])
+    self._sub_label.set_text(detail)

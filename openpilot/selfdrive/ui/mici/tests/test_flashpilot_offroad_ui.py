@@ -60,15 +60,25 @@ def test_tile_tap_waits_for_acknowledged_selection(monkeypatch):
   assert tile.value == "off"
 
 
-@pytest.mark.parametrize("phase,title", [("offroad", "Vehicle State"), ("stopping", "Vehicle State: WAIT"),
-                                        ("fault", "Vehicle State: FAULT"), ("unavailable", "Vehicle State: no data")])
-def test_tile_reflects_acknowledged_status(monkeypatch, phase, title):
+@pytest.mark.parametrize("phase,detail", [("offroad", "offroad"), ("stopping", "offroad: WAIT"),
+                                         ("fault", "offroad: FAULT"), ("unavailable", "no data")])
+def test_tile_reflects_acknowledged_status(monkeypatch, phase, detail):
   from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
   tile = object.__new__(ui.FlashPilotOffroadToggle)
   values = {}
   monkeypatch.setattr(tile, "set_value", lambda value: values.update(value=value))
-  monkeypatch.setattr(tile, "set_text", lambda text: values.update(text=text))
+  tile._sub_label = SimpleNamespace(set_text=lambda text: values.update(detail=text))
   monkeypatch.setattr(tile, "set_enabled", lambda enabled: values.update(enabled=enabled))
   monkeypatch.setattr(ui, "offroad_status", lambda: {"selection": "offroad", "can_select": False, "phase": phase})
   tile._update_state()
-  assert values == {"value": "offroad", "text": title, "enabled": False}
+  assert values == {"value": "offroad", "detail": detail, "enabled": False}
+
+
+def test_tile_reserves_indicator_column():
+  from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
+  tile = object.__new__(ui.FlashPilotOffroadToggle)
+  tile._rect = SimpleNamespace(width=402)
+  tile._txt_icon = None
+  assert tile._get_label_font_size() == 44
+  assert tile._title_width_hint() == tile._subtitle_width_hint() == 238
+  assert tile.LABEL_HORIZONTAL_PADDING + tile._title_width_hint() < 402 - 84
