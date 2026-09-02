@@ -104,9 +104,9 @@ class Car:
       if self.params.get_bool("ExperimentalFordSteerAssistRadar"):
         from opendbc.car.ford.values import CAR as FORD_CAR, FordFlags
         if self.CI.CP.carFingerprint == FORD_CAR.FORD_F_150_LIGHTNING_MK1:
-          self.CI.CP.flags |= FordFlags.STEER_ASSIST_RADAR
+          self.CI.CP.flags = int(self.CI.CP.flags | FordFlags.STEER_ASSIST_RADAR)
           if self.params.get_bool("ExperimentalFordSteerAssistRadarShadow"):
-            self.CI.CP.flags |= FordFlags.STEER_ASSIST_RADAR_SHADOW
+            self.CI.CP.flags = int(self.CI.CP.flags | FordFlags.STEER_ASSIST_RADAR_SHADOW)
           self.CI.CP.radarUnavailable = False
       self.RI = interfaces[self.CI.CP.carFingerprint].RadarInterface(self.CI.CP)
       self.CP = self.CI.CP
