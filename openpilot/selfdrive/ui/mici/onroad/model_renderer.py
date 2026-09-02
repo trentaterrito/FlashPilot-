@@ -121,7 +121,8 @@ class ModelRenderer(Widget):
     model = sm['modelV2']
     radar_state = sm['radarState'] if sm.valid['radarState'] else None
     lead_one = radar_state.leadOne if radar_state else None
-    render_lead_indicator = self._longitudinal_control and radar_state is not None
+    # Detection reference only, including when factory ACC handles longitudinal.
+    render_lead_indicator = self._should_render_lead_indicator(sm, ui_state.started_frame)
 
     # Update model data when needed
     model_updated = sm.updated['modelV2']
@@ -143,8 +144,13 @@ class ModelRenderer(Widget):
       self._draw_lane_lines()
       self._draw_path(sm)
 
-    # if render_lead_indicator and radar_state:
-    #   self._draw_lead_indicator()
+    if render_lead_indicator:
+      self._draw_lead_indicator()
+
+  @staticmethod
+  def _should_render_lead_indicator(sm, started_frame):
+    return (sm.valid['radarState'] and sm.alive['radarState'] and
+            sm.recv_frame['radarState'] >= started_frame)
 
   def _update_raw_points(self, model):
     """Update raw 3D points from model data"""
@@ -166,7 +172,8 @@ class ModelRenderer(Widget):
     leads = [radar_state.leadOne, radar_state.leadTwo]
 
     for i, lead_data in enumerate(leads):
-      if lead_data and lead_data.present:
+      if (lead_data and lead_data.present and
+          np.isfinite([lead_data.dRel, lead_data.yRel, lead_data.vRel]).all() and lead_data.dRel > 0):
         d_rel, y_rel, v_rel = lead_data.dRel, lead_data.yRel, lead_data.vRel
         idx = self._get_path_length_idx(path_x_array, d_rel)
 
@@ -271,7 +278,7 @@ class ModelRenderer(Widget):
       fill_alpha = min(fill_alpha, 255)
 
     # Calculate size and position
-    sz = np.clip((25 * 30) / (d_rel / 3 + 30), 15.0, 30.0) * 1
+    sz = np.clip((25 * 30) / (d_rel / 3 + 30), 15.0, 30.0) * 0.65
     x = np.clip(point[0], 0.0, rect.width - sz / 2)
     y = min(point[1], rect.height - sz * 0.6)
 
@@ -365,8 +372,10 @@ class ModelRenderer(Widget):
       if not lead.glow or not lead.chevron:
         continue
 
-      rl.draw_triangle_fan(lead.glow, len(lead.glow), rl.Color(218, 202, 37, 255))
-      rl.draw_triangle_fan(lead.chevron, len(lead.chevron), rl.Color(201, 34, 49, lead.fill_alpha))
+      glow = [(x + self._rect.x, y + self._rect.y) for x, y in lead.glow]
+      chevron = [(x + self._rect.x, y + self._rect.y) for x, y in lead.chevron]
+      rl.draw_triangle_fan(glow, len(glow), rl.Color(218, 202, 37, 255))
+      rl.draw_triangle_fan(chevron, len(chevron), rl.Color(201, 34, 49, lead.fill_alpha))
 
   @staticmethod
   def _get_path_length_idx(pos_x_array: np.ndarray, path_height: float) -> int:
