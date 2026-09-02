@@ -3,7 +3,11 @@
   url = ../../commaai/panda.git
 [submodule "opendbc"]
   path = opendbc_repo
-  url = ../../commaai/opendbc.git
+  url = https://github.com/trentaterrito/flashpilot-opendbc.git
+  # FlashPilot: repointed from ../../commaai/opendbc.git to carry the
+  # F-150 Lightning fingerprint patch (this session has no push access
+  # to commaai/opendbc directly). Upstream is tracked as the "upstream"
+  # remote inside opendbc_repo for future syncing.
 [submodule "msgq"]
   path = msgq_repo
   url = ../../commaai/msgq.git
