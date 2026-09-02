@@ -57,11 +57,11 @@ FlashPilot deliberately does **not**:
 
 1. ~~Establish FlashPilot from upstream openpilot~~ — the `flashpilot-baseline` tag / `flashpilot-dev`'s starting commit *is* this step (a pristine upstream commit, not a FlashPilot-authored one).
 2. ~~Add FlashPilot architecture/audit documentation~~ — done.
-3. ~~Add Lightning fingerprint test scaffolding~~ — done (`FLASHLIGHTNING_FIRMWARE_CAPTURE.md` + `tools/validate_ford_fw_capture.py`). No firmware has been captured yet; this is preparation only, next dependency is truck access.
+3. ~~Add Lightning fingerprint test scaffolding~~ — done (`FLASHLIGHTNING_FIRMWARE_CAPTURE.md` + `tools/validate_ford_fw_capture.py`), then ~~capture and add real MY2024 firmware~~ — done: a real 2024 F-150 Lightning Flash was queried, and its forward-radar firmware (`RB5T-14D049-AB`) added to `opendbc/car/ford/fingerprints.py` (ABS/EPS/camera already matched firmware on file). See `FLASHLIGHTNING_FIRMWARE_CAPTURE.md` §0 for the verified result and `test_my2024_lightning_exact_match` for the regression test.
 4. Port BluePilot lateral dependencies (no behavior enabled yet). **Not started.**
 5. Enable Lightning-only BluePilot angle control (behind the kill-switch described in `FLASHPILOT_ARCHITECTURE.md` §2). **Not started.**
 
-Steps 4-5 are intentionally on hold until step 3 produces real, validated firmware data from the truck.
+Steps 4-5 are intentionally on hold — the truck now fingerprints correctly, but no lateral/longitudinal/control code has been touched yet.
 
 ## Branch structure
 

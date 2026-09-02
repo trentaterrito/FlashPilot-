@@ -6,6 +6,23 @@ Verified directly against this repo's pinned `opendbc` submodule commit `b4ef5e1
 
 **New fact incorporated from the vehicle owner:** this 2024 Lightning does **not** use Ford's TRON/SecOC steering CAN messaging. That resolves one of the two open blockers from `FLASHLIGHTNING_FINGERPRINT_PLAN.md` (the `dashcamOnly` SecOC byte-length check in `interface.py:64-67` should not trip on this truck) — worth a quick empirical confirmation during capture (§3 below shows exactly how), but no longer treated as an unknown.
 
+## 0. MY2024 validation result — capture completed
+
+A live firmware query was performed against a physical 2024 Ford F-150 Lightning Flash. Result:
+
+| ECU | Address | Captured firmware | Status against baseline `flashpilot-dev` (pre-this-commit) |
+|---|---|---|---|
+| ABS | `0x760` | `RL38-2D053-BD` | Already on file — exact match |
+| EPS (PSCM) | `0x730` | `RL38-14D003-AA` | Already on file — exact match |
+| Forward camera (IPMA) | `0x706` | `RJ6T-14H102-BBC` | Already on file — exact match |
+| Forward radar (CCM) | `0x764` | `RB5T-14D049-AB` | **New** — only `ML3T-14D049-AL` was on file |
+
+**Verified, not assumed:** before this commit's radar addition, this exact 4-ECU set matched **nothing at all** via `opendbc.car.fw_versions.match_fw_to_car` — not exact, not fuzzy (Ford's own fuzzy matcher also requires the radar's platform code to be recognized as belonging to the candidate) — confirmed by running the real capture against a stashed copy of the pre-fix `fingerprints.py` and observing `match_fw_to_car` return no candidate. With `RB5T-14D049-AB` added, the same 4-ECU set now resolves to `CAR.FORD_F_150_LIGHTNING_MK1` via **exact match**. See `test_my2024_lightning_exact_match` in `opendbc/car/ford/tests/test_ford.py` for the permanent regression case.
+
+The truck's own VIN and the full raw query output are intentionally **not** recorded anywhere in this repository — only the four firmware strings above (which, like every other entry in `fingerprints.py`, identify an ECU hardware/firmware revision shared across a production run, not an individual vehicle).
+
+This does not change the SecOC status note above — the radar firmware has no bearing on it — but is recorded here as the first confirmed data point from the actual target vehicle referenced throughout this document.
+
 ## 1. Exact test pattern used when a new Ford firmware variant is added
 
 Re-inspected directly (`opendbc_repo/opendbc/car/ford/tests/test_ford.py`, `opendbc_repo/opendbc/car/ford/values.py`) at the pinned commit:
