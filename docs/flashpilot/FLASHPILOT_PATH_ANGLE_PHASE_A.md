@@ -1,0 +1,35 @@
+# Phase A — Path-Angle Dependency Chain (re-verified before coding)
+
+Re-verified directly against `BluePilotDev/bluepilot@501a7c0e911245044196fcc90cb077a69fa0749b` (branch `bp-dev`, same commit as the Phase 0 audit — re-confirmed still checked out and unchanged) and against our own baseline (`flashpilot-dev` / opendbc fork `b4ef5e1c`+`11e08f6`). Where a fact was already established word-for-word in `BLUEPILOT_LATERAL_AUDIT.md`, it's cited rather than re-derived; anything new (mostly scoping decisions for "smallest complete version") is called out explicitly.
+
+## 1-12: dependency chain
+
+| # | Item | Where (BluePilot) | Classification | Notes |
+|---|---|---|---|---|
+| 1 | Desired path angle calculation | `lateral_angle_ext.py:474-519`: `path_angle = kappa_cmd * v_ego * curvature_factor`, `kappa_cmd` from `actuators.curvature` | **REQUIRED** | Ported with the model-prediction blend (item in original audit #2) and VLT (audit #3) **cut** — see §13. `kappa_cmd` = planner curvature directly, nothing else. |
+| 2 | Ford lateral CAN message construction | `fordcan_ext.py`: `create_lat_ctl2_msg` (dynamic `ramp_type`/`precision_type`), `create_lka_msg` (packs `angle_mode_engaged`+`shadow_curvature` into `Lane_Assist_Data1`'s unused bits) | **REQUIRED** | Both are small, additive signature extensions of upstream `fordcan.py` functions we already have — not new messages. |
+| 3 | DBC fields changed vs. upstream | `LatCtlPath_An_Actl` (`path_angle`) goes nonzero instead of always `0.0`; `LatCtlRampType_D_Rq`/`LatCtlPrecision_D_Rq` become parameters instead of hardcoded `0`/`1` | **REQUIRED** | `LatCtlCurv_No_Actl` (curvature), `LatCtlCrv_NoRate2_Actl` (curvature rate), `LatCtlPathOffst_L_Actl` (path offset) all stay pinned at `0` — confirmed unchanged from the safety audit's decision. |
+| 4 | Population of curvature / curvature-rate / path-angle / path-angle-rate | curvature = `0.0` (always); curvature-rate = `0.0` (always); path_angle = computed in #1, then deviation-clipped, saturation-clamped, DBC-range-clamped, soft-ROC-clamped, in that order (`lateral_angle_ext.py:486-558`) | **REQUIRED** | |
+| 5 | PSCM/steering-state signals read | `LatCtlLim_D_Stat` (`lat_ctl_lim_stat`) — BluePilot's own comment: *"In angle mode, LatCtlLim_D_Stat does not fire."* | **DO NOT PORT** | Confirmed by re-reading the exact comment again this pass. Since it doesn't fire in angle mode anyway, we skip reading it entirely and rely solely on the DBC-range-proximity heuristic (item 9), which needs no new CarState parsing at all — **`carstate.py` is not touched.** |
+| 6 | Rate/angle limits required | Value range `[-0.5, 0.5235]` rad (wide, gated on confirmed engagement) vs. `[-0.25, 0.25]` (tight, default); soft ROC table `interp(v_ego, [9,10,15,25], [0.055,0.055,0.0425,0.009])` (Python) mirrored ~2% tighter than panda's C-side table | **REQUIRED (both layers)** | Panda side is Phase C, not this file. |
+| 7 | Human override/handoff | `human_turn.py`'s `HumanTurnDetector`: sustained `steeringPressed` + `\|steeringAngleDeg\| > 45°` for 1.5s (3.0s if wheel already past 45° at contact) → force mode 0 | **REQUIRED** | Ported near-verbatim — small, self-contained, no BluePilot framework dependency. |
+| 8 | Stall detection/recovery | `lateral_angle_ext.py:105-129, 345-389, 591-612` — the mode-0 "blip" pulse | **DEFERRED to optional refinement** | Re-affirming the Phase 0 audit's classification (REQUIRED-IF-REPRODUCIBLE). We have zero evidence this PSCM behavior reproduces on the Lightning (BluePilot's own comments tie every threshold to Mach-E road tests). Porting untuned thresholds for a failure mode we haven't observed is exactly the kind of speculative change the project guardrails prohibit. **Not included in this phase.** If first-drive testing (Phase F/first-drive) shows the "PSCM won't fully track after a driver touch" symptom, this becomes the next thing to add, with our own thresholds. |
+| 9 | Saturation handling | `_dbc_sat = path_angle_last` within 90% of the DBC range edges; `_in_hard_sat` blocks magnitude increases and rate-limits decreases to `_PSCM_SAT_UNWIND_RATE = 0.02 rad/call` | **REQUIRED** | Purely a function of our own tracked `path_angle_last` — no new signal needed (see #5). `_pscm_lim`-based "LimitClose" soft-block is skipped since we no longer read `lat_ctl_lim_stat` at all (it doesn't fire in angle mode regardless). |
+| 10 | Anti-weave logic | No dedicated component (re-confirmed) | **Emergent, not separately ported** | Comes from soft ROC + saturation clamp + human-turn clean handoff, all otherwise REQUIRED. |
+| 11 | Speed-factor calibration | `_GAIN_CANFD_BOF = (0.95, 0.95)` — the "CAN-FD body-on-frame truck" preset BluePilot already groups the Lightning under | **REQUIRED, values carried over as-is (unvalidated for Lightning specifically)** | Since this module is Lightning-only, the multi-platform dispatch table collapses to this one constant pair — no dispatch logic needed. |
+| 12 | State variables/timers | `path_angle_last` (float), `HumanTurnDetector`'s internal hold timer, a "was active last frame" edge for clean reset | **REQUIRED** | All plain instance attributes on the new controller class — no cereal/Params state needed. |
+
+## 13. BluePilot-specific framework dependencies — DO NOT PORT
+
+Re-confirmed unchanged from `BLUEPILOT_LATERAL_AUDIT.md`, plus two new simplifications decided for this phase specifically:
+
+- Model-predicted-curvature blend + Variable Lookup Time (`lateral_angle_ext.py:79-90, 396-471`) — **cut for this phase** (new decision): the "smallest complete functional version" only needs `actuators.curvature` directly; the blend is a smoothness refinement, not required for the car to steer correctly. No `modelV2` subscription is added to the new module as a result.
+- Lane-change-aware `precision_type`/gain scaling — **cut for this phase** (new decision, follows from the above: without a model subscription there's no lane-change signal to react to). `precision_type` is hardcoded to `1` (Precise), matching upstream's own existing default.
+- Lane centering trim (`lane_center_trim.py`) — DO NOT PORT (unchanged).
+- Pinion-angle curvature measurement + `current_safety_param_sp` ABI (`values_ext.py`, ford.h pinion table) — DO NOT PORT (unchanged; this session's session confirmed again this pass that this ABI channel still doesn't exist in plain `commaai/opendbc`).
+- MADS, ICBM, BP-Long (`longitudinal_ext.py`), HUD/cluster extensions (`hud_ext.py`) — DO NOT PORT (unchanged; longitudinal/UI, out of scope).
+- Any `Params`-backed user-tunable gain knobs (`FordLowSpeedFactor_ang`, etc.) — DO NOT PORT for this phase; all gains hardcoded to their CANFD_BOF defaults. Revisit once we have on-truck data to tune against.
+
+## Internal consistency check
+
+Everything classified REQUIRED depends only on: `CarControl`, `CarState` (existing fields only — `vEgoRaw`, `yawRate`, `steeringAngleDeg`, `steeringPressed`), `CarControlParams` constants already in `values.py`, and plain Python state on the new controller instance. Nothing REQUIRED depends on anything classified DO NOT PORT. Proceeding to Phase B.
