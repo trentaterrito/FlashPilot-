@@ -1,14 +1,8 @@
 """Three-position parked-development selector; hardwared authorizes requests."""
 import time
 
-import pyray as rl
-
 from openpilot.selfdrive.ui.ui_state import ui_state
-from openpilot.selfdrive.ui.mici.widgets.button import BigButton, BigMultiToggle
-from openpilot.system.ui.widgets import Widget
-from openpilot.system.ui.widgets.label import gui_label
-from openpilot.system.ui.widgets.scroller import NavScroller
-from openpilot.system.ui.lib.application import TextAlignment
+from openpilot.selfdrive.ui.mici.widgets.button import BigMultiToggle
 from openpilot.system.hardware.flashpilot_offroad import MODES
 
 
@@ -32,45 +26,22 @@ def request_next_mode():
   return True
 
 
-class OffroadPill(Widget):
+class FlashPilotOffroadToggle(BigMultiToggle):
+  """Settings tile beside Network; display acknowledged state, not the request."""
   def __init__(self):
-    super().__init__()
-    self.set_rect(rl.Rectangle(0, 0, 96, 44))
+    super().__init__("road mode", list(MODES))
+    self.set_enabled(False)
 
-  def _render(self, rect):
-    status = offroad_status()
-    label = {"off": "OFF", "offroad": "OFFRD", "onroad": "ONRD"}[status["selection"]]
-    if status["phase"] == "fault":
-      label = "FAULT"
-    elif status["phase"] == "stopping":
-      label = "WAIT"
-    elif status["phase"] == "unavailable":
-      label = "—"
-    color = rl.ORANGE if status.get("inhibit") else rl.GRAY
-    rl.draw_rectangle_rounded(rect, 0.3, 6, rl.Color(40, 40, 40, 255))
-    gui_label(rect, label, font_size=25, color=color, alignment=TextAlignment.CENTER)
-
-
-class FlashPilotOffroadLayout(NavScroller):
-  def __init__(self):
-    super().__init__()
-    self._mode = BigMultiToggle("development mode", ["off", "offroad", "onroad"], select_callback=self._select)
-    self._status = BigButton("parked development", "")
-    self._status.set_enabled(False)
-    self._help = BigButton("off = standard", "onroad = normal startup, not engagement")
-    self._help.set_enabled(False)
-    self._scroller.add_widgets([self._mode, self._status, self._help])
-
-  def _select(self, selection):
+  def _handle_mouse_release(self, mouse_pos):
     # Recheck after the tap, not just when rendering. Backend independently
     # validates fresh CAN, actual control state, and completed shutdown.
-    if offroad_status().get("can_select", False):
-      ui_state.params.put("FlashPilotForceOffroad", selection, block=True)
+    # Do not use BigMultiToggle's optimistic state change while awaiting ACK.
+    request_next_mode()
 
   def _update_state(self):
     super()._update_state()
     status = offroad_status()
-    self._mode.set_value(status["selection"])
-    self._mode.set_enabled(status.get("can_select", False))
-    self._status.set_text("FORCED OFFROAD" if status.get("active") else status["phase"].replace("_", " "))
-    self._status.set_value(status["reason"])
+    self.set_value(status["selection"])
+    self.set_enabled(status.get("can_select", False))
+    title = {"stopping": "road mode: WAIT", "fault": "road mode: FAULT", "unavailable": "road mode: no data"}.get(status["phase"], "road mode")
+    self.set_text(title)

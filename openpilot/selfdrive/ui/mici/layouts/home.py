@@ -12,7 +12,6 @@ from openpilot.system.ui.widgets.label import UnifiedLabel, gui_label
 from openpilot.system.ui.lib.application import gui_app, FontWeight, MousePos, TextAlignment, TextAlignmentVertical
 from openpilot.selfdrive.ui.ui_state import ui_state, ChestnutState
 from openpilot.common.version import RELEASE_BRANCHES
-from openpilot.selfdrive.ui.mici.layouts.flashpilot_offroad import OffroadPill, FlashPilotOffroadLayout, request_next_mode
 
 HEAD_BUTTON_FONT_SIZE = 40
 HOME_PADDING = 8
@@ -137,7 +136,6 @@ class MiciHomeLayout(Widget):
     self._mouse_down_t: None | float = None
     self._did_long_press = False
     self._is_pressed_prev = False
-    self._development_pressed = False
 
     self._version_text = self._get_version_text()
 
@@ -150,12 +148,10 @@ class MiciHomeLayout(Widget):
     self._body_icon = IconWidget("icons_mici/body.png", (54, 37))
 
     self._alerts_pill = AlertsPill()
-    self._offroad_pill = OffroadPill()
 
     self._status_bar_layout = HBoxLayout([
       IconWidget("icons_mici/settings.png", (48, 48), opacity=0.9),
       NetworkIcon(),
-      self._offroad_pill,
       self._experimental_icon,
       self._usb_icon,
       self._chestnut_icon,
@@ -180,7 +176,7 @@ class MiciHomeLayout(Widget):
       self._did_long_press = False
     self._is_pressed_prev = self.is_pressed
 
-    if self._mouse_down_t is not None and not self._development_pressed:
+    if self._mouse_down_t is not None:
       if time.monotonic() - self._mouse_down_t > 0.5:
         # long gating for experimental mode - only allow toggle if longitudinal control is available
         if ui_state.has_longitudinal_control and ui_state.experimental_mode_confirmed:
@@ -197,17 +193,7 @@ class MiciHomeLayout(Widget):
     self._alert_count_callback = alert_count_callback
     self._alerts_pill.set_alert_count_callback(alert_count_callback, max_severity_callback)
 
-  def _handle_mouse_press(self, mouse_pos: MousePos):
-    self._development_pressed = rl.check_collision_point_rec(rl.Vector2(mouse_pos.x, mouse_pos.y), self._offroad_pill.rect)
-
   def _handle_mouse_release(self, mouse_pos: MousePos):
-    if self._development_pressed:
-      self._development_pressed = False
-      if rl.check_collision_point_rec(rl.Vector2(mouse_pos.x, mouse_pos.y), self._offroad_pill.rect):
-        if not request_next_mode():
-          gui_app.push_widget(FlashPilotOffroadLayout())
-      self._did_long_press = False
-      return
     if not self._did_long_press:
       relative_x = mouse_pos.x - self.rect.x
       has_alerts = self._alert_count_callback and self._alert_count_callback() > 0
