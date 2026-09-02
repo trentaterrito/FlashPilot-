@@ -33,6 +33,8 @@ class BookmarkState(IntEnum):
 
 WIDE_CAM_MAX_SPEED = 5.0  # m/s (10 mph)
 ROAD_CAM_MIN_SPEED = 10  # m/s (25 mph)
+EXPERIMENTAL_BORDER_COLOR = rl.Color(218, 111, 37, 255)  # StarPilot Experimental orange
+EXPERIMENTAL_BORDER_WIDTH = 8
 
 CAM_Y_OFFSET = 20
 
@@ -235,6 +237,12 @@ class AugmentedRoadView(CameraView):
     # Draw fake rounded border
     rl.draw_rectangle_rounded_lines_ex(self._content_rect, 0.2 * 1.02, 10, 50, rl.BLACK)
 
+    if self._show_experimental_border(ui_state.sm, ui_state.status, ui_state.started_frame, alert_to_render):
+      width = EXPERIMENTAL_BORDER_WIDTH
+      border_rect = rl.Rectangle(self._content_rect.x + width / 2, self._content_rect.y + width / 2,
+                                 self._content_rect.width - width, self._content_rect.height - width)
+      rl.draw_rectangle_rounded_lines_ex(border_rect, 0.2 * 1.02, 10, width, EXPERIMENTAL_BORDER_COLOR)
+
     # End clipping region
     rl.end_scissor_mode()
 
@@ -243,6 +251,15 @@ class AugmentedRoadView(CameraView):
     self._confidence_ball.render(self.rect)
 
     self._bookmark_icon.render(self.rect)
+
+  @staticmethod
+  def _show_experimental_border(sm, status, started_frame, alert):
+    # Use the published active mode, never just the requested ExperimentalMode Param.
+    # Leave all alert rendering and override/disengaged presentation unchanged.
+    return (alert is None and status == UIStatus.ENGAGED and
+            sm.valid['selfdriveState'] and sm.alive['selfdriveState'] and
+            sm.recv_frame['selfdriveState'] >= started_frame and
+            sm['selfdriveState'].enabled and sm['selfdriveState'].experimentalMode)
 
   def _switch_stream_if_needed(self, sm):
     if sm['selfdriveState'].experimentalMode and WIDE_CAM in self.available_streams:
