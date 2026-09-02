@@ -26,6 +26,7 @@ from openpilot.system.loggerd.config import get_available_percent
 from openpilot.common.swaglog import cloudlog
 from openpilot.system.hardware.power_monitoring import PowerMonitoring
 from openpilot.system.hardware.fan_controller import FanController
+from openpilot.system.hardware.flashpilot_offroad import OffroadSupervisor
 from openpilot.system.hardware.chestnut.status import ChestnutStatus
 from openpilot.common.version import terms_version, training_version
 from openpilot.system.athena.registration import UNREGISTERED_DONGLE_ID
@@ -234,6 +235,7 @@ def hardware_thread(end_event, hw_queue) -> None:
 
   params = Params()
   power_monitor = PowerMonitoring()
+  flashpilot_offroad = OffroadSupervisor(params, messaging)
 
   uptime_offroad: float = params.get("UptimeOffroad", return_default=True)
   uptime_onroad: float = params.get("UptimeOnroad", return_default=True)
@@ -374,6 +376,14 @@ def hardware_thread(end_event, hw_queue) -> None:
       startup_conditions["registered_device"] = PC or (params.get("DongleId") != UNREGISTERED_DONGLE_ID)
 
     # Handle offroad/onroad transition
+    # Only inhibits normal startup. Physical ignition and all existing conditions
+    # remain authoritative; no direct IsOffroad writes or safety-mode overrides.
+    try:
+      onroad_conditions["flashpilot_development"] = not flashpilot_offroad.update(
+        time.monotonic(), pandaStates, sm.logMonoTime["pandaStates"] * 1e-9, started_ts is not None, sm.valid["pandaStates"])
+    except Exception:
+      cloudlog.exception("FlashPilot parked-mode supervisor failed")
+      onroad_conditions["flashpilot_development"] = not (flashpilot_offroad.policy.inhibit or params.get_bool("FlashPilotOffroadLease"))
     should_start = all(onroad_conditions.values())
     if started_ts is None:
       should_start = should_start and all(startup_conditions.values())
