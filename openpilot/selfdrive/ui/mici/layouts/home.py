@@ -161,7 +161,7 @@ class MiciHomeLayout(Widget):
       self._mic_icon,
     ], spacing=18)
 
-    self._openpilot_label = UnifiedLabel("FlashPilot", font_size=96, font_weight=FontWeight.DISPLAY, max_width=480, wrap_text=False)
+    self._openpilot_label = UnifiedLabel("FlashPilot", font_size=80, font_weight=FontWeight.DISPLAY, max_width=420, wrap_text=False)
     self._version_label = UnifiedLabel("", font_size=36, font_weight=FontWeight.ROMAN, max_width=480, wrap_text=False)
     self._large_version_label = UnifiedLabel("", font_size=64, text_color=rl.GRAY, font_weight=FontWeight.ROMAN, max_width=480, wrap_text=False)
     self._date_label = UnifiedLabel("", font_size=36, text_color=rl.GRAY, font_weight=FontWeight.ROMAN, max_width=480, wrap_text=False)
@@ -225,13 +225,18 @@ class MiciHomeLayout(Widget):
   def _render(self, _):
     # TODO: why is there extra space here to get it to be flush?
     text_pos = rl.Vector2(self.rect.x - 2 + HOME_PADDING, self.rect.y - 16)
-    self._openpilot_label.set_position(text_pos.x, text_pos.y)
+    # Draw the bolt directly: the UI font atlas does not include emoji glyphs.
+    bolt = [rl.Vector2(text_pos.x + x, text_pos.y + 12 + y)
+            for x, y in ((31, 0), (2, 41), (21, 41), (13, 72), (46, 28), (27, 28))]
+    for a, b, c in ((0, 1, 5), (1, 2, 5), (2, 3, 4), (2, 4, 5)):
+      rl.draw_triangle(bolt[a], bolt[b], bolt[c], rl.Color(255, 208, 40, 255))
+    self._openpilot_label.set_position(text_pos.x + 60, text_pos.y + 8)
     self._openpilot_label.render()
 
     if self._version_text is not None:
       # release branch
       release_branch = self._version_text[1] in RELEASE_BRANCHES
-      version_pos = rl.Rectangle(text_pos.x, text_pos.y + self._openpilot_label.font_size + 16, 100, 44)
+      version_pos = rl.Rectangle(text_pos.x, text_pos.y + 112, 100, 44)
       self._version_label.set_text(self._version_text[0])
       self._version_label.set_position(version_pos.x, version_pos.y)
       self._version_label.render()
