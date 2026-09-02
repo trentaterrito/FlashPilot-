@@ -60,8 +60,8 @@ def test_tile_tap_waits_for_acknowledged_selection(monkeypatch):
   assert tile.value == "off"
 
 
-@pytest.mark.parametrize("phase,title", [("offroad", "road mode"), ("stopping", "road mode: WAIT"),
-                                        ("fault", "road mode: FAULT"), ("unavailable", "road mode: no data")])
+@pytest.mark.parametrize("phase,title", [("offroad", "Vehicle State"), ("stopping", "Vehicle State: WAIT"),
+                                        ("fault", "Vehicle State: FAULT"), ("unavailable", "Vehicle State: no data")])
 def test_tile_reflects_acknowledged_status(monkeypatch, phase, title):
   from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
   tile = object.__new__(ui.FlashPilotOffroadToggle)

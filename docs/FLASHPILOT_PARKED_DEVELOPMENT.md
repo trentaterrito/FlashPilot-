@@ -4,7 +4,7 @@ Local implementation; not installed on the truck. Lightning-only parked authoriz
 
 ## Comma 4 UI
 
-Open the normal settings menu. The **road mode** three-position tile is immediately after **network**; all existing menu items remain in their original order. There is no home-screen badge or replacement settings menu. When verified parked, each tap requests the next selection:
+Open the normal settings menu. The **Vehicle State** three-position tile is immediately after **network**; all existing menu items remain in their original order. There is no home-screen badge or replacement settings menu. When verified parked, each tap requests the next selection:
 
 - **OFF:** standard comma lifecycle, no developer override.
 - **OFFRD:** hold the software offroad after verified Park/zero speed/cruise OFF/inactive controls. WAIT is shown until onroad processes have exited and panda reports NO_OUTPUT; only then is the state active.

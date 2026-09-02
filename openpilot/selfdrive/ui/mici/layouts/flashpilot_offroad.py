@@ -29,7 +29,7 @@ def request_next_mode():
 class FlashPilotOffroadToggle(BigMultiToggle):
   """Settings tile beside Network; display acknowledged state, not the request."""
   def __init__(self):
-    super().__init__("road mode", list(MODES))
+    super().__init__("Vehicle State", list(MODES))
     self.set_enabled(False)
 
   def _handle_mouse_release(self, mouse_pos):
@@ -43,5 +43,9 @@ class FlashPilotOffroadToggle(BigMultiToggle):
     status = offroad_status()
     self.set_value(status["selection"])
     self.set_enabled(status.get("can_select", False))
-    title = {"stopping": "road mode: WAIT", "fault": "road mode: FAULT", "unavailable": "road mode: no data"}.get(status["phase"], "road mode")
+    title = {
+      "stopping": "Vehicle State: WAIT",
+      "fault": "Vehicle State: FAULT",
+      "unavailable": "Vehicle State: no data",
+    }.get(status["phase"], "Vehicle State")
     self.set_text(title)
