@@ -423,7 +423,7 @@ class DriverMonitoring:
     dm.wheeltouchPolicyState.driverInteracting = self.driver_interacting
     return dat
 
-  def run_step(self, sm, demo=False):
+  def run_step(self, sm, demo=False, independent_lateral_engaged=False):
     if demo:
       car_speed = 30
       enabled = True
@@ -435,7 +435,7 @@ class DriverMonitoring:
       rpyCalib = [0., 0., 0.]
     else:
       car_speed = sm['carState'].vEgo
-      enabled = sm['selfdriveState'].enabled
+      enabled = sm['selfdriveState'].enabled or independent_lateral_engaged
       wrong_gear = sm['carState'].gearShifter not in (car.CarState.GearShifter.drive, car.CarState.GearShifter.low)
       lowspeed = car_speed < self.settings._ALERT_MIN_SPEED
       driver_engaged = sm['carState'].steeringPressed or sm['carState'].gasPressed

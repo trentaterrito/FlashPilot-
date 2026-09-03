@@ -1,104 +1,162 @@
-# FlashPilot MADS — sunnypilot foundation
+# FlashPilot MADS — sunnypilot development integration
 
-## Decision and scope
+Status: **partial; runtime disabled; not a vehicle-test candidate**.
+Branch: `codex/flashpilot-mads-sunnypilot`. No device was contacted or changed.
 
-The user selected sunnypilot instead of expanding the custom MADS architecture.
-Branch: `codex/flashpilot-mads-sunnypilot`. No active MADS, deployment, UI, Force
-Offroad, radar, longitudinal, or path-angle changes are authorized by this port.
+## What is implemented
 
-This is the first port stage: the exact upstream C state machine is imported and
-executed by an offline C harness. It is **not wired into production safety or
-controls**. Importing it does not assert that its policies satisfy every earlier
-FlashPilot requirement. Host integration and complete safety validation remain.
+The sunnypilot safety core is connected to actual Ford RX/TX revocation hooks,
+board fault checks, separate panda health fields, heartbeat eligibility, host
+intent, and driver monitoring. Only the native test harness can select MADS.
+There is no production initializer, Params key, UI switch or safetyParam enabling
+it. Never transplant the test initializer onto a vehicle.
 
-## Provenance
+Ordinary longitudinal engagement remains separate. Radar, MPC, stopping,
+following, coast/creep, Force Offroad and path-angle tuning were not changed.
+Existing path-angle value/rate limits and arithmetic are preserved. MISRA-only
+cleanup moved an unchanged limit constant into its sole consumer and replaced
+the shadow-curvature cast macro with identical arithmetic and an intermediate
+float variable.
 
-Official remote tips verified on 2026-09-02:
+## Provenance and reuse
 
-- sunnypilot: `e87dbbaba710bbfe7661d9ff064d46170cac9442`
-- its matching opendbc gitlink: `f95f996f5917dcbbf2e32fe51b606a24cf836af6`
-- its panda gitlink: `74a0adced421e8b7acd728d0f9988ce225423f13` (not imported)
+- Official sunnypilot host: `e87dbbaba710bbfe7661d9ff064d46170cac9442`.
+- Matching opendbc: `f95f996f5917dcbbf2e32fe51b606a24cf836af6`.
+- Matching panda audited: `74a0adced421e8b7acd728d0f9988ce225423f13`.
 
-Sources: https://github.com/sunnypilot/sunnypilot and
-https://github.com/sunnypilot/opendbc. The imported `mads.h` and
-`mads_declarations.h` are byte-identical to the pinned source; UPSTREAM.json and
-a hash test enforce this. They are not taken from the modified BluePilot tree.
+Host `openpilot/sunnypilot/mads/state.py` is byte-identical to upstream.
+The C state-machine bodies are unchanged. One documented adaptation makes the
+reference-only heartbeat helper static inline in its declaration/definition
+(MISRA 8.7). Tests reverse exactly these two substitutions before validating
+original Git blob hashes. Production does not call its three-check mismatch
+policy. Both imports retain the original license and attribution.
 
-The new FlashPilot branch starts at `f8c64eb`, before custom MADS implementation.
-Existing Lightning path-angle tuning/RB5T code is retained unchanged; original
-panda `75aa44bec9140849868239b1f1e3f22624adb8fe` is unchanged.
+Sources: https://github.com/sunnypilot/sunnypilot,
+https://github.com/sunnypilot/opendbc,
+https://github.com/sunnyhaibin/panda.
 
-Custom work remains recoverable on `codex/flashpilot-mads-custom-checkpoint`:
-FlashPilot `fef0f49`, opendbc `d511043`, panda `5eea204d`.
-Those WIP commits are superseded, not validation-approved or deployment-ready.
+The custom nonce/state-machine checkpoint remains preserved separately at
+superproject `fef0f49`, opendbc `d511043`, panda `5eea204d`.
+Its replay/tests are not evidence for this different integration.
 
-## Reuse first
+## Exact permission policy
 
-| Piece | Plan |
-|---|---|
-| Independent lateral state and reasons | Reuse sunnypilot C core; imported unchanged |
-| Host enabled/paused/overriding state | Port `openpilot/sunnypilot/mads/state.py` with its event/schema dependencies |
-| Ford TJA input | Reuse `opendbc/sunnypilot/car/ford/mads.py` and matching Ford safety button decoding |
-| Requested/actual permission separation | Reuse sunnypilot `controlsAllowedLateral` health/schema path after auditing paired panda source |
-| Brake behavior | Existing upstream modes characterized; no mode enabled here |
-| Invalid CAN, faults, reset revocation | Trace and test integration; retain only narrow demonstrated fixes |
-| Custom nonce/packet infrastructure | Not imported; do not assume it is needed for sunnypilot's architecture |
+Panda owns independent authorization. Host eligibility can veto, never grant it.
 
-Sunnypilot derives its lateral request from CAN/button/engagement transitions.
-That differs from the proposed custom positive host-request protocol. Determine
-whether a *veto-only host role* can satisfy stale-host-request requirements without
-creating a new authorization protocol. This is a design candidate, not a claim
-that reset/heartbeat safety is already solved.
+1. Reset/safety-mode change clears selection, permission and button history.
+2. Test-only selection requires a complete fresh vehicle snapshot, host
+   eligibility, and path-angle metadata. This does not grant permission.
+3. A released TJA sample followed by a new physical press while eligible feeds
+   sunnypilot's button transition; panda may then authorize steering.
+4. Any veto clears permission and button history immediately. Good CAN, cruise
+   recovery, a valid heartbeat, or a held button cannot restore permission.
+5. Recovery needs fresh eligible state and heartbeat, then new TJA release/press.
+   A second deliberate press cancels.
+6. Brake/regen/driver steering intervention disengage; no automatic brake return.
+   Main/PCM recovery are not grant edges.
+7. Independent permission only applies to Lightning path-angle steering. It
+   cannot authorize longitudinal commands, classic LMC or curvature-mode escape.
 
-## Policy differences to resolve before production wiring
+State sequence: OFF → selected/unarmed → fresh eligible + released TJA →
+new TJA press → authorized. Veto returns to unarmed; reset returns to OFF.
 
-1. Upstream C permits ACC-main, TJA, and ordinary-controls rising edges to request
-   lateral. Earlier FlashPilot requirements demanded fresh physical TJA intent
-   after revocation. Do not silently allow main/PCM recovery to reauthorize.
-2. Upstream heartbeat mismatch revokes on its third check, not the first. The
-   imported harness records this behavior; it does not approve a grace interval.
-3. Upstream brake modes include remain-active and pause/automatic return. The
-   previous fail-closed brake requirement remains until explicitly changed.
-4. At the pinned upstream `safety.h:is_msg_valid`, invalid checksum/quality/counter
-   clears ordinary controls permission; it does not directly clear the separate
-   lateral flag there. Trace the complete dispatcher/TX route before importing
-   an independent authorization OR-condition. A correct MADS state machine alone
-   does not establish that all safety revocations reach it.
-5. Upstream host `mads.py` replaces/removes selected events, including gear, door,
-   seatbelt and engagement events. Do not port those changes wholesale under the
-   current safety-core-only scope.
+No controlsAllowed bypass, grace window, changed steering limit or timed grant
+was introduced.
 
-The old core's invalid-RX tests and fault inventory are useful requirements, not
-an instruction to transplant its whole state machine. No reset bypass, steering
-limit relaxation, grace timer, or auto-recovery exception is accepted here.
+## Revocation table
 
-## Remaining sequence
+All local revocations precede the next eligible TX or permission publication.
+Host notification is subsequent telemetry, not a prerequisite for clearing.
 
-1. Preserve upstream licensing and attribution for the planned public-source
-   release; obtain separate permission if commercial/for-profit use is intended.
-2. Audit the matching panda heartbeat/health and host/schema dependencies.
-3. Add a minimal Lightning-only integration around the upstream core, initially
-   unavailable to runtime configuration. Wire every revocation before permitting
-   independent steering in tests; keep non-Lightning and MADS-off unchanged.
-4. Resolve the policy differences above explicitly, using deterministic negative
-   tests. Do not introduce new settings/UI to bypass them.
-5. Run full Ford, MADS, platform, firmware, lifecycle/replay and MISRA validation.
-6. Stop before active vehicle enablement; obtain a separately reviewed shadow plan.
+| Event/source | Existing upstream effect | MADS action / host notification |
+|---|---|---|
+| Invalid checksum/QF/rejected counter before Ford RX | Clear controlsAllowed, skip Ford RX | Generic revoke hook; RX/permission status |
+| Required malformed main-bus CAN length | Can miss normal address/length matcher | Extra observer immediately revokes; permission status |
+| RX lag/frequency failure | Tick clears controlsAllowed | Tick plus pre-RX/TX/status freshness check; health |
+| Safety-mode change, invalid mode ID, MCU/init | Reset ordinary state | Old hook clears before switch; initializer OFF |
+| USB comms reset | Clear buffers | Reset selection and permission locally |
+| Brake/regen/steering disengage | Generic permission clear | Immediate generic hook plus raw-state veto |
+| Relay/stock ECU conflict | Block TX | Revoke locally; fault/status telemetry |
+| Speed-source mismatch | Clear controlsAllowed | Revoke locally; permission telemetry |
+| Rejected or non-whitelisted TX | Reject packet | Also revoke independent permission |
+| EPS failure/not-full state, pinion bad QF, invalid lateral status | Not all covered in generic safety | Raw-state veto; permission telemetry |
+| Non-Drive, main off, invalid brake/parking brake/motion/stability | Vehicle-specific handling | Raw-state veto; vehicle/permission telemetry |
+| Board fault, power save, heartbeat lost/disabled, unavailable harness/ADC lock, ignition loss | Board-specific handling | Board callback before RX/TX/status; health |
+| RX/TX overflow, SPI/CAN error, CAN reset/checksum/lost-frame counter change, bus-off/error-passive | Error bookkeeping | Board callback latches eligibility loss; health |
+| Negative/malformed host heartbeat | Legacy ordinary bookkeeping unchanged | Immediate veto, no three-check delay |
+| Host stale/crashed or host/panda disagreement | Ordinary path unchanged | Board expiry and host fail-closed authorization |
+
+These are tested software paths, not proof of complete OEM signal integrity.
+All three CAN buses are included in the board error predicate. GPIO ignition is
+not sampled while the harness ADC lock is held. Native tests simulate registers;
+they do not establish real interrupt/transport timing.
+
+## Host, transport and monitoring
+
+Heartbeat request 0xf3 retains param1 as ordinary engagement. Param2 is a strict
+Boolean eligibility/veto; length must be zero. Invalid param1 (>1), param2 (!=1)
+or nonzero length revokes. The parser used in firmware is exercised by tests.
+Existing transport is reused, not replaced by a new positive host-grant protocol.
+There is no boot nonce or claimed cryptographic replay protection. Reset clears
+selection; a stale positive host packet alone cannot grant lateral. Full queued
+transport/restart HIL validation remains open.
+
+Eligibility, additional vehicle state and angle-mode metadata expire after
+100 ms. Existing checked RX also requires seen/valid-checksum/QF/counter/lag
+state and no more than three nominal periods. Reads never renew eligibility.
+The current 10 Hz heartbeat/health cadence is on the expiry boundary and must
+be resolved through measured scheduling, not a grace interval.
+
+Panda health bits 7/8 expose pure independent authorization / MADS selected.
+They are not ordinary-controls OR lateral. Schema and Python decoding are tested.
+
+The host adapter feeds sunnypilot's unmodified state machine. Existing
+selfdrived events are not removed; only pcmDisable is excluded from independent
+eligibility. All other disabling/no-entry events veto. During a selected onroad
+session, latActive requires both current host intent and fresh panda truth.
+Loss of panda state cannot silently fall back to ordinary lateral in that session.
+CC.enabled and CC.longActive retain their existing expressions.
+
+Driver monitoring now receives independent intent/authorization as engagement
+as well as ordinary cruise engagement. Missing optional telemetry does not break
+ordinary DM. After MADS is observed, stale data cannot relax monitoring; fresh
+negative intent AND authorization clear its monitoring latch. No attention
+threshold, lockout, alert timing or distraction logic changed. Host authorization
+also requires DM data no older than 100 ms. End-to-end alert/HUD integration is
+still unproven; this is not permission to drive with an invisible engagement state.
+
+Logged truth:
+- controlsState.madsState.enabled: requested host state.
+- controlsState.madsAuthorized: host intent AND panda permission.
+- controlsState.madsEligible: current host eligibility.
+- pandaStates[].controlsAllowedLateral and madsSafetyEnabled: panda truth.
+
+## Remaining blockers (not waived by tests)
+
+1. Complete checksum/counter integrity for added raw Ford inputs at
+   0x176, 0x82, 0x3CC, 0x83, 0x7E and 0x430. Length/value/freshness checks are
+   not substitutes. Gateway counters must be measured, not assumed +1.
+2. Heartbeat/health cadence versus strict 100 ms freshness; real H7 scheduling,
+   queued transport, reset and fault injection need bench validation.
+3. Driver-visible independent engagement/disengagement alerts/HUD plus complete
+   event integration. No UI was added under the safety-core scope.
+4. Whole-system manager/panda/ignition lifecycle and fresh TJA tests on hardware.
+   No physical active-MADS validation occurred.
+5. Actual integrated-core route replay. Older zero-TJA custom-model replay is
+   negative evidence only, not validation of this implementation.
+6. Release packaging: changed panda is local; .gitmodules still points to
+   commaai/panda. Publish to an authorized user fork, repoint and fresh-clone-test
+   before distributing. Do not push an uncloneable vehicle candidate.
+7. Production initializer intentionally absent until the above are resolved.
+
+Next: obtain/verify the missing Ford integrity rules and bench cadence evidence;
+do not enable MADS, loosen limits or retune other workstreams.
 
 ## License
 
-The actual upstream LICENSE.md is a **custom license**, despite the MIT wording
-in file headers. It requires written permission for commercial, for-profit, or
-closed-source use, plus retained notices and visible acknowledgment. The license
-is included verbatim.
-
-The user confirmed that FlashPilot will be open sourced and available to anyone
-who wants it. Record this as the intended public-source distribution model, not
-as an unrestricted license grant over sunnypilot's code. No commercial-use
-permission or exception to upstream restrictions has been asserted. Retain the
-license and acknowledgment in any release; separately resolve permission before
-commercial, for-profit, or closed-source use. This confirmation does not authorize
-a push, publication, deployment, or active MADS enablement.
+The actual upstream LICENSE.md is a custom license despite MIT wording in file
+headers. The user's public-source intent is not a commercial-use permission
+grant. Repository visibility was not changed.
 
 This software is licensed under a custom license requiring permission for use.
 This project uses software from Haibin Wen and SUNNYPILOT LLC and is licensed
