@@ -7,6 +7,7 @@ from openpilot.selfdrive.ui.mici.layouts.settings.device import DeviceLayoutMici
 from openpilot.selfdrive.ui.mici.layouts.settings.developer import DeveloperLayoutMici
 from openpilot.selfdrive.ui.mici.layouts.settings.software import SoftwareLayoutMici
 from openpilot.selfdrive.ui.mici.layouts.settings.firehose import FirehoseLayout
+from openpilot.selfdrive.ui.mici.layouts.flashpilot_offroad import FlashPilotOffroadToggle
 from openpilot.system.ui.lib.application import gui_app, FontWeight
 
 
@@ -47,6 +48,7 @@ class SettingsLayout(NavScroller):
     self._scroller.add_widgets([
       toggles_btn,
       network_btn,
+      FlashPilotOffroadToggle(),
       device_btn,
       software_btn,
       PairBigButton(),

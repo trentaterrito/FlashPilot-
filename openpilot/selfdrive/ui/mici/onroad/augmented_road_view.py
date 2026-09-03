@@ -1,5 +1,7 @@
 import numpy as np
+import time
 import pyray as rl
+from opendbc.car.ford.values import CAR as FORD_CAR
 from openpilot.cereal import log
 from opendbc.car.structs import car
 from openpilot.cereal.visionipc import VisionStreamType
@@ -10,9 +12,10 @@ from openpilot.selfdrive.ui.mici.onroad.driver_state import DriverStateRenderer
 from openpilot.selfdrive.ui.mici.onroad.hud_renderer import HudRenderer
 from openpilot.selfdrive.ui.mici.onroad.model_renderer import ModelRenderer
 from openpilot.selfdrive.ui.mici.onroad.confidence_ball import ConfidenceBall
+from openpilot.selfdrive.ui.mici.onroad.experimental_notification import ExperimentalNotification
 from openpilot.selfdrive.ui.mici.onroad.cameraview import CameraView
 from openpilot.system.ui.lib.application import FontWeight, gui_app, MousePos, MouseEvent, TextAlignment, TextAlignmentVertical
-from openpilot.system.ui.widgets.label import UnifiedLabel
+from openpilot.system.ui.widgets.label import UnifiedLabel, gui_label
 from openpilot.system.ui.widgets import Widget
 from openpilot.common.filter_simple import BounceFilter
 from openpilot.common.transformations.camera import DEVICE_CAMERAS, DeviceCameraConfig, view_frame_from_device_frame
@@ -154,6 +157,7 @@ class AugmentedRoadView(CameraView):
     self._alert_renderer = AlertRenderer()
     self._driver_state_renderer = DriverStateRenderer()
     self._confidence_ball = ConfidenceBall()
+    self._experimental_notification = ExperimentalNotification()
     self._offroad_label = UnifiedLabel("start the car to\nuse openpilot", 54, FontWeight.DISPLAY,
                                        text_color=rl.Color(255, 255, 255, int(255 * 0.9)),
                                        alignment=TextAlignment.CENTER,
@@ -234,6 +238,8 @@ class AugmentedRoadView(CameraView):
     self._alert_renderer.render(self._content_rect)
     self._hud_renderer.render(self._content_rect)
 
+    self._draw_experimental_notification(alert_to_render)
+
     # Draw fake rounded border
     rl.draw_rectangle_rounded_lines_ex(self._content_rect, 0.2 * 1.02, 10, 50, rl.BLACK)
 
@@ -260,6 +266,24 @@ class AugmentedRoadView(CameraView):
             sm.valid['selfdriveState'] and sm.alive['selfdriveState'] and
             sm.recv_frame['selfdriveState'] >= started_frame and
             sm['selfdriveState'].enabled and sm['selfdriveState'].experimentalMode)
+
+  def _draw_experimental_notification(self, alert):
+    sm = ui_state.sm
+    now = time.monotonic()
+    fresh = (ui_state.CP is not None and ui_state.CP.carFingerprint == FORD_CAR.FORD_F_150_LIGHTNING_MK1
+             and ui_state.CP.openpilotLongitudinalControl and ui_state.started
+             and sm.valid['selfdriveState'] and sm.alive['selfdriveState']
+             and sm.recv_frame['selfdriveState'] >= ui_state.started_frame
+             and 0 <= now - sm.logMonoTime['selfdriveState'] * 1e-9 < 0.5)
+    text = self._experimental_notification.update(
+      now, bool(sm['selfdriveState'].experimentalMode) if fresh else None,
+      sm['selfdriveState'].enabled, ui_state.started_frame, alert is not None)
+    if text:
+      width = min(330, self._content_rect.width - 40)
+      rect = rl.Rectangle(self._content_rect.x + (self._content_rect.width - width) / 2,
+                          self._content_rect.y + self._content_rect.height - 68, width, 42)
+      rl.draw_rectangle_rounded(rect, 0.35, 8, rl.Color(20, 20, 20, 235))
+      gui_label(rect, text, font_size=28, color=rl.WHITE, alignment=TextAlignment.CENTER)
 
   def _switch_stream_if_needed(self, sm):
     if sm['selfdriveState'].experimentalMode and WIDE_CAM in self.available_streams:

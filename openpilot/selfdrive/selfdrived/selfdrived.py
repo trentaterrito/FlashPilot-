@@ -22,6 +22,8 @@ from openpilot.selfdrive.selfdrived.events import Events, ET
 from openpilot.selfdrive.selfdrived.helpers import ExcessiveActuationCheck
 from openpilot.selfdrive.selfdrived.state import StateMachine
 from openpilot.selfdrive.selfdrived.alertmanager import AlertManager, set_offroad_alert
+from openpilot.selfdrive.selfdrived.experimental_button import DistanceButtonGesture, MAX_SAMPLE_AGE
+from opendbc.car.ford.values import CAR as FORD_CAR
 
 from openpilot.common.version import get_build_metadata
 from openpilot.common.hardware import HARDWARE
@@ -126,6 +128,10 @@ class SelfdriveD:
     self.logged_comm_issue = None
     self.not_running_prev = None
     self.experimental_mode = False
+    self._distance_button = DistanceButtonGesture()
+    self._car_state_updated = False
+    self._car_state_valid = False
+    self._car_state_time = 0.0
     self.personality = self.params.get("LongitudinalPersonality", return_default=True)
     self.recalibrating_seen = False
     self.dm_lockout_set = False
@@ -453,15 +459,43 @@ class SelfdriveD:
       if self.sm['modelV2'].frameDropPerc > 1:
         self.events.add(EventName.modeldLagging)
 
-    # Decrement personality on distance button press
-    if self.CP.openpilotLongitudinalControl:
-      if any(not be.pressed and be.type == ButtonType.gapAdjustCruise for be in CS.buttonEvents):
-        self.personality = (self.personality - 1) % 3
-        self.params.put('LongitudinalPersonality', self.personality)
-        self.events.add(EventName.personalityChanged)
+    self.update_distance_button(CS)
+
+  def update_distance_button(self, CS):
+    if self.CP.passive or not self.CP.openpilotLongitudinalControl:
+      return
+    if self.CP.carFingerprint == FORD_CAR.FORD_F_150_LIGHTNING_MK1:
+      now = time.monotonic()
+      # A microsecond tolerance covers nanosecond-to-float rounding, not stale input.
+      valid = (self._car_state_valid and CS.canValid and -1e-6 <= now - self._car_state_time <= MAX_SAMPLE_AGE
+               and self.sm.valid['deviceState'] and self.sm['deviceState'].started
+               and -1e-6 <= now - self.sm.logMonoTime['deviceState'] * 1e-9 < 1.0)
+      # data_sample can reuse CS after a receive timeout; never replay its edges.
+      edges = [be.pressed for be in CS.buttonEvents if be.type == ButtonType.gapAdjustCruise] if self._car_state_updated else []
+      action = self._distance_button.update(now, edges, valid)
+      if action == 'hold':
+        current = self.params.get_bool('ExperimentalMode')
+        if current or self.params.get_bool('ExperimentalModeConfirmed'):
+          self.params.put_bool('ExperimentalMode', not current)
+          cloudlog.info('FlashPilot distance hold: ExperimentalMode requested=%s', not current)
+        else:
+          cloudlog.info('FlashPilot distance hold ignored: ExperimentalMode consent required')
+        return
+      short_press = action == 'short'
+    else:
+      # Preserve existing behavior for every non-Lightning platform.
+      short_press = any(not be.pressed and be.type == ButtonType.gapAdjustCruise for be in CS.buttonEvents)
+    if short_press:
+      self.personality = (self.personality - 1) % 3
+      self.params.put('LongitudinalPersonality', self.personality)
+      self.events.add(EventName.personalityChanged)
 
   def data_sample(self):
     _car_state = messaging.recv_one(self.car_state_sock)
+    self._car_state_updated = _car_state is not None
+    if _car_state is not None:
+      self._car_state_time = _car_state.logMonoTime * 1e-9
+      self._car_state_valid = _car_state.valid
     CS = _car_state.carState if _car_state else self.CS_prev
 
     self.sm.update(0)
