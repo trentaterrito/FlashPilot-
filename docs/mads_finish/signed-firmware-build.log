@@ -1,0 +1,34 @@
+scons: Entering directory `/private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/panda'
+scons: Reading SConscript files ...
+gcc: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+xcrun: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+g++: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+xcrun: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+gcc: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+xcrun: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+g++: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+xcrun: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+gcc: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+xcrun: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+g++: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+xcrun: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+gcc: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+xcrun: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+g++: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+xcrun: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+gcc: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+xcrun: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+g++: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+xcrun: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+gcc: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+xcrun: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+g++: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+xcrun: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+scons: done reading SConscript files.
+scons: Building targets ...
+arm-none-eabi-gcc -o board/obj/panda_h7/main.elf -Wl,--section-start,.isr_vector=0x8020000 -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tboard/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g board/stm32h7/board/obj/panda_h7startup_stm32h7x5xx.o board/board/obj/panda_h7main.o
+arm-none-eabi-objcopy -O binary board/obj/panda_h7/main.elf board/obj/panda_h7/main.bin
+SETLEN=1 board/crypto/sign.py board/obj/panda_h7/main.bin board/obj/panda_h7.bin.signed board/certs/debug
+signing 82460 bytes
+hash: 136e06c86e4c95bdbc72e4a63db357dcbe31447a
+scons: done building targets.
