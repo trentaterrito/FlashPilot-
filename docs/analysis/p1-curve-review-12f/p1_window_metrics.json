@@ -1,0 +1,2764 @@
+{
+  "route": "0000012f--084405b919",
+  "inputs": [
+    "/private/tmp/flashpilot-12f-p1/0-rlog.zst",
+    "/private/tmp/flashpilot-12f-p1/1-rlog.zst",
+    "/private/tmp/flashpilot-12f-p1/2-rlog.zst",
+    "/private/tmp/flashpilot-12f-p1/25-rlog.zst",
+    "/private/tmp/flashpilot-12f-p1/26-rlog.zst",
+    "/private/tmp/flashpilot-12f-p1/27-rlog.zst",
+    "/private/tmp/flashpilot-12f-p1/28-rlog.zst",
+    "/private/tmp/flashpilot-12f-p1/3-rlog.zst",
+    "/private/tmp/flashpilot-12f-p1/32-rlog.zst",
+    "/private/tmp/flashpilot-12f-p1/33-rlog.zst",
+    "/private/tmp/flashpilot-12f-p1/34-rlog.zst"
+  ],
+  "bookmarks": [
+    {
+      "seg": 2,
+      "second": 48.11068614599935
+    },
+    {
+      "seg": 26,
+      "second": 25.945220486995822
+    },
+    {
+      "seg": 27,
+      "second": 44.784062420003465
+    },
+    {
+      "seg": 33,
+      "second": 10.722338325998862
+    }
+  ],
+  "init_params": {
+    "0": {
+      "AlphaLongitudinalEnabled": "1",
+      "ExperimentalFordSteerAssistRadar": "1",
+      "ExperimentalFordSteerAssistRadarShadow": "1",
+      "ExperimentalMode": "1",
+      "LongitudinalPersonality": "1",
+      "OpenpilotEnabledToggle": "1"
+    },
+    "1": {
+      "AlphaLongitudinalEnabled": "1",
+      "ExperimentalFordSteerAssistRadar": "1",
+      "ExperimentalFordSteerAssistRadarShadow": "1",
+      "ExperimentalMode": "1",
+      "LongitudinalPersonality": "1",
+      "OpenpilotEnabledToggle": "1"
+    },
+    "2": {
+      "AlphaLongitudinalEnabled": "1",
+      "ExperimentalFordSteerAssistRadar": "1",
+      "ExperimentalFordSteerAssistRadarShadow": "1",
+      "ExperimentalMode": "1",
+      "LongitudinalPersonality": "1",
+      "OpenpilotEnabledToggle": "1"
+    },
+    "3": {
+      "AlphaLongitudinalEnabled": "1",
+      "ExperimentalFordSteerAssistRadar": "1",
+      "ExperimentalFordSteerAssistRadarShadow": "1",
+      "ExperimentalMode": "1",
+      "LongitudinalPersonality": "1",
+      "OpenpilotEnabledToggle": "1"
+    },
+    "25": {
+      "AlphaLongitudinalEnabled": "1",
+      "ExperimentalFordSteerAssistRadar": "1",
+      "ExperimentalFordSteerAssistRadarShadow": "1",
+      "ExperimentalMode": "1",
+      "LongitudinalPersonality": "1",
+      "OpenpilotEnabledToggle": "1"
+    },
+    "26": {
+      "AlphaLongitudinalEnabled": "1",
+      "ExperimentalFordSteerAssistRadar": "1",
+      "ExperimentalFordSteerAssistRadarShadow": "1",
+      "ExperimentalMode": "1",
+      "LongitudinalPersonality": "1",
+      "OpenpilotEnabledToggle": "1"
+    },
+    "27": {
+      "AlphaLongitudinalEnabled": "1",
+      "ExperimentalFordSteerAssistRadar": "1",
+      "ExperimentalFordSteerAssistRadarShadow": "1",
+      "ExperimentalMode": "1",
+      "LongitudinalPersonality": "1",
+      "OpenpilotEnabledToggle": "1"
+    },
+    "28": {
+      "AlphaLongitudinalEnabled": "1",
+      "ExperimentalFordSteerAssistRadar": "1",
+      "ExperimentalFordSteerAssistRadarShadow": "1",
+      "ExperimentalMode": "1",
+      "LongitudinalPersonality": "1",
+      "OpenpilotEnabledToggle": "1"
+    },
+    "32": {
+      "AlphaLongitudinalEnabled": "1",
+      "ExperimentalFordSteerAssistRadar": "1",
+      "ExperimentalFordSteerAssistRadarShadow": "1",
+      "ExperimentalMode": "1",
+      "LongitudinalPersonality": "1",
+      "OpenpilotEnabledToggle": "1"
+    },
+    "33": {
+      "AlphaLongitudinalEnabled": "1",
+      "ExperimentalFordSteerAssistRadar": "1",
+      "ExperimentalFordSteerAssistRadarShadow": "1",
+      "ExperimentalMode": "1",
+      "LongitudinalPersonality": "1",
+      "OpenpilotEnabledToggle": "1"
+    },
+    "34": {
+      "AlphaLongitudinalEnabled": "1",
+      "ExperimentalFordSteerAssistRadar": "1",
+      "ExperimentalFordSteerAssistRadarShadow": "1",
+      "ExperimentalMode": "1",
+      "LongitudinalPersonality": "1",
+      "OpenpilotEnabledToggle": "1"
+    }
+  },
+  "provenance": {
+    "0": {
+      "version": "0.11.2",
+      "git_commit": "036430eb628234e0f75d476e2a3a1b6db72491ee",
+      "git_branch": "codex/clean-reference-036430e",
+      "git_remote": "https://github.com/trentaterrito/FlashPilot-.git"
+    },
+    "1": {
+      "version": "0.11.2",
+      "git_commit": "036430eb628234e0f75d476e2a3a1b6db72491ee",
+      "git_branch": "codex/clean-reference-036430e",
+      "git_remote": "https://github.com/trentaterrito/FlashPilot-.git"
+    },
+    "2": {
+      "version": "0.11.2",
+      "git_commit": "036430eb628234e0f75d476e2a3a1b6db72491ee",
+      "git_branch": "codex/clean-reference-036430e",
+      "git_remote": "https://github.com/trentaterrito/FlashPilot-.git"
+    },
+    "3": {
+      "version": "0.11.2",
+      "git_commit": "036430eb628234e0f75d476e2a3a1b6db72491ee",
+      "git_branch": "codex/clean-reference-036430e",
+      "git_remote": "https://github.com/trentaterrito/FlashPilot-.git"
+    },
+    "25": {
+      "version": "0.11.2",
+      "git_commit": "036430eb628234e0f75d476e2a3a1b6db72491ee",
+      "git_branch": "codex/clean-reference-036430e",
+      "git_remote": "https://github.com/trentaterrito/FlashPilot-.git"
+    },
+    "26": {
+      "version": "0.11.2",
+      "git_commit": "036430eb628234e0f75d476e2a3a1b6db72491ee",
+      "git_branch": "codex/clean-reference-036430e",
+      "git_remote": "https://github.com/trentaterrito/FlashPilot-.git"
+    },
+    "27": {
+      "version": "0.11.2",
+      "git_commit": "036430eb628234e0f75d476e2a3a1b6db72491ee",
+      "git_branch": "codex/clean-reference-036430e",
+      "git_remote": "https://github.com/trentaterrito/FlashPilot-.git"
+    },
+    "28": {
+      "version": "0.11.2",
+      "git_commit": "036430eb628234e0f75d476e2a3a1b6db72491ee",
+      "git_branch": "codex/clean-reference-036430e",
+      "git_remote": "https://github.com/trentaterrito/FlashPilot-.git"
+    },
+    "32": {
+      "version": "0.11.2",
+      "git_commit": "036430eb628234e0f75d476e2a3a1b6db72491ee",
+      "git_branch": "codex/clean-reference-036430e",
+      "git_remote": "https://github.com/trentaterrito/FlashPilot-.git"
+    },
+    "33": {
+      "version": "0.11.2",
+      "git_commit": "036430eb628234e0f75d476e2a3a1b6db72491ee",
+      "git_branch": "codex/clean-reference-036430e",
+      "git_remote": "https://github.com/trentaterrito/FlashPilot-.git"
+    },
+    "34": {
+      "version": "0.11.2",
+      "git_commit": "036430eb628234e0f75d476e2a3a1b6db72491ee",
+      "git_branch": "codex/clean-reference-036430e",
+      "git_remote": "https://github.com/trentaterrito/FlashPilot-.git"
+    }
+  },
+  "top_curve_windows": [
+    {
+      "seg": 27,
+      "start_s": 35.0,
+      "end_s": 44.99,
+      "duration_s": 9.99,
+      "speed_mph_mean": 55.08463183750989,
+      "abs_curvature_mean": 0.0016693056807795714,
+      "curvature_sign_fraction": 1.0,
+      "command": {
+        "range": 0.12085462564724647,
+        "detrended_rms": 0.03852642344103235,
+        "band_rms_0p3_2hz": 0.008400720023026498,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "wheel": {
+        "range": 0.4842078820603893,
+        "detrended_rms": 0.14268610381773691,
+        "band_rms_0p3_2hz": 0.03520482389930325,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "desired_curvature": {
+        "range": 0.006642011186142644,
+        "detrended_rms": 0.001995871859773532,
+        "band_rms_0p3_2hz": 0.0005421524753562427,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "model_curvature": {
+        "range": 0.006943626988185397,
+        "detrended_rms": 0.0020503791871102173,
+        "band_rms_0p3_2hz": 0.000574431755172844,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.003347102468290104,
+        "detrended_rms": 0.0012370519307150184,
+        "band_rms_0p3_2hz": 0.00028549954869952276,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "command_reversals": {
+        "count": 6,
+        "per_min": 36.180904520507056,
+        "times": [
+          53218.47289749902,
+          53218.62289749903,
+          53220.97289749917,
+          53223.522897499315,
+          53227.42289749954,
+          53228.07289749958
+        ]
+      },
+      "wheel_reversals": {
+        "count": 5,
+        "per_min": 30.150753767089217,
+        "times": [
+          53218.372897499015,
+          53220.772897499155,
+          53223.522897499315,
+          53227.122897499525,
+          53227.822897499565
+        ]
+      },
+      "peak_command_rate_rad_s": 0.13709251294492963,
+      "command_abs_max_rad": 0.128,
+      "model_to_controls_delta_rms_1pm": 5.266234329076001e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.06043956043956044,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.9755803763104799,
+      "command_wheel_best_lag_s": 0.0,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 0.728021978021978,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 1.0,
+      "lane_prob_inner_mean": [
+        0.9732015791993874,
+        0.8965411249261636
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.02456141982590882
+    },
+    {
+      "seg": 27,
+      "start_s": 37.5,
+      "end_s": 47.49,
+      "duration_s": 9.99,
+      "speed_mph_mean": 50.82411404379467,
+      "abs_curvature_mean": 0.001396353363020197,
+      "curvature_sign_fraction": 0.8847736625514403,
+      "command": {
+        "range": 0.13191146270118526,
+        "detrended_rms": 0.035029646271304234,
+        "band_rms_0p3_2hz": 0.005244864675956692,
+        "band_peak_hz": 0.4
+      },
+      "wheel": {
+        "range": 0.5420449651709713,
+        "detrended_rms": 0.1325686544143068,
+        "band_rms_0p3_2hz": 0.028120976034163653,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "desired_curvature": {
+        "range": 0.007160192511988078,
+        "detrended_rms": 0.0018257302895867897,
+        "band_rms_0p3_2hz": 0.00035136186954210706,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "model_curvature": {
+        "range": 0.007470650532895834,
+        "detrended_rms": 0.0018771099291598067,
+        "band_rms_0p3_2hz": 0.0003848926727698357,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.003875114329142641,
+        "detrended_rms": 0.001242688640194541,
+        "band_rms_0p3_2hz": 0.0003870045352569867,
+        "band_peak_hz": 0.4
+      },
+      "command_reversals": {
+        "count": 5,
+        "per_min": 30.150753767089217,
+        "times": [
+          53223.52088584117,
+          53227.4208858414,
+          53228.27088584145,
+          53229.1208858415,
+          53229.2208858415
+        ]
+      },
+      "wheel_reversals": {
+        "count": 8,
+        "per_min": 48.24120602734275,
+        "times": [
+          53223.52088584117,
+          53227.12088584138,
+          53227.82088584142,
+          53228.720885841474,
+          53229.1708858415,
+          53229.97088584155,
+          53230.07088584155,
+          53230.52088584158
+        ]
+      },
+      "peak_command_rate_rad_s": 0.138229254023704,
+      "command_abs_max_rad": 0.128,
+      "model_to_controls_delta_rms_1pm": 5.191536004144342e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.06035665294924554,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.9765826505148693,
+      "command_wheel_best_lag_s": 0.0,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 0.3868312757201646,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 1.0,
+      "lane_prob_inner_mean": [
+        0.9490570889578925,
+        0.8311212776619711
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.024072482488252254
+    },
+    {
+      "seg": 26,
+      "start_s": 17.5,
+      "end_s": 27.49,
+      "duration_s": 9.99,
+      "speed_mph_mean": 73.15650706583415,
+      "abs_curvature_mean": 0.0016698563977426964,
+      "curvature_sign_fraction": 1.0,
+      "command": {
+        "range": 0.03700000000000003,
+        "detrended_rms": 0.005361665726560763,
+        "band_rms_0p3_2hz": 0.00507863457734026,
+        "band_peak_hz": 0.4
+      },
+      "wheel": {
+        "range": 0.1533728903172392,
+        "detrended_rms": 0.030310290236878645,
+        "band_rms_0p3_2hz": 0.03753365677947864,
+        "band_peak_hz": 0.6000000000000001
+      },
+      "desired_curvature": {
+        "range": 0.0012984778963485502,
+        "detrended_rms": 0.00018783552903713609,
+        "band_rms_0p3_2hz": 0.00017653025239409143,
+        "band_peak_hz": 0.4
+      },
+      "model_curvature": {
+        "range": 0.001378921850118786,
+        "detrended_rms": 0.00019158985636750467,
+        "band_rms_0p3_2hz": 0.0001813639271470796,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.002151083312923635,
+        "detrended_rms": 0.00031731287292836,
+        "band_rms_0p3_2hz": 0.0004007529599682344,
+        "band_peak_hz": 0.7000000000000001
+      },
+      "command_reversals": {
+        "count": 20,
+        "per_min": 120.60301506835687,
+        "times": [
+          53141.92326086907,
+          53142.823260869125,
+          53142.973260869134,
+          53143.12326086914,
+          53143.37326086916,
+          53143.47326086916,
+          53143.82326086918,
+          53143.92326086919,
+          53144.023260869195,
+          53144.1232608692,
+          53144.82326086924,
+          53145.37326086927,
+          53145.8732608693,
+          53146.12326086932,
+          53146.47326086934,
+          53146.773260869355,
+          53148.42326086945,
+          53148.72326086947,
+          53149.57326086952,
+          53149.62326086952
+        ]
+      },
+      "wheel_reversals": {
+        "count": 11,
+        "per_min": 66.33165828759627,
+        "times": [
+          53143.92326086919,
+          53144.57326086923,
+          53144.82326086924,
+          53144.97326086925,
+          53145.67326086929,
+          53146.423260869335,
+          53146.923260869364,
+          53147.5232608694,
+          53148.97326086948,
+          53149.373260869506,
+          53149.523260869515
+        ]
+      },
+      "peak_command_rate_rad_s": 0.1200000000000001,
+      "command_abs_max_rad": 0.0635,
+      "model_to_controls_delta_rms_1pm": 2.8371404854201084e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.7802151233190722,
+      "command_wheel_best_lag_s": 0.15000000000000002,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.0,
+      "lane_prob_inner_mean": [
+        0.9862135011263844,
+        0.9682902450047711
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.05377217439591345
+    },
+    {
+      "seg": 26,
+      "start_s": 15.01,
+      "end_s": 25.0,
+      "duration_s": 9.99,
+      "speed_mph_mean": 72.19310546141703,
+      "abs_curvature_mean": 0.001731850162726797,
+      "curvature_sign_fraction": 1.0,
+      "command": {
+        "range": 0.025000000000000022,
+        "detrended_rms": 0.00488200263147069,
+        "band_rms_0p3_2hz": 0.0044619322810642795,
+        "band_peak_hz": 0.4
+      },
+      "wheel": {
+        "range": 0.1528492559685956,
+        "detrended_rms": 0.0297006774282948,
+        "band_rms_0p3_2hz": 0.023246194674416472,
+        "band_peak_hz": 0.4
+      },
+      "desired_curvature": {
+        "range": 0.0008074311772361398,
+        "detrended_rms": 0.00016586938689966613,
+        "band_rms_0p3_2hz": 0.00015597235712642695,
+        "band_peak_hz": 0.4
+      },
+      "model_curvature": {
+        "range": 0.0008806482655927539,
+        "detrended_rms": 0.00016891315961927206,
+        "band_rms_0p3_2hz": 0.00015854640452941775,
+        "band_peak_hz": 0.4
+      },
+      "yaw_curvature": {
+        "range": 0.0021863199354376283,
+        "detrended_rms": 0.0003138335603545804,
+        "band_rms_0p3_2hz": 0.00024420090304357565,
+        "band_peak_hz": 0.4
+      },
+      "command_reversals": {
+        "count": 18,
+        "per_min": 108.54271356152118,
+        "times": [
+          53138.227043023006,
+          53138.32704302301,
+          53141.92704302322,
+          53142.82704302327,
+          53142.97704302328,
+          53143.12704302329,
+          53143.377043023305,
+          53143.47704302331,
+          53143.82704302333,
+          53143.92704302334,
+          53144.02704302334,
+          53144.12704302335,
+          53144.82704302339,
+          53145.37704302342,
+          53145.87704302345,
+          53146.127043023465,
+          53146.477043023486,
+          53146.7770430235
+        ]
+      },
+      "wheel_reversals": {
+        "count": 10,
+        "per_min": 60.301507534178434,
+        "times": [
+          53140.277043023125,
+          53143.92704302334,
+          53144.727043023384,
+          53144.77704302339,
+          53144.9770430234,
+          53145.67704302344,
+          53146.42704302348,
+          53146.92704302351,
+          53147.52704302355,
+          53148.07704302358
+        ]
+      },
+      "peak_command_rate_rad_s": 0.1200000000000001,
+      "command_abs_max_rad": 0.0635,
+      "model_to_controls_delta_rms_1pm": 2.8253027584621858e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.790807643275854,
+      "command_wheel_best_lag_s": 0.1,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.0,
+      "lane_prob_inner_mean": [
+        0.9856842011213303,
+        0.968796300791925
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.052423299523070455
+    },
+    {
+      "seg": 26,
+      "start_s": 22.5,
+      "end_s": 32.49,
+      "duration_s": 9.99,
+      "speed_mph_mean": 74.88459952849863,
+      "abs_curvature_mean": 0.0011280994233096764,
+      "curvature_sign_fraction": 0.9769526248399488,
+      "command": {
+        "range": 0.05327761679520016,
+        "detrended_rms": 0.007973172054043591,
+        "band_rms_0p3_2hz": 0.0042784250161056175,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "wheel": {
+        "range": 0.27355952309246984,
+        "detrended_rms": 0.035041331646844,
+        "band_rms_0p3_2hz": 0.017414629078051566,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "desired_curvature": {
+        "range": 0.0018892020289058564,
+        "detrended_rms": 0.0002722421945144643,
+        "band_rms_0p3_2hz": 0.00013747709557994074,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "model_curvature": {
+        "range": 0.001926548762639868,
+        "detrended_rms": 0.0002738547438465766,
+        "band_rms_0p3_2hz": 0.0001376550023324502,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.0030985153644110244,
+        "detrended_rms": 0.0003412294956700137,
+        "band_rms_0p3_2hz": 0.00018552392919375955,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "command_reversals": {
+        "count": 10,
+        "per_min": 60.301507534178434,
+        "times": [
+          53145.872635086016,
+          53146.12263508603,
+          53146.47263508605,
+          53146.77263508607,
+          53148.422635086165,
+          53148.72263508618,
+          53149.57263508623,
+          53149.622635086234,
+          53154.67263508653,
+          53155.37263508657
+        ]
+      },
+      "wheel_reversals": {
+        "count": 8,
+        "per_min": 48.24120602734275,
+        "times": [
+          53146.42263508605,
+          53146.92263508608,
+          53147.52263508611,
+          53148.9726350862,
+          53149.37263508622,
+          53149.52263508623,
+          53154.37263508651,
+          53155.472635086575
+        ]
+      },
+      "peak_command_rate_rad_s": 0.07000000000000117,
+      "command_abs_max_rad": 0.05249999999999999,
+      "model_to_controls_delta_rms_1pm": 2.2360569171589152e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.8447624397728588,
+      "command_wheel_best_lag_s": 0.1,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.0,
+      "lane_prob_inner_mean": [
+        0.8847427062860782,
+        0.8727154425022201
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.04516601836530637
+    },
+    {
+      "seg": 26,
+      "start_s": 20.01,
+      "end_s": 29.15,
+      "duration_s": 9.14,
+      "speed_mph_mean": 74.04129868903053,
+      "abs_curvature_mean": 0.0014318839970699996,
+      "curvature_sign_fraction": 1.0,
+      "command": {
+        "range": 0.055499999999999994,
+        "detrended_rms": 0.008763779059501096,
+        "band_rms_0p3_2hz": 0.003711646796495137,
+        "band_peak_hz": 0.32786885245901637
+      },
+      "wheel": {
+        "range": 0.22514747517174416,
+        "detrended_rms": 0.03984424101022761,
+        "band_rms_0p3_2hz": 0.029771867516130784,
+        "band_peak_hz": 0.32786885245901637
+      },
+      "desired_curvature": {
+        "range": 0.0019098739430774003,
+        "detrended_rms": 0.00029865646505650514,
+        "band_rms_0p3_2hz": 0.00012785513828035024,
+        "band_peak_hz": 0.32786885245901637
+      },
+      "model_curvature": {
+        "range": 0.0019830910314340144,
+        "detrended_rms": 0.00030169357290787675,
+        "band_rms_0p3_2hz": 0.00013070783264724765,
+        "band_peak_hz": 0.32786885245901637
+      },
+      "yaw_curvature": {
+        "range": 0.0025720253739681467,
+        "detrended_rms": 0.00039181042713892084,
+        "band_rms_0p3_2hz": 0.0003305873562340954,
+        "band_peak_hz": 0.6557377049180327
+      },
+      "command_reversals": {
+        "count": 16,
+        "per_min": 105.49450548836491,
+        "times": [
+          53143.37837897702,
+          53143.47837897702,
+          53143.82837897704,
+          53143.92837897705,
+          53144.028378977055,
+          53144.12837897706,
+          53144.8283789771,
+          53145.37837897713,
+          53145.87837897716,
+          53146.12837897718,
+          53146.4783789772,
+          53146.778378977215,
+          53148.42837897731,
+          53148.72837897733,
+          53149.57837897738,
+          53149.62837897738
+        ]
+      },
+      "wheel_reversals": {
+        "count": 12,
+        "per_min": 79.12087911627368,
+        "times": [
+          53143.47837897702,
+          53143.92837897705,
+          53144.728378977095,
+          53144.7783789771,
+          53144.97837897711,
+          53145.67837897715,
+          53146.428378977194,
+          53146.92837897722,
+          53147.52837897726,
+          53148.97837897734,
+          53149.378378977366,
+          53149.528378977375
+        ]
+      },
+      "peak_command_rate_rad_s": 0.1200000000000001,
+      "command_abs_max_rad": 0.0635,
+      "model_to_controls_delta_rms_1pm": 2.811002671460382e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.8536567338262406,
+      "command_wheel_best_lag_s": 0.15000000000000002,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.0,
+      "lane_prob_inner_mean": [
+        0.9879640694236336,
+        0.971525489693821
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.050255882128564966
+    },
+    {
+      "seg": 27,
+      "start_s": 30.0,
+      "end_s": 39.99,
+      "duration_s": 9.98,
+      "speed_mph_mean": 62.9320680548135,
+      "abs_curvature_mean": 0.0019578432000367852,
+      "curvature_sign_fraction": 1.0,
+      "command": {
+        "range": 0.10899999999999999,
+        "detrended_rms": 0.024272253230840788,
+        "band_rms_0p3_2hz": 0.0035643336169813673,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "wheel": {
+        "range": 0.3065057407753661,
+        "detrended_rms": 0.08839607571251767,
+        "band_rms_0p3_2hz": 0.029610169564777928,
+        "band_peak_hz": 0.6000000000000001
+      },
+      "desired_curvature": {
+        "range": 0.005136622756253928,
+        "detrended_rms": 0.0010471874482128954,
+        "band_rms_0p3_2hz": 0.00014342511325779982,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "model_curvature": {
+        "range": 0.005136622756253928,
+        "detrended_rms": 0.0010515794431040814,
+        "band_rms_0p3_2hz": 0.0001446128121960111,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.0030718759514797235,
+        "detrended_rms": 0.0008456356931691091,
+        "band_rms_0p3_2hz": 0.00034958984077067273,
+        "band_peak_hz": 0.6000000000000001
+      },
+      "command_reversals": {
+        "count": 16,
+        "per_min": 96.4824120546855,
+        "times": [
+          53213.97349854505,
+          53214.12349854506,
+          53214.37349854507,
+          53214.52349854508,
+          53215.17349854512,
+          53215.37349854513,
+          53215.473498545136,
+          53215.52349854514,
+          53215.973498545165,
+          53216.323498545185,
+          53216.77349854521,
+          53217.07349854523,
+          53217.22349854524,
+          53218.47349854531,
+          53218.62349854532,
+          53220.973498545456
+        ]
+      },
+      "wheel_reversals": {
+        "count": 6,
+        "per_min": 36.180904520507056,
+        "times": [
+          53213.923498545046,
+          53214.37349854507,
+          53217.47349854525,
+          53217.97349854528,
+          53218.373498545305,
+          53220.773498545444
+        ]
+      },
+      "peak_command_rate_rad_s": 0.14999999999999902,
+      "command_abs_max_rad": 0.11650000000000005,
+      "model_to_controls_delta_rms_1pm": 4.7167065248205836e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.010070493454179255,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.9571273856766184,
+      "command_wheel_best_lag_s": 0.1,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.5971802618328298,
+      "lane_prob_inner_mean": [
+        0.9825901782284571,
+        0.9578106113430956
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.03808206430761085
+    },
+    {
+      "seg": 27,
+      "start_s": 27.51,
+      "end_s": 37.49,
+      "duration_s": 9.99,
+      "speed_mph_mean": 66.46326757975812,
+      "abs_curvature_mean": 0.0015219035482635763,
+      "curvature_sign_fraction": 1.0,
+      "command": {
+        "range": 0.07299999999999995,
+        "detrended_rms": 0.02172783287040231,
+        "band_rms_0p3_2hz": 0.0029331081630217444,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "wheel": {
+        "range": 0.284488661001054,
+        "detrended_rms": 0.08534501659027512,
+        "band_rms_0p3_2hz": 0.02331302589207585,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "desired_curvature": {
+        "range": 0.0027766238121866727,
+        "detrended_rms": 0.000827277918372581,
+        "band_rms_0p3_2hz": 0.00010759271893678822,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "model_curvature": {
+        "range": 0.0029284196425578557,
+        "detrended_rms": 0.0008306511068894682,
+        "band_rms_0p3_2hz": 0.00011294428141225131,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.0031453809824238213,
+        "detrended_rms": 0.0008336053182250655,
+        "band_rms_0p3_2hz": 0.000255712632563915,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "command_reversals": {
+        "count": 15,
+        "per_min": 90.45226130126765,
+        "times": [
+          53213.9751073072,
+          53214.125107307205,
+          53214.37510730722,
+          53214.52510730723,
+          53215.17510730727,
+          53215.37510730728,
+          53215.475107307284,
+          53215.52510730729,
+          53215.97510730731,
+          53216.32510730733,
+          53216.77510730736,
+          53217.07510730738,
+          53217.225107307386,
+          53218.47510730746,
+          53218.62510730747
+        ]
+      },
+      "wheel_reversals": {
+        "count": 5,
+        "per_min": 30.150753767089217,
+        "times": [
+          53213.925107307194,
+          53214.37510730722,
+          53217.4751073074,
+          53217.97510730743,
+          53218.37510730745
+        ]
+      },
+      "peak_command_rate_rad_s": 0.14999999999999902,
+      "command_abs_max_rad": 0.07450000000000001,
+      "model_to_controls_delta_rms_1pm": 3.499215728780449e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.9602962244910743,
+      "command_wheel_best_lag_s": 0.1,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.3477822580645161,
+      "lane_prob_inner_mean": [
+        0.9824067341584352,
+        0.9609580856537626
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.03437266636298421
+    },
+    {
+      "seg": 28,
+      "start_s": 25.0,
+      "end_s": 35.0,
+      "duration_s": 9.99,
+      "speed_mph_mean": 57.32704886996934,
+      "abs_curvature_mean": 0.0011727990349754691,
+      "curvature_sign_fraction": 1.0,
+      "command": {
+        "range": 0.015499999999999958,
+        "detrended_rms": 0.0041209167135888404,
+        "band_rms_0p3_2hz": 0.0029222913421394115,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "wheel": {
+        "range": 0.0628318597296986,
+        "detrended_rms": 0.017713219577689076,
+        "band_rms_0p3_2hz": 0.01369440761536617,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "desired_curvature": {
+        "range": 0.0006517873844131827,
+        "detrended_rms": 0.0001741544819730531,
+        "band_rms_0p3_2hz": 0.0001216358776499324,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "model_curvature": {
+        "range": 0.0006517873844131827,
+        "detrended_rms": 0.00017416334446256773,
+        "band_rms_0p3_2hz": 0.00012180374790318768,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.0007744859693456294,
+        "detrended_rms": 0.00018514491948247458,
+        "band_rms_0p3_2hz": 0.00014305055512712947,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "command_reversals": {
+        "count": 3,
+        "per_min": 18.090452260253528,
+        "times": [
+          53273.11232769229,
+          53274.71232769238,
+          53277.76232769256
+        ]
+      },
+      "wheel_reversals": {
+        "count": 4,
+        "per_min": 24.120603013671374,
+        "times": [
+          53270.96232769216,
+          53273.01232769228,
+          53274.81232769239,
+          53277.512327692544
+        ]
+      },
+      "peak_command_rate_rad_s": 0.046049238323043404,
+      "command_abs_max_rad": 0.034499999999999975,
+      "model_to_controls_delta_rms_1pm": 9.316656286009482e-06,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.980981443670565,
+      "command_wheel_best_lag_s": 0.2,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.0,
+      "lane_prob_inner_mean": [
+        0.9614901596631562,
+        0.9506942666992095
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.023946093897554477
+    },
+    {
+      "seg": 28,
+      "start_s": 27.51,
+      "end_s": 37.5,
+      "duration_s": 9.99,
+      "speed_mph_mean": 57.35374799225699,
+      "abs_curvature_mean": 0.001046999575597397,
+      "curvature_sign_fraction": 1.0,
+      "command": {
+        "range": 0.02749999999999997,
+        "detrended_rms": 0.005454047775522029,
+        "band_rms_0p3_2hz": 0.0026986465393135438,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "wheel": {
+        "range": 0.10122909994462248,
+        "detrended_rms": 0.02456197714814229,
+        "band_rms_0p3_2hz": 0.013008060902492836,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "desired_curvature": {
+        "range": 0.001170677220216021,
+        "detrended_rms": 0.00022356663744388188,
+        "band_rms_0p3_2hz": 0.00010877489534339097,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "model_curvature": {
+        "range": 0.001170677220216021,
+        "detrended_rms": 0.00022370956437194699,
+        "band_rms_0p3_2hz": 0.00010903854548343476,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.0012143945027967749,
+        "detrended_rms": 0.00026024090652977325,
+        "band_rms_0p3_2hz": 0.00014071399226715572,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "command_reversals": {
+        "count": 7,
+        "per_min": 42.211055273924906,
+        "times": [
+          53273.114621946144,
+          53274.71462194624,
+          53277.71462194641,
+          53279.01462194649,
+          53279.2146219465,
+          53279.314621946505,
+          53280.31462194656
+        ]
+      },
+      "wheel_reversals": {
+        "count": 5,
+        "per_min": 30.150753767089217,
+        "times": [
+          53273.01462194614,
+          53274.81462194624,
+          53277.5146219464,
+          53279.664621946526,
+          53280.514621946575
+        ]
+      },
+      "peak_command_rate_rad_s": 0.06999999999999895,
+      "command_abs_max_rad": 0.034499999999999975,
+      "model_to_controls_delta_rms_1pm": 1.1428794525049596e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.9824864439411889,
+      "command_wheel_best_lag_s": 0.15000000000000002,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.0,
+      "lane_prob_inner_mean": [
+        0.963456259526957,
+        0.9531608562114493
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.019332582672289152
+    },
+    {
+      "seg": 28,
+      "start_s": 30.0,
+      "end_s": 40.0,
+      "duration_s": 10.0,
+      "speed_mph_mean": 57.27670706010604,
+      "abs_curvature_mean": 0.0007605903508021695,
+      "curvature_sign_fraction": 0.7565392354124748,
+      "command": {
+        "range": 0.03849999999999998,
+        "detrended_rms": 0.005062227032309456,
+        "band_rms_0p3_2hz": 0.0025626511878804772,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "wheel": {
+        "range": 0.1518436457557445,
+        "detrended_rms": 0.02101288899498074,
+        "band_rms_0p3_2hz": 0.012757164039733374,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "desired_curvature": {
+        "range": 0.00171620913897641,
+        "detrended_rms": 0.00022133929086795182,
+        "band_rms_0p3_2hz": 0.00010450590989632813,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "model_curvature": {
+        "range": 0.00171620913897641,
+        "detrended_rms": 0.00022089011619145596,
+        "band_rms_0p3_2hz": 0.00010433635600882005,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.001723968561805766,
+        "detrended_rms": 0.00022563975255384668,
+        "band_rms_0p3_2hz": 0.00012395329437376408,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "command_reversals": {
+        "count": 6,
+        "per_min": 36.180904520507056,
+        "times": [
+          53274.709614581094,
+          53277.75961458127,
+          53279.009614581344,
+          53279.209614581356,
+          53279.30961458136,
+          53280.30961458142
+        ]
+      },
+      "wheel_reversals": {
+        "count": 4,
+        "per_min": 24.120603013671374,
+        "times": [
+          53274.8096145811,
+          53277.50961458126,
+          53279.65961458138,
+          53280.50961458143
+        ]
+      },
+      "peak_command_rate_rad_s": 0.06999999999999895,
+      "command_abs_max_rad": 0.03149999999999997,
+      "model_to_controls_delta_rms_1pm": 1.1491377567514904e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.9563112481823893,
+      "command_wheel_best_lag_s": 0.2,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.0,
+      "lane_prob_inner_mean": [
+        0.9636522376801167,
+        0.9612968292394635
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.008518652264035814
+    },
+    {
+      "seg": 27,
+      "start_s": 32.51,
+      "end_s": 40.33,
+      "duration_s": 7.83,
+      "speed_mph_mean": 60.81125019274863,
+      "abs_curvature_mean": 0.0021346700067271583,
+      "curvature_sign_fraction": 1.0,
+      "command": {
+        "range": 0.11399999999999999,
+        "detrended_rms": 0.030810802484666354,
+        "band_rms_0p3_2hz": 0.0025481125248344176,
+        "band_peak_hz": 0.3821656050955414
+      },
+      "wheel": {
+        "range": 0.4364018526918502,
+        "detrended_rms": 0.10718512995421543,
+        "band_rms_0p3_2hz": 0.0220381589691505,
+        "band_peak_hz": 0.6369426751592356
+      },
+      "desired_curvature": {
+        "range": 0.006644361032272078,
+        "detrended_rms": 0.001427350998628023,
+        "band_rms_0p3_2hz": 0.00010265941588195968,
+        "band_peak_hz": 0.3821656050955414
+      },
+      "model_curvature": {
+        "range": 0.006659724924247712,
+        "detrended_rms": 0.001432218324806217,
+        "band_rms_0p3_2hz": 0.00010351340083709264,
+        "band_peak_hz": 0.3821656050955414
+      },
+      "yaw_curvature": {
+        "range": 0.0032889608534738724,
+        "detrended_rms": 0.001004629753356935,
+        "band_rms_0p3_2hz": 0.0002903407191619541,
+        "band_peak_hz": 0.6369426751592356
+      },
+      "command_reversals": {
+        "count": 8,
+        "per_min": 61.53846153487953,
+        "times": [
+          53215.973860983024,
+          53216.323860983044,
+          53216.77386098307,
+          53217.07386098309,
+          53217.2238609831,
+          53218.47386098317,
+          53218.62386098318,
+          53220.973860983315
+        ]
+      },
+      "wheel_reversals": {
+        "count": 4,
+        "per_min": 30.769230767439765,
+        "times": [
+          53217.47386098311,
+          53217.97386098314,
+          53218.37386098316,
+          53220.7738609833
+        ]
+      },
+      "peak_command_rate_rad_s": 0.14999999999999902,
+      "command_abs_max_rad": 0.128,
+      "model_to_controls_delta_rms_1pm": 5.804469040819033e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.056555269922879174,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.9609048377109337,
+      "command_wheel_best_lag_s": 0.0,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.8059125964010283,
+      "lane_prob_inner_mean": [
+        0.982116944532468,
+        0.9601418286332128
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.03297358087999004
+    },
+    {
+      "seg": 26,
+      "start_s": 25.01,
+      "end_s": 33.92,
+      "duration_s": 8.91,
+      "speed_mph_mean": 75.79216424346943,
+      "abs_curvature_mean": 0.0008260223151928858,
+      "curvature_sign_fraction": 0.9715639810426541,
+      "command": {
+        "range": 0.05080128508267537,
+        "detrended_rms": 0.010246670124993869,
+        "band_rms_0p3_2hz": 0.002416446013124784,
+        "band_peak_hz": 0.33519553072625696
+      },
+      "wheel": {
+        "range": 0.21192437880303977,
+        "detrended_rms": 0.04534843177751663,
+        "band_rms_0p3_2hz": 0.010045080896321746,
+        "band_peak_hz": 0.33519553072625696
+      },
+      "desired_curvature": {
+        "range": 0.00175663699155848,
+        "detrended_rms": 0.0003547053380705415,
+        "band_rms_0p3_2hz": 7.671748601757282e-05,
+        "band_peak_hz": 0.33519553072625696
+      },
+      "model_curvature": {
+        "range": 0.0017665159957687138,
+        "detrended_rms": 0.0003548838689925114,
+        "band_rms_0p3_2hz": 7.632619211500086e-05,
+        "band_peak_hz": 0.33519553072625696
+      },
+      "yaw_curvature": {
+        "range": 0.0020595441617308734,
+        "detrended_rms": 0.0003775119049465355,
+        "band_rms_0p3_2hz": 0.00010680277478482556,
+        "band_peak_hz": 0.33519553072625696
+      },
+      "command_reversals": {
+        "count": 6,
+        "per_min": 40.449438199892725,
+        "times": [
+          53148.727598535035,
+          53149.577598535085,
+          53149.62759853509,
+          53154.67759853538,
+          53155.37759853542,
+          53155.777598535446
+        ]
+      },
+      "wheel_reversals": {
+        "count": 9,
+        "per_min": 60.67415729983909,
+        "times": [
+          53148.97759853505,
+          53149.37759853507,
+          53149.52759853508,
+          53154.377598535364,
+          53155.47759853543,
+          53155.72759853544,
+          53156.07759853546,
+          53156.32759853548,
+          53157.02759853552
+        ]
+      },
+      "peak_command_rate_rad_s": 0.049999999999998934,
+      "command_abs_max_rad": 0.04949999999999999,
+      "model_to_controls_delta_rms_1pm": 1.1716886164279846e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.9838300420976456,
+      "command_wheel_best_lag_s": 0.1,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.0,
+      "lane_prob_inner_mean": [
+        0.8599389266968657,
+        0.843303375343364
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.0366993404418748
+    },
+    {
+      "seg": 28,
+      "start_s": 22.51,
+      "end_s": 32.49,
+      "duration_s": 9.98,
+      "speed_mph_mean": 57.127309026234755,
+      "abs_curvature_mean": 0.0011726906870126964,
+      "curvature_sign_fraction": 1.0,
+      "command": {
+        "range": 0.015000000000000013,
+        "detrended_rms": 0.003873754987037725,
+        "band_rms_0p3_2hz": 0.0023344111010630683,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "wheel": {
+        "range": 0.0628318597296986,
+        "detrended_rms": 0.01724052594857693,
+        "band_rms_0p3_2hz": 0.01068719987964346,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "desired_curvature": {
+        "range": 0.0006422722362913191,
+        "detrended_rms": 0.0001625891653695926,
+        "band_rms_0p3_2hz": 9.861316701171663e-05,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "model_curvature": {
+        "range": 0.0006422722362913191,
+        "detrended_rms": 0.0001626399342390658,
+        "band_rms_0p3_2hz": 9.860054203339661e-05,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.0007965566532791465,
+        "detrended_rms": 0.00018426297556776988,
+        "band_rms_0p3_2hz": 0.00011085388022378193,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "command_reversals": {
+        "count": 3,
+        "per_min": 18.090452260253528,
+        "times": [
+          53270.8660933783,
+          53273.116093378434,
+          53274.71609337853
+        ]
+      },
+      "wheel_reversals": {
+        "count": 3,
+        "per_min": 18.090452260253528,
+        "times": [
+          53270.96609337831,
+          53273.01609337843,
+          53274.81609337853
+        ]
+      },
+      "peak_command_rate_rad_s": 0.040000000000000036,
+      "command_abs_max_rad": 0.034499999999999975,
+      "model_to_controls_delta_rms_1pm": 9.358665780659518e-06,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.9881528635693906,
+      "command_wheel_best_lag_s": 0.2,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.0,
+      "lane_prob_inner_mean": [
+        0.9640401331679699,
+        0.9535841401009881
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.024362498404756412
+    },
+    {
+      "seg": 26,
+      "start_s": 50.0,
+      "end_s": 59.98,
+      "duration_s": 9.98,
+      "speed_mph_mean": 68.98774970442243,
+      "abs_curvature_mean": 0.001195649769507553,
+      "curvature_sign_fraction": 0.8006042296072508,
+      "command": {
+        "range": 0.05800000000000005,
+        "detrended_rms": 0.007261407601867416,
+        "band_rms_0p3_2hz": 0.0023063523747583136,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "wheel": {
+        "range": 0.2548180691266964,
+        "detrended_rms": 0.02899616313087385,
+        "band_rms_0p3_2hz": 0.013045924030520285,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "desired_curvature": {
+        "range": 0.0022171789896674454,
+        "detrended_rms": 0.000273303035824698,
+        "band_rms_0p3_2hz": 7.97872013363994e-05,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "model_curvature": {
+        "range": 0.0022171789896674454,
+        "detrended_rms": 0.0002738815236890161,
+        "band_rms_0p3_2hz": 8.136744498323431e-05,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.002682433579873896,
+        "detrended_rms": 0.000294283742521029,
+        "band_rms_0p3_2hz": 0.00013994948564780954,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "command_reversals": {
+        "count": 11,
+        "per_min": 66.33165828759627,
+        "times": [
+          53175.123239727116,
+          53176.22323972718,
+          53178.2232397273,
+          53178.2732397273,
+          53178.67323972732,
+          53178.77323972733,
+          53179.27323972736,
+          53179.37323972736,
+          53179.67323972738,
+          53179.77323972739,
+          53181.57323972749
+        ]
+      },
+      "wheel_reversals": {
+        "count": 7,
+        "per_min": 42.211055273924906,
+        "times": [
+          53175.17323972712,
+          53175.47323972714,
+          53175.92323972716,
+          53176.42323972719,
+          53179.77323972739,
+          53180.37323972742,
+          53181.823239727506
+        ]
+      },
+      "peak_command_rate_rad_s": 0.08000000000000007,
+      "command_abs_max_rad": 0.055499999999999994,
+      "model_to_controls_delta_rms_1pm": 1.5215515056390956e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.9294362150116031,
+      "command_wheel_best_lag_s": 0.1,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.0,
+      "lane_prob_inner_mean": [
+        0.960385290757647,
+        0.8973860657227123
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": 0.04666020405597887
+    },
+    {
+      "seg": 26,
+      "start_s": 10.0,
+      "end_s": 20.0,
+      "duration_s": 9.99,
+      "speed_mph_mean": 72.43505542338461,
+      "abs_curvature_mean": 0.0017624647078909835,
+      "curvature_sign_fraction": 1.0,
+      "command": {
+        "range": 0.016000000000000014,
+        "detrended_rms": 0.003234631133869357,
+        "band_rms_0p3_2hz": 0.002247516082057457,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "wheel": {
+        "range": 0.057595868644764237,
+        "detrended_rms": 0.015290789267533291,
+        "band_rms_0p3_2hz": 0.014847751430019,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "desired_curvature": {
+        "range": 0.0005495140794664621,
+        "detrended_rms": 0.00010932341171623157,
+        "band_rms_0p3_2hz": 8.079424553330045e-05,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "model_curvature": {
+        "range": 0.0005495140794664621,
+        "detrended_rms": 0.00011294309598276729,
+        "band_rms_0p3_2hz": 8.545300547097728e-05,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.0009842591803087598,
+        "detrended_rms": 0.0001664104255575307,
+        "band_rms_0p3_2hz": 0.00012994335698015956,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "command_reversals": {
+        "count": 9,
+        "per_min": 54.27135678076059,
+        "times": [
+          53134.620450489085,
+          53135.27045048912,
+          53137.370450489245,
+          53137.92045048928,
+          53138.070450489286,
+          53138.3204504893,
+          53141.92045048951,
+          53142.82045048956,
+          53142.97045048957
+        ]
+      },
+      "wheel_reversals": {
+        "count": 7,
+        "per_min": 42.211055273924906,
+        "times": [
+          53133.87045048904,
+          53134.52045048908,
+          53135.87045048916,
+          53137.62045048926,
+          53138.87045048933,
+          53140.32045048942,
+          53143.07045048958
+        ]
+      },
+      "peak_command_rate_rad_s": 0.08000000000000007,
+      "command_abs_max_rad": 0.05900000000000005,
+      "model_to_controls_delta_rms_1pm": 1.6623921602874873e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.9015816525906643,
+      "command_wheel_best_lag_s": 0.2,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.0,
+      "lane_prob_inner_mean": [
+        0.9917618795147827,
+        0.9798403750624387
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.05057456773600631
+    },
+    {
+      "seg": 27,
+      "start_s": 25.01,
+      "end_s": 35.0,
+      "duration_s": 9.99,
+      "speed_mph_mean": 67.99596887604373,
+      "abs_curvature_mean": 0.001297727211517459,
+      "curvature_sign_fraction": 0.8165322580645161,
+      "command": {
+        "range": 0.07950000000000002,
+        "detrended_rms": 0.007651955981851756,
+        "band_rms_0p3_2hz": 0.0020258270675595305,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "wheel": {
+        "range": 0.31066860030111765,
+        "detrended_rms": 0.0318600592064916,
+        "band_rms_0p3_2hz": 0.013131054269957716,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "desired_curvature": {
+        "range": 0.0030406572695956873,
+        "detrended_rms": 0.0002887600356582525,
+        "band_rms_0p3_2hz": 7.14394468344787e-05,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "model_curvature": {
+        "range": 0.003190901959897019,
+        "detrended_rms": 0.0002907626926904143,
+        "band_rms_0p3_2hz": 7.129429952079091e-05,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.003274245010723283,
+        "detrended_rms": 0.00034052328168156405,
+        "band_rms_0p3_2hz": 0.0001732215302454344,
+        "band_peak_hz": 0.9
+      },
+      "command_reversals": {
+        "count": 13,
+        "per_min": 78.39195979443197,
+        "times": [
+          53213.97786544134,
+          53214.12786544135,
+          53214.37786544136,
+          53214.52786544137,
+          53215.17786544141,
+          53215.37786544142,
+          53215.477865441426,
+          53215.52786544143,
+          53215.977865441455,
+          53216.327865441475,
+          53216.7778654415,
+          53217.07786544152,
+          53217.22786544153
+        ]
+      },
+      "wheel_reversals": {
+        "count": 4,
+        "per_min": 24.120603013671374,
+        "times": [
+          53213.927865441336,
+          53214.37786544136,
+          53217.27786544153,
+          53217.97786544157
+        ]
+      },
+      "peak_command_rate_rad_s": 0.14999999999999902,
+      "command_abs_max_rad": 0.07450000000000001,
+      "model_to_controls_delta_rms_1pm": 3.370547469263415e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.8801759127883041,
+      "command_wheel_best_lag_s": 0.2,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.09778225806451613,
+      "lane_prob_inner_mean": [
+        0.9852845060729212,
+        0.955450382564337
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.02347696818377875
+    },
+    {
+      "seg": 26,
+      "start_s": 12.51,
+      "end_s": 22.49,
+      "duration_s": 9.98,
+      "speed_mph_mean": 72.17235200653865,
+      "abs_curvature_mean": 0.0017743560792070874,
+      "curvature_sign_fraction": 1.0,
+      "command": {
+        "range": 0.025000000000000022,
+        "detrended_rms": 0.004481785730590246,
+        "band_rms_0p3_2hz": 0.0019830132131266835,
+        "band_peak_hz": 0.4
+      },
+      "wheel": {
+        "range": 0.10995574620459408,
+        "detrended_rms": 0.021885365391876466,
+        "band_rms_0p3_2hz": 0.010484178504957076,
+        "band_peak_hz": 0.4
+      },
+      "desired_curvature": {
+        "range": 0.0008074311772361398,
+        "detrended_rms": 0.00015063707542745463,
+        "band_rms_0p3_2hz": 7.123953487000755e-05,
+        "band_peak_hz": 0.4
+      },
+      "model_curvature": {
+        "range": 0.0008806482655927539,
+        "detrended_rms": 0.00015409713841588182,
+        "band_rms_0p3_2hz": 7.138113026085341e-05,
+        "band_peak_hz": 0.4
+      },
+      "yaw_curvature": {
+        "range": 0.0013981450218088446,
+        "detrended_rms": 0.00022090466293549067,
+        "band_rms_0p3_2hz": 0.00011897736130405161,
+        "band_peak_hz": 0.4
+      },
+      "command_reversals": {
+        "count": 16,
+        "per_min": 96.4824120546855,
+        "times": [
+          53137.3789622221,
+          53137.92896222213,
+          53138.07896222214,
+          53138.32896222216,
+          53140.178962222264,
+          53142.82896222242,
+          53142.97896222243,
+          53143.128962222436,
+          53143.37896222245,
+          53143.478962222456,
+          53143.82896222248,
+          53143.92896222248,
+          53144.02896222249,
+          53144.128962222494,
+          53144.828962222535,
+          53145.37896222257
+        ]
+      },
+      "wheel_reversals": {
+        "count": 12,
+        "per_min": 72.36180904101411,
+        "times": [
+          53136.47896222205,
+          53137.22896222209,
+          53137.628962222116,
+          53138.42896222216,
+          53140.27896222227,
+          53140.97896222231,
+          53142.02896222237,
+          53143.92896222248,
+          53144.72896222253,
+          53144.77896222253,
+          53144.97896222254,
+          53145.57896222258
+        ]
+      },
+      "peak_command_rate_rad_s": 0.1200000000000001,
+      "command_abs_max_rad": 0.0635,
+      "model_to_controls_delta_rms_1pm": 2.372143434279913e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.8964517327313124,
+      "command_wheel_best_lag_s": 0.2,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.0,
+      "lane_prob_inner_mean": [
+        0.987739922298539,
+        0.9724278352673976
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.05106009688648966
+    },
+    {
+      "seg": 26,
+      "start_s": 7.51,
+      "end_s": 17.49,
+      "duration_s": 9.99,
+      "speed_mph_mean": 72.9242568565895,
+      "abs_curvature_mean": 0.0017727770070582027,
+      "curvature_sign_fraction": 1.0,
+      "command": {
+        "range": 0.013000000000000012,
+        "detrended_rms": 0.0026671392996670163,
+        "band_rms_0p3_2hz": 0.0019361345699648407,
+        "band_peak_hz": 0.4
+      },
+      "wheel": {
+        "range": 0.055850532734867175,
+        "detrended_rms": 0.015002504110528336,
+        "band_rms_0p3_2hz": 0.012466211619457662,
+        "band_peak_hz": 0.4
+      },
+      "desired_curvature": {
+        "range": 0.0003937609726563096,
+        "detrended_rms": 9.284873799388123e-05,
+        "band_rms_0p3_2hz": 7.09630878667814e-05,
+        "band_peak_hz": 0.4
+      },
+      "model_curvature": {
+        "range": 0.0004166263388469815,
+        "detrended_rms": 9.491335386814139e-05,
+        "band_rms_0p3_2hz": 7.251349197356273e-05,
+        "band_peak_hz": 0.4
+      },
+      "yaw_curvature": {
+        "range": 0.000617046076518898,
+        "detrended_rms": 0.00014333375498952266,
+        "band_rms_0p3_2hz": 0.00011888506047894281,
+        "band_peak_hz": 0.4
+      },
+      "command_reversals": {
+        "count": 13,
+        "per_min": 78.39195979443197,
+        "times": [
+          53131.72522459806,
+          53131.82522459807,
+          53132.075224598084,
+          53132.275224598096,
+          53132.57522459811,
+          53132.67522459812,
+          53132.775224598125,
+          53134.825224598244,
+          53135.27522459827,
+          53137.37522459839,
+          53137.925224598424,
+          53138.07522459843,
+          53138.32522459845
+        ]
+      },
+      "wheel_reversals": {
+        "count": 10,
+        "per_min": 60.301507534178434,
+        "times": [
+          53132.275224598096,
+          53133.275224598154,
+          53133.87522459819,
+          53134.52522459823,
+          53135.875224598305,
+          53136.47522459834,
+          53137.225224598384,
+          53137.62522459841,
+          53138.42522459845,
+          53140.27522459856
+        ]
+      },
+      "peak_command_rate_rad_s": 0.06000000000000005,
+      "command_abs_max_rad": 0.05600000000000005,
+      "model_to_controls_delta_rms_1pm": 1.6169987138448234e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.8897368141871257,
+      "command_wheel_best_lag_s": 0.2,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.0,
+      "lane_prob_inner_mean": [
+        0.994629324204265,
+        0.9838498407367741
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.049782323563616164
+    },
+    {
+      "seg": 26,
+      "start_s": 2.51,
+      "end_s": 12.5,
+      "duration_s": 9.99,
+      "speed_mph_mean": 74.01955329459246,
+      "abs_curvature_mean": 0.001144222615334247,
+      "curvature_sign_fraction": 1.0,
+      "command": {
+        "range": 0.052999999999999936,
+        "detrended_rms": 0.008145520721268035,
+        "band_rms_0p3_2hz": 0.0018335862297180273,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "wheel": {
+        "range": 0.2268927961273675,
+        "detrended_rms": 0.03252404367593842,
+        "band_rms_0p3_2hz": 0.008436734564802388,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "desired_curvature": {
+        "range": 0.0018711622906266712,
+        "detrended_rms": 0.0002893782319507264,
+        "band_rms_0p3_2hz": 5.8761309766415035e-05,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "model_curvature": {
+        "range": 0.0018711622906266712,
+        "detrended_rms": 0.00028892463265083805,
+        "band_rms_0p3_2hz": 5.860606265561568e-05,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.0021839857666569604,
+        "detrended_rms": 0.0003001460318972751,
+        "band_rms_0p3_2hz": 0.00012016440224312631,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "command_reversals": {
+        "count": 9,
+        "per_min": 54.27135678076059,
+        "times": [
+          53131.72853894836,
+          53131.828538948364,
+          53132.07853894838,
+          53132.27853894839,
+          53132.57853894841,
+          53132.678538948414,
+          53132.77853894842,
+          53134.82853894854,
+          53135.428538948574
+        ]
+      },
+      "wheel_reversals": {
+        "count": 7,
+        "per_min": 42.211055273924906,
+        "times": [
+          53125.92853894802,
+          53127.67853894812,
+          53128.02853894814,
+          53132.27853894839,
+          53133.27853894845,
+          53133.878538948484,
+          53134.52853894852
+        ]
+      },
+      "peak_command_rate_rad_s": 0.06000000000000005,
+      "command_abs_max_rad": 0.05449999999999999,
+      "model_to_controls_delta_rms_1pm": 1.4396134392335169e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.9837929193293794,
+      "command_wheel_best_lag_s": 0.1,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.0,
+      "lane_prob_inner_mean": [
+        0.9941165356597631,
+        0.9749437135391965
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.03807951122323522
+    }
+  ],
+  "straight_controls": [
+    {
+      "seg": 3,
+      "start_s": 30.01,
+      "end_s": 40.0,
+      "duration_s": 9.99,
+      "speed_mph_mean": 47.79661485255141,
+      "abs_curvature_mean": 0.00021369697832589678,
+      "curvature_sign_fraction": 0.04032258064516129,
+      "command": {
+        "range": 0.019499999999999962,
+        "detrended_rms": 0.004094190679650509,
+        "band_rms_0p3_2hz": 0.0034128511914282332,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "wheel": {
+        "range": 0.07569818550595878,
+        "detrended_rms": 0.020732901259318873,
+        "band_rms_0p3_2hz": 0.018354175586577596,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "desired_curvature": {
+        "range": 0.0010345395130570978,
+        "detrended_rms": 0.0002166734599431012,
+        "band_rms_0p3_2hz": 0.0001806719460039604,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "model_curvature": {
+        "range": 0.0010345395130570978,
+        "detrended_rms": 0.00021605504139767407,
+        "band_rms_0p3_2hz": 0.0001801692067556746,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.0010472802734166398,
+        "detrended_rms": 0.00022119038561471704,
+        "band_rms_0p3_2hz": 0.00018372481267351013,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "command_reversals": {
+        "count": 4,
+        "per_min": 24.120603013671374,
+        "times": [
+          51777.663366899265,
+          51778.06336689929,
+          51782.21336689953,
+          51783.01336689958
+        ]
+      },
+      "wheel_reversals": {
+        "count": 4,
+        "per_min": 24.120603013671374,
+        "times": [
+          51774.8133668991,
+          51775.16336689912,
+          51778.3133668993,
+          51781.413366899484
+        ]
+      },
+      "peak_command_rate_rad_s": 0.060948563381844,
+      "command_abs_max_rad": 0.012499999999999956,
+      "model_to_controls_delta_rms_1pm": 1.2216802434335432e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.9324255996232191,
+      "command_wheel_best_lag_s": 0.35000000000000003,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.0,
+      "lane_prob_inner_mean": [
+        0.9898254629224539,
+        0.9920047630946482
+      ],
+      "delay_mean_s": 0.3352617621421814,
+      "roll_mean_rad": 0.020434752038131738
+    },
+    {
+      "seg": 2,
+      "start_s": 4.12,
+      "end_s": 10.0,
+      "duration_s": 5.88,
+      "speed_mph_mean": 41.67182363080196,
+      "abs_curvature_mean": 0.000236700969632325,
+      "curvature_sign_fraction": 0.27615780445969124,
+      "command": {
+        "range": 0.01665097030318633,
+        "detrended_rms": 0.004512793707254666,
+        "band_rms_0p3_2hz": 0.0032099963228242,
+        "band_peak_hz": 0.3389830508474576
+      },
+      "wheel": {
+        "range": 0.07748425408820774,
+        "detrended_rms": 0.02472844434322861,
+        "band_rms_0p3_2hz": 0.01875860794451387,
+        "band_peak_hz": 0.3389830508474576
+      },
+      "desired_curvature": {
+        "range": 0.0009920158772729337,
+        "detrended_rms": 0.0002668599455633956,
+        "band_rms_0p3_2hz": 0.00018763537692296359,
+        "band_peak_hz": 0.3389830508474576
+      },
+      "model_curvature": {
+        "range": 0.0009920158772729337,
+        "detrended_rms": 0.00026551877154052164,
+        "band_rms_0p3_2hz": 0.00018772717180090133,
+        "band_peak_hz": 0.3389830508474576
+      },
+      "yaw_curvature": {
+        "range": 0.0016059491752558979,
+        "detrended_rms": 0.0003123624519197783,
+        "band_rms_0p3_2hz": 0.00022341869181122394,
+        "band_peak_hz": 0.3389830508474576
+      },
+      "command_reversals": {
+        "count": 5,
+        "per_min": 51.28205127906627,
+        "times": [
+          51688.06822253305,
+          51688.71822253309,
+          51690.76822253321,
+          51692.66822253332,
+          51692.96822253334
+        ]
+      },
+      "wheel_reversals": {
+        "count": 3,
+        "per_min": 30.769230767439765,
+        "times": [
+          51689.06822253311,
+          51690.81822253321,
+          51692.918222533335
+        ]
+      },
+      "peak_command_rate_rad_s": 0.060000000000001164,
+      "command_abs_max_rad": 0.01150000000000001,
+      "model_to_controls_delta_rms_1pm": 2.099793653292326e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.9209577271532342,
+      "command_wheel_best_lag_s": 0.4,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 0.9245283018867925,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 1.0,
+      "lane_prob_inner_mean": [
+        0.9750528114737613,
+        0.9849973020381829
+      ],
+      "delay_mean_s": 0.3352617621421814,
+      "roll_mean_rad": 0.014526661497414573
+    },
+    {
+      "seg": 2,
+      "start_s": 20.01,
+      "end_s": 29.99,
+      "duration_s": 9.99,
+      "speed_mph_mean": 38.28087147839694,
+      "abs_curvature_mean": 0.00022448179215016508,
+      "curvature_sign_fraction": 0.3856998992950655,
+      "command": {
+        "range": 0.02650000000000008,
+        "detrended_rms": 0.004994979052467761,
+        "band_rms_0p3_2hz": 0.002658043452657428,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "wheel": {
+        "range": 0.11597191115490615,
+        "detrended_rms": 0.021997929132646088,
+        "band_rms_0p3_2hz": 0.011599312020263963,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "desired_curvature": {
+        "range": 0.0015481593436561525,
+        "detrended_rms": 0.00030334479406744135,
+        "band_rms_0p3_2hz": 0.00015291563453123725,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "model_curvature": {
+        "range": 0.0015481593436561525,
+        "detrended_rms": 0.00030365205434046866,
+        "band_rms_0p3_2hz": 0.00015303757383628125,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.0019027189580326734,
+        "detrended_rms": 0.0003192258665602758,
+        "band_rms_0p3_2hz": 0.00023474835272365455,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "command_reversals": {
+        "count": 6,
+        "per_min": 36.180904520507056,
+        "times": [
+          51707.605928383266,
+          51708.955928383344,
+          51709.45592838337,
+          51709.655928383385,
+          51710.155928383414,
+          51712.95592838358
+        ]
+      },
+      "wheel_reversals": {
+        "count": 7,
+        "per_min": 42.211055273924906,
+        "times": [
+          51706.35592838319,
+          51707.30592838325,
+          51709.00592838335,
+          51709.10592838335,
+          51709.20592838336,
+          51709.35592838337,
+          51709.80592838339
+        ]
+      },
+      "peak_command_rate_rad_s": 0.09726987624222666,
+      "command_abs_max_rad": 0.017000000000000015,
+      "model_to_controls_delta_rms_1pm": 1.7710205020374784e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.9745440449743782,
+      "command_wheel_best_lag_s": 0.25,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 1.0,
+      "lane_prob_inner_mean": [
+        0.9335013776267284,
+        0.9518352004756621
+      ],
+      "delay_mean_s": 0.3352617621421814,
+      "roll_mean_rad": 0.02618866055746153
+    },
+    {
+      "seg": 32,
+      "start_s": 20.0,
+      "end_s": 29.99,
+      "duration_s": 9.99,
+      "speed_mph_mean": 54.816774349574814,
+      "abs_curvature_mean": 0.00024056490052686716,
+      "curvature_sign_fraction": 0.2716297786720322,
+      "command": {
+        "range": 0.019000000000000072,
+        "detrended_rms": 0.003906840280201,
+        "band_rms_0p3_2hz": 0.0025259141836976736,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "wheel": {
+        "range": 0.08028514808845268,
+        "detrended_rms": 0.01958909578538229,
+        "band_rms_0p3_2hz": 0.011821390367764088,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "desired_curvature": {
+        "range": 0.0009334315545856953,
+        "detrended_rms": 0.0001914957057223103,
+        "band_rms_0p3_2hz": 0.0001271196014267204,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "model_curvature": {
+        "range": 0.0009334315545856953,
+        "detrended_rms": 0.00019162045996375473,
+        "band_rms_0p3_2hz": 0.00012633992559826576,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.0013881586242363276,
+        "detrended_rms": 0.00022292876580420957,
+        "band_rms_0p3_2hz": 0.0001974058598138366,
+        "band_peak_hz": 0.6000000000000001
+      },
+      "command_reversals": {
+        "count": 8,
+        "per_min": 48.24120602734275,
+        "times": [
+          53507.23554844724,
+          53507.635548447266,
+          53508.285548447304,
+          53509.8855484474,
+          53510.23554844742,
+          53511.18554844747,
+          53512.73554844756,
+          53513.03554844758
+        ]
+      },
+      "wheel_reversals": {
+        "count": 6,
+        "per_min": 36.180904520507056,
+        "times": [
+          53507.33554844725,
+          53507.435548447254,
+          53507.53554844726,
+          53507.635548447266,
+          53508.485548447316,
+          53512.88554844757
+        ]
+      },
+      "peak_command_rate_rad_s": 0.05681361253284103,
+      "command_abs_max_rad": 0.013500000000000012,
+      "model_to_controls_delta_rms_1pm": 1.4448275463862281e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.9490639340918733,
+      "command_wheel_best_lag_s": 0.25,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.0,
+      "lane_prob_inner_mean": [
+        0.6568379911258667,
+        0.7154623588745743
+      ],
+      "delay_mean_s": 0.2963246703147888,
+      "roll_mean_rad": 0.019212899068361093
+    },
+    {
+      "seg": 3,
+      "start_s": 32.51,
+      "end_s": 42.49,
+      "duration_s": 9.98,
+      "speed_mph_mean": 51.16375764112073,
+      "abs_curvature_mean": 0.0001835812436385617,
+      "curvature_sign_fraction": 0.1532258064516129,
+      "command": {
+        "range": 0.019499999999999962,
+        "detrended_rms": 0.004289695026219377,
+        "band_rms_0p3_2hz": 0.002400510540988525,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "wheel": {
+        "range": 0.07553300289609975,
+        "detrended_rms": 0.02287207395015406,
+        "band_rms_0p3_2hz": 0.01320879909631417,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "desired_curvature": {
+        "range": 0.0010345395130570978,
+        "detrended_rms": 0.00022103749025942758,
+        "band_rms_0p3_2hz": 0.00012192129386004063,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "model_curvature": {
+        "range": 0.0010345395130570978,
+        "detrended_rms": 0.00022007518050128614,
+        "band_rms_0p3_2hz": 0.00012233914721025937,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.0009745348785434733,
+        "detrended_rms": 0.00021468685397329197,
+        "band_rms_0p3_2hz": 0.0001506248259360552,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "command_reversals": {
+        "count": 5,
+        "per_min": 30.150753767089217,
+        "times": [
+          51777.66224930312,
+          51778.06224930314,
+          51782.21224930338,
+          51783.01224930343,
+          51784.96224930354
+        ]
+      },
+      "wheel_reversals": {
+        "count": 3,
+        "per_min": 18.090452260253528,
+        "times": [
+          51778.312249303155,
+          51781.212249303324,
+          51783.112249303435
+        ]
+      },
+      "peak_command_rate_rad_s": 0.0630216563898998,
+      "command_abs_max_rad": 0.012499999999999956,
+      "model_to_controls_delta_rms_1pm": 1.3402459999546822e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.9477075578802847,
+      "command_wheel_best_lag_s": 0.35000000000000003,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.0,
+      "lane_prob_inner_mean": [
+        0.9920948543135197,
+        0.993565960576938
+      ],
+      "delay_mean_s": 0.3352617621421814,
+      "roll_mean_rad": 0.019408613553218122
+    },
+    {
+      "seg": 26,
+      "start_s": 36.23,
+      "end_s": 45.0,
+      "duration_s": 8.77,
+      "speed_mph_mean": 73.64870399527632,
+      "abs_curvature_mean": 0.00022163461689901683,
+      "curvature_sign_fraction": 0.9858906525573192,
+      "command": {
+        "range": 0.02195848267478189,
+        "detrended_rms": 0.004409096363892742,
+        "band_rms_0p3_2hz": 0.002365559092757806,
+        "band_peak_hz": 0.3409090909090909
+      },
+      "wheel": {
+        "range": 0.12257132167267316,
+        "detrended_rms": 0.027072055043961814,
+        "band_rms_0p3_2hz": 0.010319535480984026,
+        "band_peak_hz": 0.3409090909090909
+      },
+      "desired_curvature": {
+        "range": 0.0008689954787316749,
+        "detrended_rms": 0.0001761510994325717,
+        "band_rms_0p3_2hz": 9.623275785414738e-05,
+        "band_peak_hz": 0.3409090909090909
+      },
+      "model_curvature": {
+        "range": 0.0008689954787316749,
+        "detrended_rms": 0.0001760425756149604,
+        "band_rms_0p3_2hz": 9.617004312856225e-05,
+        "band_peak_hz": 0.3409090909090909
+      },
+      "yaw_curvature": {
+        "range": 0.0009372073322813021,
+        "detrended_rms": 0.00021130412477827275,
+        "band_rms_0p3_2hz": 9.365900664230486e-05,
+        "band_peak_hz": 0.3409090909090909
+      },
+      "command_reversals": {
+        "count": 1,
+        "per_min": 6.857142856743719,
+        "times": [
+          53166.14671605839
+        ]
+      },
+      "wheel_reversals": {
+        "count": 14,
+        "per_min": 95.99999999441206,
+        "times": [
+          53159.496716058005,
+          53159.846716058026,
+          53160.14671605804,
+          53160.54671605807,
+          53160.74671605808,
+          53161.84671605814,
+          53163.34671605823,
+          53165.996716058384,
+          53166.2967160584,
+          53166.74671605843,
+          53166.94671605844,
+          53167.24671605846,
+          53167.59671605848,
+          53167.9467160585
+        ]
+      },
+      "peak_command_rate_rad_s": 0.05005127665674569,
+      "command_abs_max_rad": 0.013000000000000012,
+      "model_to_controls_delta_rms_1pm": 7.230121214691085e-06,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.8145634029399358,
+      "command_wheel_best_lag_s": 0.15000000000000002,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.0,
+      "lane_prob_inner_mean": [
+        0.9236243986795661,
+        0.8145023323496972
+      ],
+      "delay_mean_s": 0.279139906167984,
+      "roll_mean_rad": -0.003292197485600567
+    },
+    {
+      "seg": 3,
+      "start_s": 35.01,
+      "end_s": 45.0,
+      "duration_s": 9.99,
+      "speed_mph_mean": 53.76686457433686,
+      "abs_curvature_mean": 0.0001625695465145373,
+      "curvature_sign_fraction": 0.23867069486404835,
+      "command": {
+        "range": 0.01750000000000007,
+        "detrended_rms": 0.0038111961514557266,
+        "band_rms_0p3_2hz": 0.0023221238591978137,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "wheel": {
+        "range": 0.07588840344199158,
+        "detrended_rms": 0.022301152541118863,
+        "band_rms_0p3_2hz": 0.012052322592576964,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "desired_curvature": {
+        "range": 0.0008797546324785799,
+        "detrended_rms": 0.0001904679287830691,
+        "band_rms_0p3_2hz": 0.00011476838279259142,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "model_curvature": {
+        "range": 0.0008797546324785799,
+        "detrended_rms": 0.00019027049712467715,
+        "band_rms_0p3_2hz": 0.00011416197142638095,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.0009508641440494959,
+        "detrended_rms": 0.00021127893165371752,
+        "band_rms_0p3_2hz": 0.00011491125162199966,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "command_reversals": {
+        "count": 3,
+        "per_min": 18.090452260253528,
+        "times": [
+          51782.21465388024,
+          51783.01465388029,
+          51784.9646538804
+        ]
+      },
+      "wheel_reversals": {
+        "count": 4,
+        "per_min": 24.120603013671374,
+        "times": [
+          51778.314653880014,
+          51781.414653880194,
+          51783.11465388029,
+          51787.06465388052
+        ]
+      },
+      "peak_command_rate_rad_s": 0.050000000000001155,
+      "command_abs_max_rad": 0.010500000000000065,
+      "model_to_controls_delta_rms_1pm": 1.3400099323298454e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.940695196932302,
+      "command_wheel_best_lag_s": 0.35000000000000003,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 0.0,
+      "lane_prob_inner_mean": [
+        0.9914445962310438,
+        0.9934752328998493
+      ],
+      "delay_mean_s": 0.3352617621421814,
+      "roll_mean_rad": 0.018231094469694273
+    },
+    {
+      "seg": 2,
+      "start_s": 4.12,
+      "end_s": 12.5,
+      "duration_s": 8.38,
+      "speed_mph_mean": 41.612570462569636,
+      "abs_curvature_mean": 0.00019857462124342183,
+      "curvature_sign_fraction": 0.40794223826714804,
+      "command": {
+        "range": 0.01665097030318633,
+        "detrended_rms": 0.0039556776193234566,
+        "band_rms_0p3_2hz": 0.0019589867150069675,
+        "band_peak_hz": 0.3571428571428571
+      },
+      "wheel": {
+        "range": 0.07748425408820774,
+        "detrended_rms": 0.021807946048375444,
+        "band_rms_0p3_2hz": 0.009739271193067663,
+        "band_peak_hz": 0.3571428571428571
+      },
+      "desired_curvature": {
+        "range": 0.0009920158772729337,
+        "detrended_rms": 0.00023316617545181308,
+        "band_rms_0p3_2hz": 0.00011662715200679847,
+        "band_peak_hz": 0.3571428571428571
+      },
+      "model_curvature": {
+        "range": 0.0009920158772729337,
+        "detrended_rms": 0.00023235045844838828,
+        "band_rms_0p3_2hz": 0.0001165914877864764,
+        "band_peak_hz": 0.3571428571428571
+      },
+      "yaw_curvature": {
+        "range": 0.0016059491752558979,
+        "detrended_rms": 0.00027520692015222114,
+        "band_rms_0p3_2hz": 0.00021867984623291469,
+        "band_peak_hz": 1.3095238095238095
+      },
+      "command_reversals": {
+        "count": 6,
+        "per_min": 43.11377245258027,
+        "times": [
+          51688.06822253305,
+          51688.71822253309,
+          51690.76822253321,
+          51692.66822253332,
+          51692.96822253334,
+          51693.46822253337
+        ]
+      },
+      "wheel_reversals": {
+        "count": 3,
+        "per_min": 21.556886226290136,
+        "times": [
+          51689.06822253311,
+          51690.81822253321,
+          51692.918222533335
+        ]
+      },
+      "peak_command_rate_rad_s": 0.060000000000001164,
+      "command_abs_max_rad": 0.01150000000000001,
+      "model_to_controls_delta_rms_1pm": 1.8467245173583876e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.9245323180415267,
+      "command_wheel_best_lag_s": 0.35000000000000003,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 0.9470517448856799,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 1.0,
+      "lane_prob_inner_mean": [
+        0.9794365382079757,
+        0.9866255479455711
+      ],
+      "delay_mean_s": 0.3352617621421814,
+      "roll_mean_rad": 0.01343530087611861
+    },
+    {
+      "seg": 2,
+      "start_s": 5.01,
+      "end_s": 14.99,
+      "duration_s": 9.99,
+      "speed_mph_mean": 41.32803523755127,
+      "abs_curvature_mean": 0.00019134382572051888,
+      "curvature_sign_fraction": 0.552870090634441,
+      "command": {
+        "range": 0.01700000000000007,
+        "detrended_rms": 0.0036438080329616413,
+        "band_rms_0p3_2hz": 0.001865533161393439,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "wheel": {
+        "range": 0.07853981842033943,
+        "detrended_rms": 0.020408275923670074,
+        "band_rms_0p3_2hz": 0.007623978675286901,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "desired_curvature": {
+        "range": 0.0009920158772729337,
+        "detrended_rms": 0.00021284003367068462,
+        "band_rms_0p3_2hz": 0.00010982007362808197,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "model_curvature": {
+        "range": 0.0009920158772729337,
+        "detrended_rms": 0.00021282906970139065,
+        "band_rms_0p3_2hz": 0.00010948828475755562,
+        "band_peak_hz": 0.30000000000000004
+      },
+      "yaw_curvature": {
+        "range": 0.001805457734651282,
+        "detrended_rms": 0.00030306463850307227,
+        "band_rms_0p3_2hz": 0.0002347845816022091,
+        "band_peak_hz": 1.3
+      },
+      "command_reversals": {
+        "count": 6,
+        "per_min": 36.180904520507056,
+        "times": [
+          51688.70530216603,
+          51692.45530216625,
+          51692.65530216626,
+          51692.95530216628,
+          51693.45530216631,
+          51696.155302166466
+        ]
+      },
+      "wheel_reversals": {
+        "count": 9,
+        "per_min": 54.27135678076059,
+        "times": [
+          51689.05530216605,
+          51690.805302166154,
+          51692.95530216628,
+          51695.605302166434,
+          51695.70530216644,
+          51695.805302166445,
+          51695.955302166454,
+          51696.35530216648,
+          51698.05530216658
+        ]
+      },
+      "peak_command_rate_rad_s": 0.07000000000000006,
+      "command_abs_max_rad": 0.01150000000000001,
+      "model_to_controls_delta_rms_1pm": 1.6861784798640215e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.940849747258944,
+      "command_wheel_best_lag_s": 0.25,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 1.0,
+      "lane_prob_inner_mean": [
+        0.9819304845844511,
+        0.9876764719219726
+      ],
+      "delay_mean_s": 0.3352617621421814,
+      "roll_mean_rad": 0.01245228982364528
+    },
+    {
+      "seg": 2,
+      "start_s": 12.51,
+      "end_s": 22.5,
+      "duration_s": 9.99,
+      "speed_mph_mean": 40.48940871622159,
+      "abs_curvature_mean": 9.4901551256513e-05,
+      "curvature_sign_fraction": 0.48036253776435045,
+      "command": {
+        "range": 0.010000000000000009,
+        "detrended_rms": 0.001797024543123889,
+        "band_rms_0p3_2hz": 0.0018332139912753966,
+        "band_peak_hz": 0.9
+      },
+      "wheel": {
+        "range": 0.04188790371233959,
+        "detrended_rms": 0.008032413962686193,
+        "band_rms_0p3_2hz": 0.0023094861943332187,
+        "band_peak_hz": 0.4
+      },
+      "desired_curvature": {
+        "range": 0.0005956915847491473,
+        "detrended_rms": 0.0001076696033728288,
+        "band_rms_0p3_2hz": 0.00010668137107787241,
+        "band_peak_hz": 0.9
+      },
+      "model_curvature": {
+        "range": 0.0005956915847491473,
+        "detrended_rms": 0.0001093628506380025,
+        "band_rms_0p3_2hz": 0.00010822525043549897,
+        "band_peak_hz": 0.9
+      },
+      "yaw_curvature": {
+        "range": 0.0015785888485558897,
+        "detrended_rms": 0.00023755858492465094,
+        "band_rms_0p3_2hz": 0.00021051474795976357,
+        "band_peak_hz": 1.1
+      },
+      "command_reversals": {
+        "count": 6,
+        "per_min": 36.180904520507056,
+        "times": [
+          51696.15672350303,
+          51698.55672350317,
+          51700.05672350326,
+          51700.40672350328,
+          51700.95672350331,
+          51701.35672350333
+        ]
+      },
+      "wheel_reversals": {
+        "count": 9,
+        "per_min": 54.27135678076059,
+        "times": [
+          51695.706723503004,
+          51695.80672350301,
+          51695.95672350302,
+          51696.35672350304,
+          51698.70672350318,
+          51700.356723503275,
+          51700.60672350329,
+          51701.65672350335,
+          51703.256723503444
+        ]
+      },
+      "peak_command_rate_rad_s": 0.07000000000000006,
+      "command_abs_max_rad": 0.007000000000000006,
+      "model_to_controls_delta_rms_1pm": 1.769638617430225e-05,
+      "desired_vs_yaw_gt_deviation_band_fraction": 0.0,
+      "soft_rate_cap_fraction": 0.0,
+      "command_wheel_best_corr": 0.6174227553684748,
+      "command_wheel_best_lag_s": 0.2,
+      "saturated_fraction": 0.0,
+      "driver_fraction": 0.0,
+      "lat_active_fraction": 1.0,
+      "long_active_fraction": 1.0,
+      "selfdrive_active_fraction": 1.0,
+      "experimental_active_fraction": 1.0,
+      "lane_prob_inner_mean": [
+        0.9891765698685506,
+        0.9846171683895384
+      ],
+      "delay_mean_s": 0.3352617621421814,
+      "roll_mean_rad": 0.015162712782771445
+    }
+  ],
+  "limitations": [
+    "Recorded response only; no counterfactual vehicle simulation.",
+    "Overlapping ranked windows are retained; select non-overlapping exemplars for plots.",
+    "Decoded 0x3D6 path angle is in CAN/vehicle sign convention; production negates the internal controller result before packing."
+  ]
+}
