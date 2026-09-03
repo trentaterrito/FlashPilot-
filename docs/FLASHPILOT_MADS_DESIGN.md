@@ -4,6 +4,7 @@ Release decision (2026-09-02): **B. BLOCKED; runtime disabled; not a vehicle-tes
 Branch: `codex/flashpilot-mads-sunnypilot`. No device was contacted or changed.
 
 Current checkpoint details:
+- [Direct SunnyPilot Ford parity audit and minimal brake-policy integration scope](SUNNYPILOT_FORD_MADS_PARITY.md).
 - [0x3CC checksum/frozen-counter validation and accepted replay boundary](mads_3cc/FRESHNESS.md).
 - [Final message-integrity table](mads_rc/MESSAGE_INTEGRITY.md).
 - [Heartbeat/lifecycle and driver-feedback matrix](mads_rc/LIFECYCLE_AND_FEEDBACK.md).
@@ -154,9 +155,10 @@ Logged truth:
 1. Complete integrity coverage in the linked table, including host-only door/
    belt veto inputs. The [0x3CC follow-up](mads_3cc/REPORT.md) explains the old
    108 mismatches with a missing limit term; the corrected empirical checksum
-   matches 377,209 identified-Lightning frames. Native counter/replay semantics
-   and safety integration remain open. 0x176/0x3CC counters are not +1.
-   No guessed rule or new production integrity check was installed.
+   matches 377,209 identified-Lightning frames. The disabled MADS path now checks
+   that checksum and expires frozen counters. Changing-sequence replay is an
+   accepted limitation, not this phase's completion gate. See the current
+   [freshness follow-up](mads_3cc/FRESHNESS.md). 0x176/0x3CC counters are not +1.
    Existing checked speed/yaw counter anomalies now revoke on the first error.
 2. Real H7 scheduling, queued transport/reset/fault injection and the strict
    deadlines on nominal 10 Hz CAN messages need bench validation.
@@ -174,8 +176,10 @@ Logged truth:
    Brake/regen still cancel lateral; steering does not persist through manual
    braking under this policy. Do not promise the broader desired brake behavior.
 
-Next: obtain/verify the missing Ford integrity rules and bench cadence evidence;
-do not enable MADS, loosen limits or retune other workstreams.
+Next: use the direct SunnyPilot parity audit to scope the missing shared
+REMAIN_ACTIVE brake-policy integration; separately validate the added slow-message
+timing contract. Do not expand anti-replay work, enable MADS, loosen steering
+limits or retune other workstreams.
 
 ## License
 
