@@ -1,9 +1,14 @@
 # FlashPilot MADS — sunnypilot development integration
 
-Release decision (2026-09-02): **B. BLOCKED; runtime disabled; not a vehicle-test candidate**.
+Current brake-parity checkpoint (2026-09-02): **A. Ready for the next bounded
+bench/lifecycle validation stage; runtime disabled; NOT a vehicle-test candidate**.
+This supersedes the earlier missing-REMAIN_ACTIVE policy blocker, not the
+remaining physical validation and packaging requirements.
 Branch: `codex/flashpilot-mads-sunnypilot`. No device was contacted or changed.
 
 Current checkpoint details:
+- [Implemented REMAIN_ACTIVE brake parity, validation and limitations](MADS_REMAIN_ACTIVE_IMPLEMENTATION.md).
+- [Separate Ford deadline parity note — unchanged deadlines](MADS_FORD_DEADLINE_PARITY.md).
 - [Direct SunnyPilot Ford parity audit and minimal brake-policy integration scope](SUNNYPILOT_FORD_MADS_PARITY.md).
 - [0x3CC checksum/frozen-counter validation and accepted replay boundary](mads_3cc/FRESHNESS.md).
 - [Final message-integrity table](mads_rc/MESSAGE_INTEGRITY.md).
@@ -59,8 +64,10 @@ Panda owns independent authorization. Host eligibility can veto, never grant it.
    recovery, a valid heartbeat, or a held button cannot restore permission.
 5. Recovery needs fresh eligible state and heartbeat, then new TJA release/press.
    A second deliberate press cancels.
-6. Brake/regen/driver steering intervention disengage; no automatic brake return.
-   Main/PCM recovery are not grant edges.
+6. Valid manual brake/regen cancels ordinary longitudinal permission, but selected
+   independently authorized lateral uses SunnyPilot REMAIN_ACTIVE. Invalid brake
+   encoding and driver steering intervention still revoke. Brake release never
+   grants lateral or longitudinal; main/PCM recovery are not lateral grant edges.
 7. Independent permission only applies to Lightning path-angle steering. It
    cannot authorize longitudinal commands, classic LMC or curvature-mode escape.
 
@@ -82,12 +89,13 @@ Host notification is subsequent telemetry, not a prerequisite for clearing.
 | RX lag/frequency failure | Tick clears controlsAllowed | Tick plus pre-RX/TX/status freshness check; health |
 | Safety-mode change, invalid mode ID, MCU/init | Reset ordinary state | Old hook clears before switch; initializer OFF |
 | USB comms reset | Clear buffers | Reset selection and permission locally |
-| Brake/regen/steering disengage | Generic permission clear | Immediate generic hook plus raw-state veto |
+| Valid brake/regen | Ordinary longitudinal permission clear | Selected MADS retains lateral; unknown/invalid brake state still vetoes |
+| Steering disengage | Generic permission clear | Immediate lateral revoke, unchanged |
 | Relay/stock ECU conflict | Block TX | Revoke locally; fault/status telemetry |
 | Speed-source mismatch | Clear controlsAllowed | Revoke locally; permission telemetry |
 | Rejected or non-whitelisted TX | Reject packet | Also revoke independent permission |
 | EPS failure/not-full state, pinion bad QF, invalid lateral status | Not all covered in generic safety | Raw-state veto; permission telemetry |
-| Non-Drive, main off, invalid brake/parking brake/motion/stability | Vehicle-specific handling | Raw-state veto; vehicle/permission telemetry |
+| Non-Drive, main off, invalid brake encoding/parking brake/motion/stability | Vehicle-specific handling | Raw-state veto; vehicle/permission telemetry |
 | Board fault, power save, heartbeat lost/disabled, unavailable harness/ADC lock, ignition loss | Board-specific handling | Board callback before RX/TX/status; health |
 | RX/TX overflow, SPI/CAN error, CAN reset/checksum/lost-frame counter change, bus-off/error-passive | Error bookkeeping | Board callback latches eligibility loss; health |
 | Negative/malformed host heartbeat | Legacy ordinary bookkeeping unchanged | Immediate veto, no three-check delay |
@@ -126,8 +134,11 @@ Panda health bits 7/8 expose pure independent authorization / MADS selected.
 They are not ordinary-controls OR lateral. Schema and Python decoding are tested.
 
 The host adapter feeds sunnypilot's unmodified state machine. Existing
-selfdrived events are not removed; only pcmDisable is excluded from independent
-eligibility. All other disabling/no-entry events veto. During a selected onroad
+selfdrived events are not removed. pcmDisable and a witnessed brake/regen
+pedalPressed association are excluded only from selected independent lateral
+eligibility. Gas, unknown pedal cause and other disabling/no-entry events veto.
+The association clears on event removal, gas, selection loss or invalid lifecycle;
+it adds no timer or permission. During a selected onroad
 session, latActive requires both current host intent and fresh panda truth.
 Loss of panda state cannot silently fall back to ordinary lateral in that session.
 CC.enabled and CC.longActive retain their existing expressions.
@@ -173,13 +184,13 @@ Logged truth:
    before distributing. Local-only fresh-clone tests do not prove remote access.
    Full application build status is recorded in the validation document.
 7. Production initializer intentionally absent until the above are resolved.
-   Brake/regen still cancel lateral; steering does not persist through manual
-   braking under this policy. Do not promise the broader desired brake behavior.
+   The new selected policy retains lateral through valid manual braking in
+   deterministic tests; physical timing/interaction remains unvalidated.
 
-Next: use the direct SunnyPilot parity audit to scope the missing shared
-REMAIN_ACTIVE brake-policy integration; separately validate the added slow-message
-timing contract. Do not expand anti-replay work, enable MADS, loosen steering
-limits or retune other workstreams.
+Next: validate real host/panda delivery ordering and the unchanged slow-message
+timing contract. The bounded REMAIN_ACTIVE integration is implemented; see its
+current validation report. Do not expand anti-replay work, enable MADS, loosen
+steering limits or retune other workstreams.
 
 ## License
 

@@ -1,5 +1,9 @@
 # Direct SunnyPilot Ford MADS parity audit
 
+Follow-up: the user subsequently authorized the narrow REMAIN_ACTIVE patch.
+See [implementation and validation](MADS_REMAIN_ACTIVE_IMPLEMENTATION.md).
+This document retains the pre-patch comparison and its exact baseline.
+
 Date: 2026-09-02. **Source audit complete; no vehicle-code changes or deployment.**
 
 ## Assignment / source boundary

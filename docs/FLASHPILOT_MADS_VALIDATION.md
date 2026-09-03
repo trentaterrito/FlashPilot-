@@ -1,5 +1,9 @@
 # MADS release-candidate checkpoint — 2026-09-02
 
+**Current brake-policy follow-up:** [REMAIN_ACTIVE implementation/validation](MADS_REMAIN_ACTIVE_IMPLEMENTATION.md)
+supersedes this historical checkpoint's brake-disengage policy. Source below is
+retained as checkpoint history; no deployment or production enablement follows.
+
 **Latest follow-up:** [0x3CC safety checksum/frozen-counter validation](mads_3cc/FRESHNESS.md)
 records the new disabled-gate safety code and current test results (3,175 passed).
 Changing-sequence replay is a documented limitation, not this phase's completion

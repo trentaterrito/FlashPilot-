@@ -30,7 +30,7 @@ observed; both superproject and opendbc whitespace checks passed.
 
 ## Findings
 
-1. Generic panda `stock_ecu_check` still clears ordinary `controls_allowed` on
+1. Generic panda `generic_rx_checks` still clears ordinary `controls_allowed` on
    brake/regen. Ford's selected MADS callback alone exempts those two lateral
    revocation reasons; the longitudinal permission path is not bypassed.
 2. The imported SunnyPilot core is configured with `(enabled, false, false)`:
