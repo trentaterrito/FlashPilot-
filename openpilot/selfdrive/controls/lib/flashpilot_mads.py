@@ -45,6 +45,7 @@ class LightningMadsHost:
     self.session = False
     self.previous_button = None
     self.previous_authorized = False
+    self.await_panda_clear = True
     self.events = EventView()
     self.selfdrive = SimpleNamespace(enabled=False, events=self.events, events_sp=EventView(),
                                     state_machine=SimpleNamespace(current_alert_types=[], soft_disable_timer=0))
@@ -56,6 +57,7 @@ class LightningMadsHost:
       self.session = False
       self.previous_button = None
       self.previous_authorized = False
+      self.await_panda_clear = True
       self.machine.state = State.disabled
       self.result = MadsResult()
       return self.result
@@ -67,6 +69,16 @@ class LightningMadsHost:
     self.selfdrive.state_machine.current_alert_types = []
     self.events.types.clear()
     ready = self.session and fresh and eligible and panda_enabled
+    # On host start/restart or an invalid lifecycle boundary, do not adopt an
+    # already-authorized panda. Send a negative eligibility heartbeat until
+    # fresh panda telemetry acknowledges cleared permission.
+    if not ready:
+      self.await_panda_clear = True
+    if self.await_panda_clear:
+      if ready and not panda_authorized:
+        self.await_panda_clear = False
+      else:
+        ready = False
     revoked = self.previous_authorized and not panda_authorized
     if not ready or revoked:
       self.events.types.add(ET.IMMEDIATE_DISABLE)

@@ -141,6 +141,8 @@ class AlertRenderer(Widget):
 
     # No alert if size is none
     if ss.alertSize == 0:
+      if ui_state.mads_display.warning:
+        return Alert(text1=ui_state.mads_display.warning, size=AlertSize.small, status=AlertStatus.userPrompt)
       return None
 
     # Return current alert

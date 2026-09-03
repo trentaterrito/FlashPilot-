@@ -1,4 +1,5 @@
 #include "selfdrive/pandad/pandad.h"
+#include "selfdrive/pandad/mads_lifecycle.h"
 
 #include <array>
 #include <bitset>
@@ -383,9 +384,12 @@ void pandad_run(Panda *panda) {
       process_peripheral_state(panda, &pm, no_fan_control, is_onroad);
     }
 
-    // Process panda state at 10 Hz
-    if (rk.frame() % 10 == 0) {
-      sm.update(0);
+    sm.update(0);
+    // Keep legacy cadence OFF. Selected MADS needs status/heartbeat well inside
+    // the existing 100 ms deadline; do not lengthen the safety allowance.
+    const bool mads_selected = sm.allAliveAndValid({"controlsState"}) &&
+                                sm["controlsState"].getControlsState().getMadsState().getAvailable();
+    if (rk.frame() % mads_state_period(mads_selected) == 0) {
       engaged = sm.allAliveAndValid({"selfdriveState"}) && sm["selfdriveState"].getSelfdriveState().getEnabled();
       if (sm.updated("deviceState")) {
         is_onroad = sm["deviceState"].getDeviceState().getStarted();
@@ -393,10 +397,12 @@ void pandad_run(Panda *panda) {
       // Separate host eligibility is a veto, never a request to grant lateral.
       const uint64_t now = nanos_since_boot();
       const uint64_t host_time = sm["controlsState"].getLogMonoTime();
-      const bool host_fresh = (now >= host_time) && ((now - host_time) <= 100000000ULL);
+      const bool host_fresh = mads_host_fresh(sm.allAliveAndValid({"controlsState"}), now, host_time);
       const bool mads_eligible = is_onroad && !spoofing_started && sm.allAliveAndValid({"controlsState", "deviceState"}) &&
                                  host_fresh && sm["controlsState"].getControlsState().getMadsEligible();
       process_panda_state(panda, &pm, engaged, is_onroad, spoofing_started, mads_eligible);
+    }
+    if (rk.frame() % 10 == 0) {
       panda_safety.configureSafetyMode(is_onroad);
     }
 

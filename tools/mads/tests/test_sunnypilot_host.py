@@ -1,5 +1,16 @@
 import pytest
 
+def test_manager_restart_requests_panda_clear_before_new_intent():
+  restarted = LightningMadsHost(True)
+  result = update(restarted, panda_authorized=True, tja_pressed=False)
+  assert not result.eligible and not result.requested and not result.authorized
+  assert not update(restarted, panda_authorized=True, tja_pressed=True).eligible
+  assert update(restarted, panda_authorized=False, tja_pressed=False).eligible
+  update(restarted, panda_authorized=False, tja_pressed=False)  # release after clear acknowledgement
+  assert not update(restarted, panda_authorized=False, tja_pressed=True).authorized
+  assert update(restarted, panda_authorized=True, tja_pressed=True).authorized
+
+
 from openpilot.cereal import log
 from openpilot.selfdrive.controls.lib.flashpilot_mads import LightningMadsHost, vehicle_eligible
 from opendbc.car.structs import CarState
@@ -51,6 +62,10 @@ def test_held_button_at_manager_start_cannot_engage():
   h = LightningMadsHost(True)
   assert not update(h, tja_pressed=True, panda_authorized=True).requested
   update(h, tja_pressed=False, panda_authorized=True)
+  assert not update(h, tja_pressed=True, panda_authorized=True).eligible
+  update(h, tja_pressed=False, panda_authorized=False)
+  update(h, tja_pressed=False, panda_authorized=False)  # observe release after revocation edge
+  update(h, tja_pressed=True, panda_authorized=False)
   assert update(h, tja_pressed=True, panda_authorized=True).authorized
 
 
