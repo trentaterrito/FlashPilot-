@@ -17,7 +17,24 @@ class TestLongControlStateTransition(OpenpilotTestCase):
                              should_stop=False, brake_pressed=False, cruise_standstill=True)
     assert next_state == LongCtrlState.stopping
     next_state = long_control_state_trans(active, current_state,
-                             should_stop=False, brake_pressed=False, cruise_standstill=False)
+                             should_stop=False, brake_pressed=False, cruise_standstill=False, allow_stopping_to_pid=True)
+    assert next_state == LongCtrlState.pid
+    next_state = long_control_state_trans(active, current_state,
+                             should_stop=False, brake_pressed=False, cruise_standstill=False, allow_stopping_to_pid=False)
+    assert next_state == LongCtrlState.stopping
+
+  def test_stopping_to_pid_requires_confirmation(self):
+    active = True
+    current_state = LongCtrlState.stopping
+    # no confirmation yet
+    next_state = long_control_state_trans(active, current_state,
+                             should_stop=False, brake_pressed=False, cruise_standstill=False, allow_stopping_to_pid=False)
+    assert next_state == LongCtrlState.stopping
+    next_state = long_control_state_trans(active, current_state,
+                             should_stop=False, brake_pressed=False, cruise_standstill=False, allow_stopping_to_pid=False)
+    assert next_state == LongCtrlState.stopping
+    next_state = long_control_state_trans(active, current_state,
+                             should_stop=False, brake_pressed=False, cruise_standstill=False, allow_stopping_to_pid=True)
     assert next_state == LongCtrlState.pid
     active = False
     next_state = long_control_state_trans(active, current_state,
@@ -37,5 +54,5 @@ class TestLongControlStateTransition(OpenpilotTestCase):
                              should_stop=False, brake_pressed=False, cruise_standstill=True)
     assert next_state == LongCtrlState.stopping
     next_state = long_control_state_trans(active, current_state,
-                             should_stop=False, brake_pressed=False, cruise_standstill=False)
+                             should_stop=False, brake_pressed=False, cruise_standstill=False, allow_stopping_to_pid=True)
     assert next_state == LongCtrlState.pid
