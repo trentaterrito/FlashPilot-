@@ -79,6 +79,14 @@ class Scenario:
     assert cc.latActive
     assert cc.longActive == long_on
 
+  def engage_with_set(self):
+    # Host first observes longitudinal inactive, then ordinary SET/PCM enable.
+    self.step()
+    self.panda.controlsAllowedLateral = True
+    cc = self.step(log.OnroadEvent.EventName.pcmEnable)
+    assert cc.latActive and cc.longActive
+    return cc
+
 
 @pytest.mark.parametrize("long_on", [False, True])
 @pytest.mark.parametrize("pedal", ["brakePressed", "regenBraking"])
@@ -111,6 +119,23 @@ def test_brake_event_can_drain_after_release_without_timer_or_reengagement():
   assert s.step().latActive
   # REMAIN_ACTIVE filters independent pedal events without socket association.
   assert s.step(log.OnroadEvent.EventName.pedalPressed).latActive
+
+
+def test_set_engages_both_then_cancel_preserves_lateral():
+  s = Scenario()
+  s.engage_with_set()
+  cc = s.step(log.OnroadEvent.EventName.buttonCancel)
+  assert cc.latActive and not cc.longActive
+  cc = s.step(log.OnroadEvent.EventName.pcmEnable)
+  assert cc.latActive and cc.longActive
+
+
+def test_cruise_master_off_revokes_lateral_host_side():
+  s = Scenario()
+  s.engage_with_set()
+  s.cs.cruiseState.available = False
+  cc = s.step(log.OnroadEvent.EventName.wrongCarMode)
+  assert not cc.latActive and not cc.longActive
 
 
 @pytest.mark.parametrize("fault", ["steerFaultTemporary", "steerFaultPermanent", "parkingBrake",

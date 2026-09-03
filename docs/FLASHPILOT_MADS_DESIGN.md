@@ -58,21 +58,30 @@ Panda owns independent authorization. Host eligibility can veto, never grant it.
 1. Reset/safety-mode change clears selection, permission and button history.
 2. Test-only selection requires a complete fresh vehicle snapshot, host
    eligibility, and path-angle metadata. This does not grant permission.
-3. A released TJA sample followed by a new physical press while eligible feeds
-   sunnypilot's button transition; panda may then authorize steering.
-4. Any veto clears permission and button history immediately. Good CAN, cruise
-   recovery, a valid heartbeat, or a held button cannot restore permission.
-5. Recovery needs fresh eligible state and heartbeat, then new TJA release/press.
-   A second deliberate press cancels.
+3. Either a released TJA sample followed by a new physical press, or a Ford ACC
+   transition from main-ready (state 3) to engaged (state 4/5), feeds the
+   sunnypilot button transition while eligible; panda may then authorize steering.
+   The ACC path requires state 3 to have been observed in the current safety
+   session, so restart while cruise is already active cannot grant lateral.
+4. Any veto clears permission and button history immediately. Good CAN, a valid
+   heartbeat, a held button, or cruise recovery without a new engagement edge
+   cannot restore permission.
+5. Recovery needs fresh eligible state and heartbeat, then a new TJA release/press
+   or ACC engagement transition. A second deliberate TJA press cancels lateral.
+   Brake, accelerator and CANCEL may cancel longitudinal without lateral; cruise
+   master OFF revokes both through the existing main-availability veto.
 6. Valid manual brake/regen cancels ordinary longitudinal permission, but selected
    independently authorized lateral uses SunnyPilot REMAIN_ACTIVE. Invalid brake
    encoding and driver steering intervention still revoke. Brake release never
-   grants lateral or longitudinal; main/PCM recovery are not lateral grant edges.
+   grants lateral or longitudinal; passive main/PCM recovery is not a lateral
+   grant edge, while a fresh inactive-to-engaged ACC transition is explicit intent.
 7. Independent permission only applies to Lightning path-angle steering. It
    cannot authorize longitudinal commands, classic LMC or curvature-mode escape.
 
-State sequence: OFF → selected/unarmed → fresh eligible + released TJA →
-new TJA press → authorized. Veto returns to unarmed; reset returns to OFF.
+State sequence: OFF → selected/unarmed → fresh eligible → new TJA press or
+main-ready→ACC-engaged transition → authorized. Veto returns to unarmed; reset
+returns to OFF. Once authorized, ordinary longitudinal engagement/disengagement
+does not toggle lateral; cruise master OFF is a vehicle-state veto.
 
 No controlsAllowed bypass, grace window, changed steering limit or timed grant
 was introduced.

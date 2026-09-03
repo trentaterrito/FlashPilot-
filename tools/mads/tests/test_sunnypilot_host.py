@@ -75,6 +75,22 @@ def test_ordinary_longitudinal_state_does_not_change_lateral(host):
     assert update(host, tja_pressed=True, panda_authorized=True, ordinary_enabled=enabled).authorized
 
 
+def test_set_engagement_requests_lateral_after_observed_longitudinal_off(host):
+  assert not update(host, ordinary_enabled=False).requested
+  result = update(host, ordinary_enabled=True)
+  assert result.requested and not result.authorized
+  assert update(host, ordinary_enabled=True, panda_authorized=True).authorized
+  # CANCEL/brake/accelerator may drop longitudinal without toggling lateral.
+  assert update(host, ordinary_enabled=False, panda_authorized=True).authorized
+  assert update(host, ordinary_enabled=True, panda_authorized=True).authorized
+
+
+def test_manager_restart_with_longitudinal_already_on_cannot_request_lateral():
+  restarted = LightningMadsHost(True)
+  assert not update(restarted, ordinary_enabled=True).requested
+  assert not update(restarted, ordinary_enabled=True, panda_authorized=True).requested
+
+
 def test_tja_second_press_disengages(host):
   engage(host)
   update(host, tja_pressed=False, panda_authorized=True)

@@ -53,6 +53,8 @@ class LightningMadsHost:
     self.lightning = lightning
     self.session = False
     self.previous_button = None
+    self.previous_longitudinal = None
+    self.longitudinal_release_seen = False
     self.previous_authorized = False
     self.await_panda_clear = True
     self.pending_events = set()
@@ -78,6 +80,8 @@ class LightningMadsHost:
     if not self.lightning or not onroad:
       self.session = False
       self.previous_button = None
+      self.previous_longitudinal = None
+      self.longitudinal_release_seen = False
       self.previous_authorized = False
       self.await_panda_clear = True
       self.pending_events.clear()
@@ -121,6 +125,16 @@ class LightningMadsHost:
       if rising:
         self.events.types.add(ET.USER_DISABLE if self.machine.state != State.disabled else ET.ENABLE)
       self.previous_button = tja_pressed
+      # A fresh physical SET/RESUME engagement may also start lateral. Merely
+      # restarting while cruise is already engaged cannot: an observed
+      # longitudinal-off state is required first. Once lateral is active,
+      # brake/CANCEL/accelerator longitudinal transitions do not toggle it.
+      longitudinal_rising = self.previous_longitudinal is False and ordinary_enabled
+      if longitudinal_rising and self.longitudinal_release_seen and self.machine.state == State.disabled:
+        self.events.types.add(ET.ENABLE)
+      if not ordinary_enabled:
+        self.longitudinal_release_seen = True
+      self.previous_longitudinal = ordinary_enabled
 
     _, requested = self.machine.update()
     # A denied new entry or completed disable must also clear panda's existing
