@@ -1,7 +1,12 @@
 # FlashPilot MADS — sunnypilot development integration
 
-Status: **partial; runtime disabled; not a vehicle-test candidate**.
+Release decision (2026-09-02): **B. BLOCKED; runtime disabled; not a vehicle-test candidate**.
 Branch: `codex/flashpilot-mads-sunnypilot`. No device was contacted or changed.
+
+Current checkpoint details:
+- [Final message-integrity table](mads_rc/MESSAGE_INTEGRITY.md).
+- [Heartbeat/lifecycle and driver-feedback matrix](mads_rc/LIFECYCLE_AND_FEEDBACK.md).
+- [Validation, packaging and exact change inventory](FLASHPILOT_MADS_VALIDATION.md).
 
 ## What is implemented
 
@@ -104,8 +109,16 @@ transport/restart HIL validation remains open.
 Eligibility, additional vehicle state and angle-mode metadata expire after
 100 ms. Existing checked RX also requires seen/valid-checksum/QF/counter/lag
 state and no more than three nominal periods. Reads never renew eligibility.
-The current 10 Hz heartbeat/health cadence is on the expiry boundary and must
-be resolved through measured scheduling, not a grace interval.
+Selected MADS heartbeat/health now runs at 50 Hz; OFF retains 10 Hz. The
+100 ms deadline is unchanged. DeviceState uses the retained latest sample,
+not the per-loop updated flag, so a transition between heartbeat ticks cannot
+be discarded. Safety-mode configuration stays at 10 Hz. Actual H7/USB scheduling
+and nominal 10 Hz CAN inputs at the 100 ms deadline still need bench evidence.
+
+The host starts and recovers through a panda-clear acknowledgement: it sends
+negative eligibility until fresh panda telemetry reports permission false.
+It cannot adopt already-authorized state after a restart. Recovery still needs
+a released TJA sample and a new physical press, not a positive heartbeat alone.
 
 Panda health bits 7/8 expose pure independent authorization / MADS selected.
 They are not ordinary-controls OR lateral. Schema and Python decoding are tested.
@@ -122,8 +135,12 @@ as well as ordinary cruise engagement. Missing optional telemetry does not break
 ordinary DM. After MADS is observed, stale data cannot relax monitoring; fresh
 negative intent AND authorization clear its monitoring latch. No attention
 threshold, lockout, alert timing or distraction logic changed. Host authorization
-also requires DM data no older than 100 ms. End-to-end alert/HUD integration is
-still unproven; this is not permission to drive with an invisible engagement state.
+also requires DM data no older than 100 ms. Minimal regular and Comma 4/mici HUD
+labels now separate requested, panda-authorized, active lateral and longitudinal
+state. Existing alert renderers show revocation/unavailable notices without
+overriding higher-priority vehicle alerts. Stale or mismatched state never claims
+ACTIVE. Physical readability, whole-screen placement and end-to-end alert
+behavior remain unproven. No UI toggle or broad sunnypilot framework was added.
 
 Logged truth:
 - controlsState.madsState.enabled: requested host state.
@@ -133,21 +150,25 @@ Logged truth:
 
 ## Remaining blockers (not waived by tests)
 
-1. Complete checksum/counter integrity for added raw Ford inputs at
-   0x176, 0x82, 0x3CC, 0x83, 0x7E and 0x430. Length/value/freshness checks are
-   not substitutes. Gateway counters must be measured, not assumed +1.
-2. Heartbeat/health cadence versus strict 100 ms freshness; real H7 scheduling,
-   queued transport, reset and fault injection need bench validation.
-3. Driver-visible independent engagement/disengagement alerts/HUD plus complete
-   event integration. No UI was added under the safety-core scope.
-4. Whole-system manager/panda/ignition lifecycle and fresh TJA tests on hardware.
-   No physical active-MADS validation occurred.
-5. Actual integrated-core route replay. Older zero-TJA custom-model replay is
-   negative evidence only, not validation of this implementation.
+1. Complete integrity coverage in the linked table, including host-only door/
+   belt veto inputs. A candidate 0x3CC checksum fails 108 recorded frames;
+   gateway counters for 0x176/0x3CC are not +1. No guessed rule was installed.
+   Existing checked speed/yaw counter anomalies now revoke on the first error.
+2. Real H7 scheduling, queued transport/reset/fault injection and the strict
+   deadlines on nominal 10 Hz CAN messages need bench validation.
+3. Physical UI visibility, event/alert arbitration and driver response remain
+   untested despite deterministic feedback tests and a rendered label preview.
+4. Whole-system manager/panda/ignition/USB lifecycle, active fresh-TJA tests and
+   factory-TJA coexistence/arbitration. No connected panda was available.
+5. Six actual-core/current-host replay segments show zero false engagement,
+   but zero TJA presses cannot validate positive engagement or active revocation.
 6. Release packaging: changed panda is local; .gitmodules still points to
    commaai/panda. Publish to an authorized user fork, repoint and fresh-clone-test
-   before distributing. Do not push an uncloneable vehicle candidate.
+   before distributing. Local-only fresh-clone tests do not prove remote access.
+   Full application build status is recorded in the validation document.
 7. Production initializer intentionally absent until the above are resolved.
+   Brake/regen still cancel lateral; steering does not persist through manual
+   braking under this policy. Do not promise the broader desired brake behavior.
 
 Next: obtain/verify the missing Ford integrity rules and bench cadence evidence;
 do not enable MADS, loosen limits or retune other workstreams.

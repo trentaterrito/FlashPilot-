@@ -1,0 +1,632 @@
+[
+  {
+    "file": "../drive_review_129_12b/129_2.rlog.zst",
+    "tja_press_edges": 0,
+    "host_requested_samples": 0,
+    "authorization_grants": 0,
+    "authorized_revocations": 0,
+    "eligible_checks": 44101,
+    "checks": 84572,
+    "rejected_recorded_tx": 933,
+    "messages": {
+      "0x415": {
+        "frames": 3005,
+        "dispatcher_invalid": 0,
+        "upstream": 3005,
+        "checksum_match": 3005,
+        "counter_delta_1": 3004,
+        "observed_hz": 50.07
+      },
+      "0x202": {
+        "frames": 3000,
+        "dispatcher_invalid": 0,
+        "upstream_ignores_checksum_and_counter": 3000,
+        "counter_delta_0": 2999,
+        "observed_hz": 49.99
+      },
+      "0x91": {
+        "frames": 6000,
+        "dispatcher_invalid": 0,
+        "upstream": 6000,
+        "checksum_match": 6000,
+        "counter_delta_1": 5999,
+        "observed_hz": 99.98
+      },
+      "0x165": {
+        "frames": 3000,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 3000,
+        "observed_hz": 49.99
+      },
+      "0x204": {
+        "frames": 6000,
+        "dispatcher_invalid": 0,
+        "upstream_ignores_checksum_and_counter": 6000,
+        "counter_delta_1": 5999,
+        "observed_hz": 99.98
+      },
+      "0x213": {
+        "frames": 3005,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 3005,
+        "observed_hz": 50.07
+      },
+      "0x176": {
+        "frames": 600,
+        "dispatcher_invalid": 0,
+        "candidate_only": 600,
+        "checksum_match": 600,
+        "counter_delta_10": 599,
+        "observed_hz": 10.0
+      },
+      "0x82": {
+        "frames": 3000,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 3000,
+        "observed_hz": 49.99
+      },
+      "0x3cc": {
+        "frames": 2001,
+        "dispatcher_invalid": 0,
+        "candidate_only": 2001,
+        "checksum_match": 2001,
+        "counter_delta_8": 530,
+        "counter_delta_6": 412,
+        "counter_delta_7": 1055,
+        "counter_delta_5": 2,
+        "counter_delta_4": 1,
+        "observed_hz": 33.34
+      },
+      "0x83": {
+        "frames": 610,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 610,
+        "observed_hz": 10.16
+      },
+      "0x7e": {
+        "frames": 6000,
+        "dispatcher_invalid": 0,
+        "unverified": 6000,
+        "counter_delta_1": 5999,
+        "observed_hz": 99.98
+      },
+      "0x430": {
+        "frames": 599,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 599,
+        "observed_hz": 9.98
+      }
+    },
+    "limitations": [
+      "Actual C core and host intent adapter, synthetic 50 Hz heartbeat/status timing and simplified host eligibility.",
+      "No TJA press is synthesized. Zero TJA cannot validate positive engagement or active revocation.",
+      "Recorded ordinary steering TX can be rejected in selected MADS with no independent request.",
+      "Candidate checksum matches are not verified OEM rules. Not hardware-in-loop."
+    ]
+  },
+  {
+    "file": "../drive_review_129_12b/12b_1.rlog.zst",
+    "tja_press_edges": 0,
+    "host_requested_samples": 0,
+    "authorization_grants": 0,
+    "authorized_revocations": 0,
+    "eligible_checks": 22868,
+    "checks": 83931,
+    "rejected_recorded_tx": 3741,
+    "messages": {
+      "0x415": {
+        "frames": 3005,
+        "dispatcher_invalid": 0,
+        "upstream": 3005,
+        "checksum_match": 3005,
+        "counter_delta_1": 3004,
+        "observed_hz": 50.07
+      },
+      "0x202": {
+        "frames": 3000,
+        "dispatcher_invalid": 0,
+        "upstream_ignores_checksum_and_counter": 3000,
+        "counter_delta_0": 2999,
+        "observed_hz": 50.01
+      },
+      "0x91": {
+        "frames": 6000,
+        "dispatcher_invalid": 0,
+        "upstream": 6000,
+        "checksum_match": 6000,
+        "counter_delta_1": 5999,
+        "observed_hz": 100.0
+      },
+      "0x165": {
+        "frames": 3000,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 3000,
+        "observed_hz": 50.0
+      },
+      "0x204": {
+        "frames": 6000,
+        "dispatcher_invalid": 0,
+        "upstream_ignores_checksum_and_counter": 6000,
+        "counter_delta_1": 5999,
+        "observed_hz": 100.01
+      },
+      "0x213": {
+        "frames": 3005,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 3005,
+        "observed_hz": 50.08
+      },
+      "0x176": {
+        "frames": 600,
+        "dispatcher_invalid": 0,
+        "candidate_only": 600,
+        "checksum_match": 600,
+        "counter_delta_10": 599,
+        "observed_hz": 10.0
+      },
+      "0x82": {
+        "frames": 3000,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 3000,
+        "observed_hz": 50.0
+      },
+      "0x3cc": {
+        "frames": 2007,
+        "dispatcher_invalid": 0,
+        "candidate_only": 2007,
+        "checksum_match": 1995,
+        "counter_delta_6": 408,
+        "counter_delta_8": 524,
+        "counter_delta_7": 1053,
+        "checksum_mismatch": 12,
+        "counter_delta_5": 15,
+        "counter_delta_4": 6,
+        "observed_hz": 33.45
+      },
+      "0x83": {
+        "frames": 614,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 614,
+        "observed_hz": 10.25
+      },
+      "0x7e": {
+        "frames": 6000,
+        "dispatcher_invalid": 0,
+        "unverified": 6000,
+        "counter_delta_1": 5999,
+        "observed_hz": 100.0
+      },
+      "0x430": {
+        "frames": 599,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 599,
+        "observed_hz": 9.98
+      }
+    },
+    "limitations": [
+      "Actual C core and host intent adapter, synthetic 50 Hz heartbeat/status timing and simplified host eligibility.",
+      "No TJA press is synthesized. Zero TJA cannot validate positive engagement or active revocation.",
+      "Recorded ordinary steering TX can be rejected in selected MADS with no independent request.",
+      "Candidate checksum matches are not verified OEM rules. Not hardware-in-loop."
+    ]
+  },
+  {
+    "file": "../drive_review_129_12b/12b_2.rlog.zst",
+    "tja_press_edges": 0,
+    "host_requested_samples": 0,
+    "authorization_grants": 0,
+    "authorized_revocations": 0,
+    "eligible_checks": 28035,
+    "checks": 83924,
+    "rejected_recorded_tx": 3980,
+    "messages": {
+      "0x415": {
+        "frames": 3005,
+        "dispatcher_invalid": 0,
+        "upstream": 3005,
+        "checksum_match": 3005,
+        "counter_delta_1": 3004,
+        "observed_hz": 50.08
+      },
+      "0x202": {
+        "frames": 3000,
+        "dispatcher_invalid": 0,
+        "upstream_ignores_checksum_and_counter": 3000,
+        "counter_delta_0": 2999,
+        "observed_hz": 50.0
+      },
+      "0x91": {
+        "frames": 6000,
+        "dispatcher_invalid": 0,
+        "upstream": 6000,
+        "checksum_match": 6000,
+        "counter_delta_1": 5999,
+        "observed_hz": 100.0
+      },
+      "0x165": {
+        "frames": 3000,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 3000,
+        "observed_hz": 49.99
+      },
+      "0x204": {
+        "frames": 5999,
+        "dispatcher_invalid": 0,
+        "upstream_ignores_checksum_and_counter": 5999,
+        "counter_delta_1": 5998,
+        "observed_hz": 100.0
+      },
+      "0x213": {
+        "frames": 3005,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 3005,
+        "observed_hz": 50.07
+      },
+      "0x176": {
+        "frames": 600,
+        "dispatcher_invalid": 0,
+        "candidate_only": 600,
+        "checksum_match": 600,
+        "counter_delta_10": 599,
+        "observed_hz": 10.0
+      },
+      "0x82": {
+        "frames": 3000,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 3000,
+        "observed_hz": 50.0
+      },
+      "0x3cc": {
+        "frames": 2001,
+        "dispatcher_invalid": 0,
+        "candidate_only": 2001,
+        "checksum_match": 2001,
+        "counter_delta_7": 1053,
+        "counter_delta_8": 531,
+        "counter_delta_6": 413,
+        "counter_delta_5": 2,
+        "counter_delta_4": 1,
+        "observed_hz": 33.35
+      },
+      "0x83": {
+        "frames": 606,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 606,
+        "observed_hz": 10.1
+      },
+      "0x7e": {
+        "frames": 6000,
+        "dispatcher_invalid": 0,
+        "unverified": 6000,
+        "counter_delta_1": 5999,
+        "observed_hz": 100.0
+      },
+      "0x430": {
+        "frames": 599,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 599,
+        "observed_hz": 9.98
+      }
+    },
+    "limitations": [
+      "Actual C core and host intent adapter, synthetic 50 Hz heartbeat/status timing and simplified host eligibility.",
+      "No TJA press is synthesized. Zero TJA cannot validate positive engagement or active revocation.",
+      "Recorded ordinary steering TX can be rejected in selected MADS with no independent request.",
+      "Candidate checksum matches are not verified OEM rules. Not hardware-in-loop."
+    ]
+  },
+  {
+    "file": "../drive_review_129_12b/12c_1.rlog.zst",
+    "tja_press_edges": 0,
+    "host_requested_samples": 0,
+    "authorization_grants": 0,
+    "authorized_revocations": 0,
+    "eligible_checks": 23147,
+    "checks": 85127,
+    "rejected_recorded_tx": 3781,
+    "messages": {
+      "0x415": {
+        "frames": 3005,
+        "dispatcher_invalid": 0,
+        "upstream": 3005,
+        "checksum_match": 3005,
+        "counter_delta_1": 3004,
+        "observed_hz": 50.08
+      },
+      "0x202": {
+        "frames": 3000,
+        "dispatcher_invalid": 0,
+        "upstream_ignores_checksum_and_counter": 3000,
+        "counter_delta_0": 2999,
+        "observed_hz": 50.0
+      },
+      "0x91": {
+        "frames": 6000,
+        "dispatcher_invalid": 0,
+        "upstream": 6000,
+        "checksum_match": 6000,
+        "counter_delta_1": 5999,
+        "observed_hz": 100.01
+      },
+      "0x165": {
+        "frames": 3000,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 3000,
+        "observed_hz": 50.0
+      },
+      "0x204": {
+        "frames": 6000,
+        "dispatcher_invalid": 0,
+        "upstream_ignores_checksum_and_counter": 6000,
+        "counter_delta_1": 5999,
+        "observed_hz": 99.99
+      },
+      "0x213": {
+        "frames": 3005,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 3005,
+        "observed_hz": 50.08
+      },
+      "0x176": {
+        "frames": 600,
+        "dispatcher_invalid": 0,
+        "candidate_only": 600,
+        "checksum_match": 600,
+        "counter_delta_10": 599,
+        "observed_hz": 10.0
+      },
+      "0x82": {
+        "frames": 3000,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 3000,
+        "observed_hz": 50.0
+      },
+      "0x3cc": {
+        "frames": 2008,
+        "dispatcher_invalid": 0,
+        "candidate_only": 2008,
+        "checksum_match": 1912,
+        "counter_delta_6": 408,
+        "counter_delta_8": 525,
+        "counter_delta_7": 1050,
+        "checksum_mismatch": 96,
+        "counter_delta_5": 16,
+        "counter_delta_4": 8,
+        "observed_hz": 33.47
+      },
+      "0x83": {
+        "frames": 613,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 613,
+        "observed_hz": 10.21
+      },
+      "0x7e": {
+        "frames": 6000,
+        "dispatcher_invalid": 0,
+        "unverified": 6000,
+        "counter_delta_1": 5999,
+        "observed_hz": 99.99
+      },
+      "0x430": {
+        "frames": 599,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 599,
+        "observed_hz": 9.98
+      }
+    },
+    "limitations": [
+      "Actual C core and host intent adapter, synthetic 50 Hz heartbeat/status timing and simplified host eligibility.",
+      "No TJA press is synthesized. Zero TJA cannot validate positive engagement or active revocation.",
+      "Recorded ordinary steering TX can be rejected in selected MADS with no independent request.",
+      "Candidate checksum matches are not verified OEM rules. Not hardware-in-loop."
+    ]
+  },
+  {
+    "file": "../drive_review_129_12b/12c_17.rlog.zst",
+    "tja_press_edges": 0,
+    "host_requested_samples": 0,
+    "authorization_grants": 0,
+    "authorized_revocations": 0,
+    "eligible_checks": 30232,
+    "checks": 84894,
+    "rejected_recorded_tx": 4173,
+    "messages": {
+      "0x415": {
+        "frames": 3005,
+        "dispatcher_invalid": 0,
+        "upstream": 3005,
+        "checksum_match": 3005,
+        "counter_delta_1": 3004,
+        "observed_hz": 50.09
+      },
+      "0x202": {
+        "frames": 3000,
+        "dispatcher_invalid": 0,
+        "upstream_ignores_checksum_and_counter": 3000,
+        "counter_delta_0": 2999,
+        "observed_hz": 50.0
+      },
+      "0x91": {
+        "frames": 6000,
+        "dispatcher_invalid": 0,
+        "upstream": 6000,
+        "checksum_match": 6000,
+        "counter_delta_1": 5999,
+        "observed_hz": 100.0
+      },
+      "0x165": {
+        "frames": 3000,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 3000,
+        "observed_hz": 50.0
+      },
+      "0x204": {
+        "frames": 6000,
+        "dispatcher_invalid": 0,
+        "upstream_ignores_checksum_and_counter": 6000,
+        "counter_delta_1": 5999,
+        "observed_hz": 100.0
+      },
+      "0x213": {
+        "frames": 3005,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 3005,
+        "observed_hz": 50.08
+      },
+      "0x176": {
+        "frames": 600,
+        "dispatcher_invalid": 0,
+        "candidate_only": 600,
+        "checksum_match": 600,
+        "counter_delta_10": 599,
+        "observed_hz": 10.0
+      },
+      "0x82": {
+        "frames": 3000,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 3000,
+        "observed_hz": 50.0
+      },
+      "0x3cc": {
+        "frames": 2000,
+        "dispatcher_invalid": 0,
+        "candidate_only": 2000,
+        "checksum_match": 2000,
+        "counter_delta_7": 1062,
+        "counter_delta_8": 527,
+        "counter_delta_6": 410,
+        "observed_hz": 33.34
+      },
+      "0x83": {
+        "frames": 603,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 603,
+        "observed_hz": 10.05
+      },
+      "0x7e": {
+        "frames": 6001,
+        "dispatcher_invalid": 0,
+        "unverified": 6001,
+        "counter_delta_1": 6000,
+        "observed_hz": 100.01
+      },
+      "0x430": {
+        "frames": 599,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 599,
+        "observed_hz": 9.98
+      }
+    },
+    "limitations": [
+      "Actual C core and host intent adapter, synthetic 50 Hz heartbeat/status timing and simplified host eligibility.",
+      "No TJA press is synthesized. Zero TJA cannot validate positive engagement or active revocation.",
+      "Recorded ordinary steering TX can be rejected in selected MADS with no independent request.",
+      "Candidate checksum matches are not verified OEM rules. Not hardware-in-loop."
+    ]
+  },
+  {
+    "file": "../drive_review_129_12b/12c_18.rlog.zst",
+    "tja_press_edges": 0,
+    "host_requested_samples": 0,
+    "authorization_grants": 0,
+    "authorized_revocations": 0,
+    "eligible_checks": 26161,
+    "checks": 84886,
+    "rejected_recorded_tx": 3228,
+    "messages": {
+      "0x415": {
+        "frames": 3005,
+        "dispatcher_invalid": 0,
+        "upstream": 3005,
+        "checksum_match": 3005,
+        "counter_delta_1": 3004,
+        "observed_hz": 50.08
+      },
+      "0x202": {
+        "frames": 3000,
+        "dispatcher_invalid": 0,
+        "upstream_ignores_checksum_and_counter": 3000,
+        "counter_delta_0": 2999,
+        "observed_hz": 50.0
+      },
+      "0x91": {
+        "frames": 5999,
+        "dispatcher_invalid": 0,
+        "upstream": 5999,
+        "checksum_match": 5999,
+        "counter_delta_1": 5998,
+        "observed_hz": 99.99
+      },
+      "0x165": {
+        "frames": 3000,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 3000,
+        "observed_hz": 50.0
+      },
+      "0x204": {
+        "frames": 5999,
+        "dispatcher_invalid": 0,
+        "upstream_ignores_checksum_and_counter": 5999,
+        "counter_delta_1": 5998,
+        "observed_hz": 99.99
+      },
+      "0x213": {
+        "frames": 3005,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 3005,
+        "observed_hz": 50.08
+      },
+      "0x176": {
+        "frames": 600,
+        "dispatcher_invalid": 0,
+        "candidate_only": 600,
+        "checksum_match": 600,
+        "counter_delta_10": 599,
+        "observed_hz": 10.0
+      },
+      "0x82": {
+        "frames": 3000,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 3000,
+        "observed_hz": 50.0
+      },
+      "0x3cc": {
+        "frames": 2001,
+        "dispatcher_invalid": 0,
+        "candidate_only": 2001,
+        "checksum_match": 2001,
+        "counter_delta_6": 412,
+        "counter_delta_8": 529,
+        "counter_delta_7": 1056,
+        "counter_delta_5": 2,
+        "counter_delta_4": 1,
+        "observed_hz": 33.35
+      },
+      "0x83": {
+        "frames": 603,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 603,
+        "observed_hz": 10.04
+      },
+      "0x7e": {
+        "frames": 5999,
+        "dispatcher_invalid": 0,
+        "unverified": 5999,
+        "counter_delta_1": 5998,
+        "observed_hz": 99.99
+      },
+      "0x430": {
+        "frames": 598,
+        "dispatcher_invalid": 0,
+        "no_verified_application_integrity": 598,
+        "observed_hz": 9.98
+      }
+    },
+    "limitations": [
+      "Actual C core and host intent adapter, synthetic 50 Hz heartbeat/status timing and simplified host eligibility.",
+      "No TJA press is synthesized. Zero TJA cannot validate positive engagement or active revocation.",
+      "Recorded ordinary steering TX can be rejected in selected MADS with no independent request.",
+      "Candidate checksum matches are not verified OEM rules. Not hardware-in-loop."
+    ]
+  }
+]
