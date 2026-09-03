@@ -385,8 +385,7 @@ void pandad_run(Panda *panda) {
     }
 
     sm.update(0);
-    // Keep legacy cadence OFF. Selected MADS needs status/heartbeat well inside
-    // the existing 100 ms deadline; do not lengthen the safety allowance.
+    // Use the reference 10 Hz heartbeat/status cadence in both modes.
     const bool mads_selected = sm.allAliveAndValid({"controlsState"}) &&
                                 sm["controlsState"].getControlsState().getMadsState().getAvailable();
     if (rk.frame() % mads_state_period(mads_selected) == 0) {

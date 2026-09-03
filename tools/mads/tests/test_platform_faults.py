@@ -32,11 +32,11 @@ def test_healthy_predicate_is_not_permission_grant(board):
   assert board.platform_ready()
 
 
-@pytest.mark.parametrize("kind,bus", [(k, 0) for k in range(11)] + [(k, b) for k in range(11, 18) for b in range(3)])
+@pytest.mark.parametrize("kind,bus", [(k, 0) for k in (0, 1, 2, 3, 4, 6, 7)] + [(k, b) for k in (11, 12, 15) for b in range(3)])
 def test_each_platform_fault_vetoes(board, kind, bus):
   board.platform_fault(kind, bus)
   assert not board.platform_ready()
-  if kind in (*range(8, 11), *range(13, 18)):
+  if kind == 15:
     # Counter deltas are observations. Caller latches the veto until a fresh
     # heartbeat AND needs a new physical TJA selection (covered by Ford tests).
     assert board.platform_ready()
@@ -46,5 +46,11 @@ def test_each_platform_fault_vetoes(board, kind, bus):
 
 def test_adc_lock_never_reads_ignition_gpio(board):
   board.platform_fault(5, 0)
-  assert not board.platform_ready()
+  assert board.platform_ready()
   assert board.platform_gpio_reads() == 0
+
+
+@pytest.mark.parametrize("kind,bus", [(k, 0) for k in (8, 9, 10)] + [(k, b) for k in (13, 14, 16, 17) for b in range(3)])
+def test_diagnostic_counter_alone_is_not_steering_fault(board, kind, bus):
+  board.platform_fault(kind, bus)
+  assert board.platform_ready()

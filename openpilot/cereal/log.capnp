@@ -870,6 +870,7 @@ struct ControlsState @0x97ff69c53601abf1 {
   madsState @67 :Custom.ModularAssistiveDrivingSystem;
   madsAuthorized @68 :Bool;
   madsEligible @69 :Bool;
+  madsSoftDisableTimer @70 :UInt16;  # Existing lifecycle countdown, for takeover alerts only
   longitudinalPlanMonoTime @28 :UInt64;
   lateralPlanMonoTime @50 :UInt64;
 

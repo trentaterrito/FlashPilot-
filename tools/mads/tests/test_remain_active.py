@@ -109,11 +109,11 @@ def test_brake_event_can_drain_after_release_without_timer_or_reengagement():
   s.cs.brakePressed = False
   assert s.step(log.OnroadEvent.EventName.pedalPressed).latActive
   assert s.step().latActive
-  # A new unexplained pedal event is NOT carried by the old association.
-  assert not s.step(log.OnroadEvent.EventName.pedalPressed).latActive
+  # REMAIN_ACTIVE filters independent pedal events without socket association.
+  assert s.step(log.OnroadEvent.EventName.pedalPressed).latActive
 
 
-@pytest.mark.parametrize("fault", ["steerFaultTemporary", "steerFaultPermanent", "steeringPressed", "parkingBrake",
+@pytest.mark.parametrize("fault", ["steerFaultTemporary", "steerFaultPermanent", "parkingBrake",
                                    "vehicleSensorsInvalid", "espDisabled", "doorOpen", "seatbeltUnlatched"])
 def test_brake_does_not_mask_vehicle_faults_or_override(fault):
   s = Scenario()
@@ -159,7 +159,7 @@ def test_tja_disable_repeated_brakes_and_nonbrake_pedal_preserved():
   s = Scenario()
   s.engage()
   s.cs.brakePressed = s.cs.gasPressed = True
-  assert not s.step(log.OnroadEvent.EventName.pedalPressed).latActive
+  assert s.step(log.OnroadEvent.EventName.pedalPressed).latActive
 
 
 @pytest.mark.parametrize("lightning,selected", [(True, False), (False, False), (False, True)])

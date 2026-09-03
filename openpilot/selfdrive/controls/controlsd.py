@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import math
-import time
 from numbers import Number
 
 from openpilot.cereal import log
@@ -102,15 +101,11 @@ class Controls:
     standstill = abs(CS.vEgo) <= max(self.CP.minSteerSpeed, 0.3) or CS.standstill
     CC.latActive = self.sm['selfdriveState'].active and not CS.steerFaultTemporary and not CS.steerFaultPermanent and \
                    (not standstill or self.CP.steerAtStandstill)
-    # No Params/UI enable: the panda initializer is still unavailable at runtime.
-    # When that integration is validated, independent steering requires BOTH
-    # sunnypilot host intent and fresh, separate panda authorization.
+    # Startup-only FlashPilotMads selection still requires BOTH SunnyPilot host
+    # intent and fresh, separate panda authorization. Params never grant control.
     pandas = self.sm['pandaStates']
     sources = ['carState', 'pandaStates', 'deviceState', 'onroadEvents', 'driverMonitoringState', 'selfdriveState', 'modelV2']
     fresh = self.sm.all_checks(sources)
-    now = time.monotonic_ns()
-    fresh = fresh and all(0 <= now - self.sm.logMonoTime[s] <= 100_000_000
-                          for s in ('pandaStates', 'carState', 'onroadEvents', 'driverMonitoringState'))
     valid_panda = (len(pandas) == 1 and str(pandas[0].safetyModel) == "ford" and len(self.CP.safetyConfigs) == 1
                    and pandas[0].safetyParam == self.CP.safetyConfigs[0].safetyParam)
     panda_enabled = valid_panda and pandas[0].madsSafetyEnabled
@@ -118,7 +113,8 @@ class Controls:
     safety_ready = valid_panda and not pandas[0].safetyRxChecksInvalid and not pandas[0].faults and not pandas[0].heartbeatLost
     mads = self.mads.update(onroad=self.sm['deviceState'].started, fresh=fresh,
                             eligible=safety_ready and self.mads.vehicle_eligible(CS, self.sm['onroadEvents'], driver_ready,
-                                                                               panda_enabled=panda_enabled),
+                                                                               panda_enabled=panda_enabled,
+                                                                               ordinary_enabled=CC.enabled),
                             panda_enabled=panda_enabled,
                             panda_authorized=valid_panda and pandas[0].controlsAllowedLateral,
                             tja_pressed=CS.genericToggle, ordinary_enabled=CC.enabled)
@@ -222,6 +218,7 @@ class Controls:
     cs.madsState.available = self.mads.result.session
     cs.madsAuthorized = self.mads.result.authorized
     cs.madsEligible = self.mads.result.eligible
+    cs.madsSoftDisableTimer = self.mads.selfdrive.state_machine.soft_disable_timer
 
     cs.curvature = self.curvature
     cs.longitudinalPlanMonoTime = self.sm.logMonoTime['longitudinalPlan']

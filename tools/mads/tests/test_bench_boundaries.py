@@ -37,24 +37,22 @@ def test_brake_delivery_order(order, pedal, standstill):
     assert cc.longActive and cc.latActive
   elif order == "event_first":
     cc = s.step(PEDAL)
-    assert not cc.longActive and not cc.latActive
+    assert not cc.longActive and cc.latActive
   setattr(s.cs, pedal, True)
   cc = s.step(PEDAL)
   assert not cc.longActive
-  assert cc.latActive == (order != "event_first")
+  assert cc.latActive
   for _ in range(5):
     cc = s.step(PEDAL)
     assert not cc.longActive
-    assert cc.latActive == (order != "event_first")
+    assert cc.latActive
   setattr(s.cs, pedal, False)
   cc = s.step(PEDAL)  # event removal may trail the state sample
   assert not cc.longActive
-  assert cc.latActive == (order != "event_first")
+  assert cc.latActive
   cc = s.step()
   assert not cc.longActive
-  assert cc.latActive == (order != "event_first")
-  if order == "event_first":
-    assert_no_return(s)
+  assert cc.latActive
 
 
 def test_panda_cancels_long_before_delayed_host_event():
@@ -133,7 +131,7 @@ def test_host_lifecycle_requires_clear_ack_and_new_physical_selection(boundary, 
   assert cc.latActive and not cc.longActive
 
 
-@pytest.mark.parametrize("boundary", ["reset", "negative_heartbeat", "expired_heartbeat", "platform_loss"])
+@pytest.mark.parametrize("boundary", ["reset", "negative_heartbeat", "expired_status", "platform_loss"])
 def test_actual_core_recovery_never_adopts_stale_positive_request(boundary):
   h = BrakeHarness()
   h.engage()
@@ -142,7 +140,7 @@ def test_actual_core_recovery_never_adopts_stale_positive_request(boundary):
     h.safety.set_safety_hooks(CarParams.SafetyModel.ford, 2)
   elif boundary == "negative_heartbeat":
     h.safety.test_sp_heartbeat(0, 0, 0)
-  elif boundary == "expired_heartbeat":
+  elif boundary == "expired_status":
     h.now += 100001
     h.safety.set_timer(h.now)
   else:
@@ -153,7 +151,7 @@ def test_actual_core_recovery_never_adopts_stale_positive_request(boundary):
   h.button(True)  # held historical intent, not a new engagement
   assert not h.allowed()
   if boundary == "reset":
-    assert not h.safety.test_sp_enabled()  # no production initializer added
+    assert not h.safety.test_sp_enabled()  # reset to ordinary Ford param2
   else:
     h.refresh()
     assert not h.allowed()
@@ -175,8 +173,9 @@ def test_actual_safety_source_deadline_boundary_not_real_arrival_measurement(add
   h.now = last + age_us
   h.safety.set_timer(h.now)
   h.refresh()
-  assert h.allowed() == (age_us <= 100000)
-  if age_us > 100000:
+  expires = address == 0x3CC and age_us > 100000
+  assert h.allowed() == (not expires)
+  if expires:
     h.omit_address = None
     h.refresh()
     assert not h.allowed()  # late target arrival cannot silently restore

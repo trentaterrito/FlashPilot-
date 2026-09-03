@@ -508,15 +508,36 @@ class SelfdriveD:
     return CS
 
   def update_alerts(self, CS):
+    alert_types = list(self.state_machine.current_alert_types)
+    soft_disable_timer = self.state_machine.soft_disable_timer
+    # The independent lifecycle lives in controlsd; reuse these existing alert
+    # definitions even when ordinary longitudinal is disabled. Display-only:
+    # never write engagement or modify the ordinary state machine's timer.
+    cs = self.sm['controlsState']
+    pandas = self.sm['pandaStates']
+    mads_active = (self.CP.carFingerprint == "FORD_F_150_LIGHTNING_MK1" and
+                   self.sm.all_checks(['controlsState', 'pandaStates', 'carControl']) and
+                   len(pandas) == 1 and len(self.CP.safetyConfigs) == 1 and
+                   str(pandas[0].safetyModel) == "ford" and
+                   pandas[0].safetyParam == self.CP.safetyConfigs[0].safetyParam and
+                   pandas[0].madsSafetyEnabled and pandas[0].controlsAllowedLateral and
+                   cs.madsState.enabled and cs.madsAuthorized and self.sm['carControl'].latActive)
+    if mads_active:
+      if ET.WARNING not in alert_types:
+        alert_types.append(ET.WARNING)
+      if str(cs.madsState.state) == 'softDisabling':
+        soft_disable_timer = (min(soft_disable_timer, cs.madsSoftDisableTimer)
+                              if ET.SOFT_DISABLE in alert_types else cs.madsSoftDisableTimer)
+        if ET.SOFT_DISABLE not in alert_types:
+          alert_types.append(ET.SOFT_DISABLE)
     clear_event_types = set()
-    if ET.WARNING not in self.state_machine.current_alert_types:
+    if ET.WARNING not in alert_types:
       clear_event_types.add(ET.WARNING)
     if self.enabled:
       clear_event_types.add(ET.NO_ENTRY)
 
     pers = LONGITUDINAL_PERSONALITY_MAP[self.personality]
-    alerts = self.events.create_alerts(self.state_machine.current_alert_types, [self.CP, CS, self.sm, self.is_metric,
-                                                                                self.state_machine.soft_disable_timer, pers])
+    alerts = self.events.create_alerts(alert_types, [self.CP, CS, self.sm, self.is_metric, soft_disable_timer, pers])
     self.AM.add_many(self.sm.frame, alerts)
     self.AM.process_alerts(self.sm.frame, clear_event_types)
 
