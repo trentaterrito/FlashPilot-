@@ -1,7 +1,7 @@
 """Lightning adapter for sunnypilot's unmodified host MADS state machine.
 
 Panda is authoritative. This module cannot enable panda MADS or grant its own
-steering permission. All safety inputs must be fresh; no automatic brake return.
+steering permission. Selected MADS uses REMAIN_ACTIVE braking, never pause/resume.
 """
 from dataclasses import dataclass
 from types import SimpleNamespace
@@ -46,11 +46,26 @@ class LightningMadsHost:
     self.previous_button = None
     self.previous_authorized = False
     self.await_panda_clear = True
+    self.brake_pedal_event = False
     self.events = EventView()
     self.selfdrive = SimpleNamespace(enabled=False, events=self.events, events_sp=EventView(),
                                     state_machine=SimpleNamespace(current_alert_types=[], soft_disable_timer=0))
     self.machine = StateMachine(self)
     self.result = MadsResult()
+
+  def vehicle_eligible(self, cs, events, driver_ready, *, panda_enabled):
+    remain_active = self.lightning and panda_enabled
+    pedal_event = any(e.name == log.OnroadEvent.EventName.pedalPressed for e in events)
+    # Associate only a witnessed brake/regen event. Preserve this association
+    # until that event clears, including one socket delivering brake release
+    # before the other delivers event removal. No timer, permission grant or
+    # pause/resume is involved. Gas or an unknown pedal cause still vetoes.
+    if not remain_active or not pedal_event or cs.gasPressed:
+      self.brake_pedal_event = False
+    elif cs.brakePressed or cs.regenBraking:
+      self.brake_pedal_event = True
+    return vehicle_eligible(cs, events, driver_ready, remain_active=remain_active,
+                            brake_pedal_event=self.brake_pedal_event)
 
   def update(self, *, onroad, fresh, eligible, panda_enabled, panda_authorized, tja_pressed, ordinary_enabled=False):
     if not self.lightning or not onroad:
@@ -58,6 +73,7 @@ class LightningMadsHost:
       self.previous_button = None
       self.previous_authorized = False
       self.await_panda_clear = True
+      self.brake_pedal_event = False
       self.machine.state = State.disabled
       self.result = MadsResult()
       return self.result
@@ -74,6 +90,7 @@ class LightningMadsHost:
     # fresh panda telemetry acknowledges cleared permission.
     if not ready:
       self.await_panda_clear = True
+      self.brake_pedal_event = False
     if self.await_panda_clear:
       if ready and not panda_authorized:
         self.await_panda_clear = False
@@ -99,12 +116,14 @@ class LightningMadsHost:
     return self.result
 
 
-def vehicle_eligible(cs, events, driver_ready):
-  """Keep the existing restrictive safety policy; ordinary events are untouched."""
+def vehicle_eligible(cs, events, driver_ready, *, remain_active=False, brake_pedal_event=False):
+  """Independent lateral event view only; ordinary selfdrived events are untouched."""
   return (cs.canValid and not cs.steerFaultTemporary and not cs.steerFaultPermanent
           and not cs.vehicleSensorsInvalid and str(cs.gearShifter) == "drive"
-          and cs.cruiseState.available and not cs.brakePressed and not cs.regenBraking
+          and cs.cruiseState.available and (remain_active or (not cs.brakePressed and not cs.regenBraking))
           and not cs.steeringPressed and not cs.parkingBrake and not cs.espDisabled
           and not cs.doorOpen and not cs.seatbeltUnlatched and driver_ready
           and not any(e.noEntry or e.softDisable or e.immediateDisable or e.userDisable or e.preEnable
-                      for e in events if e.name != log.OnroadEvent.EventName.pcmDisable))
+                      for e in events if e.name != log.OnroadEvent.EventName.pcmDisable
+                      and not (remain_active and brake_pedal_event and not cs.gasPressed
+                               and e.name == log.OnroadEvent.EventName.pedalPressed)))

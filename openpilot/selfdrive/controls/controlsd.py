@@ -22,7 +22,7 @@ from openpilot.selfdrive.controls.lib.latcontrol_torque import LatControlTorque
 from openpilot.selfdrive.controls.lib.longcontrol import LongControl
 from openpilot.selfdrive.modeld.modeld import LAT_SMOOTH_SECONDS
 from openpilot.selfdrive.locationd.helpers import PoseCalibrator, Pose
-from openpilot.selfdrive.controls.lib.flashpilot_mads import LightningMadsHost, vehicle_eligible
+from openpilot.selfdrive.controls.lib.flashpilot_mads import LightningMadsHost
 
 State = log.SelfdriveState.OpenpilotState
 LaneChangeState = log.LaneChangeState
@@ -117,7 +117,8 @@ class Controls:
     driver_ready = not self.sm['driverMonitoringState'].noResponseForceDecel
     safety_ready = valid_panda and not pandas[0].safetyRxChecksInvalid and not pandas[0].faults and not pandas[0].heartbeatLost
     mads = self.mads.update(onroad=self.sm['deviceState'].started, fresh=fresh,
-                            eligible=safety_ready and vehicle_eligible(CS, self.sm['onroadEvents'], driver_ready),
+                            eligible=safety_ready and self.mads.vehicle_eligible(CS, self.sm['onroadEvents'], driver_ready,
+                                                                               panda_enabled=panda_enabled),
                             panda_enabled=panda_enabled,
                             panda_authorized=valid_panda and pandas[0].controlsAllowedLateral,
                             tja_pressed=CS.genericToggle, ordinary_enabled=CC.enabled)
