@@ -1,0 +1,59 @@
+2026-09-02 local validation. Suites overlap; do not sum counts.
+Production safety source: opendbc 810ae9b49272a8bb50168811b07e8e7f84d24333.
+Panda source unchanged: e01740407d1b346bf1fa8700a1163da2d9878fc2.
+No vehicle deployment or MADS enablement.
+
+Environment used from FlashPilot repository root:
+PYTHONPATH="$PWD/opendbc_repo:$PWD:/tmp/flashpilot-mads-clean.8hPcQk/repo/msgq_repo"
+PATH="/tmp/flashpilot-venv/bin:$PATH"
+The existing local native test environment is not an installed-vehicle dependency.
+
+Full suite command:
+python -m pytest -q opendbc_repo/opendbc/safety/tests --ignore=opendbc_repo/opendbc/safety/tests/misra opendbc_repo/opendbc/car/ford/tests panda/tests/usbprotocol tools/mads/tests
+Final output (/tmp/mads-3cc-full-tests-final.log):
+3175 passed, 1328 skipped, 9287 subtests passed in 30.13s
+
+Release-mode command (no ALLOW_DEBUG, test-only MADS initializer):
+python -c 'from opendbc.safety.tests.libsafety import libsafety_py; libsafety_py.load(libsafety_py._build_libsafety(release=True)); import pytest; raise SystemExit(pytest.main(["-q","opendbc_repo/opendbc/safety/tests/test_ford_sunnypilot_mads.py","opendbc_repo/opendbc/safety/tests/test_ford_mads_status_integrity.py"]))'
+Output (/tmp/mads-3cc-release.log):
+151 passed in 0.35s
+
+New integrity suite:
+python -m pytest -q opendbc_repo/opendbc/safety/tests/test_ford_mads_status_integrity.py
+35 passed. Actual C, 631 captured unique payloads / 377209 weighted frames;
+11989 covered single-bit corruptions rejected. Changing-sequence replay is an
+explicit accepted test boundary, not claimed prevented.
+
+New offline timing suite:
+python -m pytest -q tools/mads/tests/test_ford_freshness_timing.py
+3 passed in 0.34s
+
+Recorded status replay:
+python tools/mads/replay_ford_status_freshness.py /tmp/ford-3cc-all.jsonl.gz
+Exit 0. 377209 frames; 374089 eligible status; 3120 unavailable status.
+Zero checksum rejects, eligible false rejects, unavailable false accepts,
+unexpected grants or pre-RX progress false expiries. Status subpredicate only;
+not full vehicle eligibility, positive TJA or hardware validation.
+Durable details: freshness_corpus_results.json.
+
+Recorded next-item timing audit:
+python tools/mads/audit_ford_freshness_timing.py docs/mads_3cc/freshness_corpus_results.json --workers 2
+Exit 0. 189 original files, hashes verified, no container warnings.
+Durable details: freshness_timing_results.json. Three 10 Hz prerequisites exceed
+100 ms in host-log timing; this is not proof of panda arrival timing.
+
+Firmware:
+scons -C panda -j4 board/obj/panda_h7/main.elf tests/libpanda/libpanda.so
+Exit 0; scons: done building targets. H7 debug build and native libpanda.
+Nonfatal macOS confstr temporary-directory warnings; no firmware flashing.
+
+Static analysis:
+python tools/mads/run_safety_static_checks.py --output /tmp/mads-3cc-static
+Cppcheck 2.21.0. opendbc: exit 0, coverageTableMatches=true, pass=true.
+H7: exit 0, coverageTableMatches=true, pass=true.
+Durable commands/results: freshness_static_results.json.
+No new suppressions. MISRA mutation wrapper not rerun; not certification.
+
+Changed Python files: compileall PASS. All three repositories: git diff --check PASS.
+No new full application build, host C++ build, Ruff or physical/HIL run claimed.
+Host C++ and panda source unchanged in this follow-up.

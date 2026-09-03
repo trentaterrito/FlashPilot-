@@ -4,6 +4,7 @@ Release decision (2026-09-02): **B. BLOCKED; runtime disabled; not a vehicle-tes
 Branch: `codex/flashpilot-mads-sunnypilot`. No device was contacted or changed.
 
 Current checkpoint details:
+- [0x3CC checksum/frozen-counter validation and accepted replay boundary](mads_3cc/FRESHNESS.md).
 - [Final message-integrity table](mads_rc/MESSAGE_INTEGRITY.md).
 - [Heartbeat/lifecycle and driver-feedback matrix](mads_rc/LIFECYCLE_AND_FEEDBACK.md).
 - [Validation, packaging and exact change inventory](FLASHPILOT_MADS_VALIDATION.md).

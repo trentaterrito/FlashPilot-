@@ -1,5 +1,11 @@
 # Ford 0x3CC recorded-traffic investigation — 2026-09-02
 
+**Follow-up:** [Checksum promotion and frozen-counter checks](FRESHNESS.md) now
+supersede the checksum-not-installed and identical-replay conclusions below.
+Changing-sequence replay is now an accepted documented boundary, not the current
+phase's completion gate. This analysis checkpoint
+is retained as history; its counts are not new validation of later code.
+
 **Recommendation: KEEP as a negative availability/fault veto. Category B:
 usable with different integrity semantics, not a standalone authorization source.**
 The 108 checksum mismatches are explained. The full integrity/replay blocker is

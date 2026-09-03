@@ -128,28 +128,29 @@ def test_actual_gate_malformed_3cc_fails_closed():
   assert not h.allowed()
 
 
-def test_document_current_gate_does_not_enforce_new_checksum_yet():
+def test_current_gate_enforces_status_checksum():
   h = Harness()
   h.engage()
   bad = bytearray.fromhex("a80002809cf40000")
   bad[5] ^= 1
   assert not checksum_matches(bad)
   h.safety.safety_rx_hook(libsafety_py.make_CANPacket(0x3CC, 0, bad))
-  assert h.allowed()  # Known open blocker, not a passing integrity guarantee.
+  assert not h.allowed()
 
 
-def test_document_repeated_recent_capture_is_not_authenticated_fresh():
+def test_repeated_capture_cannot_renew_counter_progress():
   h = Harness()
   h.engage()
   captured = bytes.fromhex("a80002809cf40000")
   assert checksum_matches(captured)
   h.omit_address = 0x3CC
-  for _ in range(30):
+  h.safety.safety_rx_hook(libsafety_py.make_CANPacket(0x3CC, 0, captured))
+  for i in range(30):
     h.now += 10000
     h.safety.set_timer(h.now)
     h.refresh()  # other required inputs remain fresh
     h.safety.safety_rx_hook(libsafety_py.make_CANPacket(0x3CC, 0, captured))
-    assert h.allowed()  # Replayed frames refresh RX age: unresolved, no claim otherwise.
+    assert h.allowed() == (i < 10)  # Existing 100 ms deadline; duplicates do not renew it.
 
 
 def test_recorded_same_payload_can_recur_without_replay():

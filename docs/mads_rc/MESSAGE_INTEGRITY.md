@@ -1,5 +1,10 @@
 # Ford MADS message-integrity audit
 
+**Current follow-up:** [0x3CC checksum and frozen-counter checks](../mads_3cc/FRESHNESS.md)
+are implemented only inside the disabled MADS safety path. Changing-sequence
+replay is a documented limitation, not this phase's completion gate. The candidate-failure/unchanged-production statements
+in the earlier checkpoint below are historical, not the current implementation.
+
 **2026-09-02 follow-up:** the historical 0x3CC candidate's 108 mismatches below
 are now explained by an omitted LatCtlLim_D_Stat term. The corrected empirical
 sum matches 377,209 identified-Lightning frames; counter/replay semantics remain

@@ -1,5 +1,11 @@
 # MADS release-candidate checkpoint — 2026-09-02
 
+**Latest follow-up:** [0x3CC safety checksum/frozen-counter validation](mads_3cc/FRESHNESS.md)
+records the new disabled-gate safety code and current test results (3,175 passed).
+Changing-sequence replay is a documented limitation, not this phase's completion
+gate; hardware/lifecycle readiness remains unproven. The results below describe the earlier
+release-candidate checkpoint, not a rerun of its entire build/HIL matrix.
+
 Subsequent analysis-only [0x3CC investigation](mads_3cc/REPORT.md) explains the
 checksum mismatches mentioned below; it does not change the recorded code/test
 checkpoint or close counter/replay/safety-integration blockers. The checkpoint
