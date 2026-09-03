@@ -42,6 +42,7 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"ExperimentalFordSteerAssistRadar", {PERSISTENT | DEVELOPMENT_ONLY, BOOL}},
     {"ExperimentalFordSteerAssistRadarShadow", {PERSISTENT | DEVELOPMENT_ONLY, BOOL}},
     {"FlashPilotMads", {PERSISTENT | DEVELOPMENT_ONLY, BOOL}},
+    {"FlashPilotNudgelessLaneChange", {PERSISTENT | DEVELOPMENT_ONLY, BOOL}},
     {"ExperimentalMode", {PERSISTENT, BOOL}},
     {"ExperimentalModeConfirmed", {PERSISTENT, BOOL}},
     {"FirmwareQueryDone", {CLEAR_ON_MANAGER_START | CLEAR_ON_ONROAD_TRANSITION, BOOL}},
