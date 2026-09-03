@@ -17,7 +17,8 @@ older rollback tree to make this installation fit.
 
 Prepared package directory:
 `work/releases/flashpilot-mads-20260903/` under the workspace. Contains seven
-self-contained Git bundles, the existing upstream LFS objects, SHA256SUMS and
+self-contained source Git bundles plus shallow-history boundary files, the
+existing upstream LFS objects, SHA256SUMS and
 MANIFEST.json. No Mac native binaries are installed on the Comma. Public remotes
 do not yet contain these commits; do not replace this with git pull or an
 upstream panda submodule checkout.
@@ -74,6 +75,9 @@ git clone flashpilot.bundle /data/openpilot-mads-candidate
 for name in opendbc_repo panda msgq_repo rednose_repo teleoprtc_repo tinygrad_repo; do
   git clone "$name.bundle" "/data/openpilot-mads-candidate/$name"
 done
+# Preserve the actual truncated ancestor boundaries; no commit is rewritten.
+cp flashpilot.shallow /data/openpilot-mads-candidate/.git/shallow
+cp opendbc_repo.shallow /data/openpilot-mads-candidate/opendbc_repo/.git/shallow
 tar -xzf lfs-objects.tar.gz -C /data/openpilot-mads-candidate/.git
 cd /data/openpilot-mads-candidate
 git lfs install --local --skip-smudge
@@ -87,6 +91,7 @@ for path, expected in m['commits'].items():
   actual = subprocess.check_output(['git', '-C', path, 'rev-parse', 'HEAD'], text=True).strip()
   assert actual == expected, (path, actual, expected)
   assert not subprocess.check_output(['git', '-C', path, 'status', '--porcelain']), path
+  subprocess.run(['git', '-C', path, 'fsck', '--connectivity-only'], check=True)
 print('EXACT SOURCE AND CLEAN TREES VERIFIED')
 PY
 # HEAD is deliberately detached: do not enable automatic branch updates for
@@ -100,6 +105,9 @@ If either launcher comparison fails, stop rather than override AGNOS_VERSION or
 run an updater. Source requires its existing Comma4/AGNOS environment; preserve
 `/data/continue.sh`, calibration and all existing settings. This stage has not
 changed `/data/openpilot` or started candidate pandad.
+The two shallow files are required package metadata: the source snapshots do
+not include history before those commits. They preserve valid shallow-clone
+semantics; all current code/assets and pinned commits are present.
 
 ## Build and activate with local rollback retained
 

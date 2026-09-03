@@ -52,8 +52,14 @@ Implementation commits:
 The containing final documentation commit is source-equivalent to the FlashPilot
 implementation commit. The release package MANIFEST.json pins its exact HEAD and
 all six submodules; nothing has been pushed. Existing panda upstream URL cannot
-supply our local commits, so installation uses self-contained Git bundles, not
+supply our local commits, so installation uses self-contained source Git bundles
+with the original shallow-history boundaries, not
 an assumed public fork. No new remote/fork was created.
+Package round-trip validation cloned all seven bundles independently, restored
+the two shallow boundaries and passed Git connectivity checks. Extracted LFS
+archive hydrated all240 assets and passed fsck. These are source-package checks,
+not a vehicle installation or test. The boundaries preserve the existing
+truncated histories without rewriting any commit or inventing missing ancestors.
 
 Ledger revision12 reconciled: its separate reference installation has no source
 overlap here and did not deploy this MADS work. No ledger mutation by this task.
