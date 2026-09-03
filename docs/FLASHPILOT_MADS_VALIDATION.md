@@ -1,5 +1,10 @@
 # MADS release-candidate checkpoint — 2026-09-02
 
+Subsequent analysis-only [0x3CC investigation](mads_3cc/REPORT.md) explains the
+checksum mismatches mentioned below; it does not change the recorded code/test
+checkpoint or close counter/replay/safety-integration blockers. The checkpoint
+results below are retained as history.
+
 **B. BLOCKED.** Development checkpoint, not an installable or controlled-road-test
 candidate. MADS remains runtime OFF: there is still no production initializer,
 Param, UI toggle or automatic enable. Nothing was pushed or deployed.

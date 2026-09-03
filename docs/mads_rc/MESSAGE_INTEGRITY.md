@@ -1,5 +1,11 @@
 # Ford MADS message-integrity audit
 
+**2026-09-02 follow-up:** the historical 0x3CC candidate's 108 mismatches below
+are now explained by an omitted LatCtlLim_D_Stat term. The corrected empirical
+sum matches 377,209 identified-Lightning frames; counter/replay semantics remain
+open and production safety is unchanged. See the [0x3CC investigation](../mads_3cc/REPORT.md).
+The original checkpoint table/evidence below is retained as history.
+
 Basis: exact `ford_lincoln_base_pt.dbc`, Ford safety/CarState sources, and six
 local Lightning rlog segments. **Audit complete; integrity implementation NOT
 complete.** Missing/unsupported rules are blockers, not assumed valid rules.

@@ -151,8 +151,11 @@ Logged truth:
 ## Remaining blockers (not waived by tests)
 
 1. Complete integrity coverage in the linked table, including host-only door/
-   belt veto inputs. A candidate 0x3CC checksum fails 108 recorded frames;
-   gateway counters for 0x176/0x3CC are not +1. No guessed rule was installed.
+   belt veto inputs. The [0x3CC follow-up](mads_3cc/REPORT.md) explains the old
+   108 mismatches with a missing limit term; the corrected empirical checksum
+   matches 377,209 identified-Lightning frames. Native counter/replay semantics
+   and safety integration remain open. 0x176/0x3CC counters are not +1.
+   No guessed rule or new production integrity check was installed.
    Existing checked speed/yaw counter anomalies now revoke on the first error.
 2. Real H7 scheduling, queued transport/reset/fault injection and the strict
    deadlines on nominal 10 Hz CAN messages need bench validation.
