@@ -1,5 +1,6 @@
 from collections.abc import Callable
 
+from opendbc.car.ford.values import CAR as FORD_CAR
 from openpilot.cereal import log
 
 from openpilot.system.ui.widgets.scroller import NavScroller
@@ -10,6 +11,13 @@ from openpilot.selfdrive.ui.layouts.settings.common import restart_needed_callba
 from openpilot.selfdrive.ui.ui_state import ui_state
 
 PERSONALITY_TO_INT = log.LongitudinalPersonality.schema.enumerants
+
+
+def ford_lightning_connected() -> bool:
+  """FlashPilot: gates the Ford Hands-Free Cluster toggle's visibility to the
+  currently-detected car -- a standalone function (not an inline lambda) so it's
+  testable without constructing any widget."""
+  return ui_state.CP is not None and ui_state.CP.carFingerprint == FORD_CAR.FORD_F_150_LIGHTNING_MK1
 
 
 class ExperimentalModeConfirmPage(NavScroller):
@@ -50,6 +58,14 @@ class TogglesLayoutMici(NavScroller):
     record_front = BigParamControl("record & upload cabin camera", "RecordFront", toggle_callback=restart_needed_callback)
     record_mic = BigParamControl("record & upload mic audio", "RecordAudio", toggle_callback=restart_needed_callback)
     enable_openpilot = BigParamControl("enable openpilot", "OpenpilotEnabledToggle", toggle_callback=restart_needed_callback)
+    # FlashPilot: Ford Lightning-only, display-only cluster option -- see
+    # docs/flashpilot/FLASHPILOT_UI_FORD_HANDS_FREE_CLUSTER_AUDIT.md. card.py only
+    # reads this Param once per Car process init, so a change needs an
+    # offroad/onroad cycle to take effect -- same mechanism (not a full restart)
+    # as Record Front/Record Audio/Enable Openpilot above.
+    ford_hands_free_cluster = BigParamControl("ford hands-free cluster display", "FlashPilotFordHandsFreeCluster",
+                                              toggle_callback=restart_needed_callback)
+    ford_hands_free_cluster.set_visible(ford_lightning_connected)
 
     self._scroller.add_widgets([
       self._personality_toggle,
@@ -60,6 +76,7 @@ class TogglesLayoutMici(NavScroller):
       record_front,
       record_mic,
       enable_openpilot,
+      ford_hands_free_cluster,
     ])
 
     # Toggle lists
@@ -71,6 +88,7 @@ class TogglesLayoutMici(NavScroller):
       ("RecordFront", record_front),
       ("RecordAudio", record_mic),
       ("OpenpilotEnabledToggle", enable_openpilot),
+      ("FlashPilotFordHandsFreeCluster", ford_hands_free_cluster),
     )
 
     enable_openpilot.set_enabled(lambda: not ui_state.engaged)
