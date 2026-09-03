@@ -48,7 +48,8 @@ absolute path. The source-only imports retain their upstream license and notices
 
 ## Blockers
 
-- Resolve custom-license use conditions before publication/deployment.
+- Public-source release intent confirmed by the user. Preserve upstream notices;
+  commercial/for-profit/closed-source use still requires separate permission.
 - Port the matching host/schema/health pieces, without UI or unrelated features.
 - Resolve the prior FlashPilot re-engagement/brake/heartbeat policy requirements.
 - Verify all invalid-CAN/platform/reset revocations reach independent permission.

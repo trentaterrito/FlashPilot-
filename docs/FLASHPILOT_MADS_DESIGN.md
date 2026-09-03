@@ -74,7 +74,8 @@ limit relaxation, grace timer, or auto-recovery exception is accepted here.
 
 ## Remaining sequence
 
-1. Resolve upstream licensing conditions before any push/distribution/deployment.
+1. Preserve upstream licensing and attribution for the planned public-source
+   release; obtain separate permission if commercial/for-profit use is intended.
 2. Audit the matching panda heartbeat/health and host/schema dependencies.
 3. Add a minimal Lightning-only integration around the upstream core, initially
    unavailable to runtime configuration. Wire every revocation before permitting
@@ -89,7 +90,15 @@ limit relaxation, grace timer, or auto-recovery exception is accepted here.
 The actual upstream LICENSE.md is a **custom license**, despite the MIT wording
 in file headers. It requires written permission for commercial, for-profit, or
 closed-source use, plus retained notices and visible acknowledgment. The license
-is included verbatim; use/distribution conditions must be resolved with the user.
+is included verbatim.
+
+The user confirmed that FlashPilot will be open sourced and available to anyone
+who wants it. Record this as the intended public-source distribution model, not
+as an unrestricted license grant over sunnypilot's code. No commercial-use
+permission or exception to upstream restrictions has been asserted. Retain the
+license and acknowledgment in any release; separately resolve permission before
+commercial, for-profit, or closed-source use. This confirmation does not authorize
+a push, publication, deployment, or active MADS enablement.
 
 This software is licensed under a custom license requiring permission for use.
 This project uses software from Haibin Wen and SUNNYPILOT LLC and is licensed
