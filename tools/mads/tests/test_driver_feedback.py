@@ -70,3 +70,13 @@ def test_native_lifecycle_deadlines(tmp_path):
   subprocess.run(["c++", "-std=c++17", "-Wall", "-Wextra", "-Werror", "-I", str(root),
                   str(Path(__file__).with_name("lifecycle_harness.cc")), "-o", str(output)], check=True)
   subprocess.run([str(output)], check=True)
+
+
+def test_pandad_cadence_does_not_discard_device_state_updates():
+  # Wiring regression: SubMaster.updated() is cleared every loop, so a slower
+  # heartbeat block must read the retained value rather than require a new edge.
+  root = Path(__file__).resolve().parents[3]
+  source = (root / "openpilot/selfdrive/pandad/pandad.cc").read_text()
+  loop = source.split("void pandad_run(Panda *panda) {")[1]
+  assert 'sm.updated("deviceState")' not in loop
+  assert 'is_onroad = sm["deviceState"].getDeviceState().getStarted();' in loop

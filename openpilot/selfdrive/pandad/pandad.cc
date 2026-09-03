@@ -391,9 +391,9 @@ void pandad_run(Panda *panda) {
                                 sm["controlsState"].getControlsState().getMadsState().getAvailable();
     if (rk.frame() % mads_state_period(mads_selected) == 0) {
       engaged = sm.allAliveAndValid({"selfdriveState"}) && sm["selfdriveState"].getSelfdriveState().getEnabled();
-      if (sm.updated("deviceState")) {
-        is_onroad = sm["deviceState"].getDeviceState().getStarted();
-      }
+      // SubMaster is polled more often than this block. Read its retained latest
+      // value: updated() may already be false after an intervening loop tick.
+      is_onroad = sm["deviceState"].getDeviceState().getStarted();
       // Separate host eligibility is a veto, never a request to grant lateral.
       const uint64_t now = nanos_since_boot();
       const uint64_t host_time = sm["controlsState"].getLogMonoTime();
