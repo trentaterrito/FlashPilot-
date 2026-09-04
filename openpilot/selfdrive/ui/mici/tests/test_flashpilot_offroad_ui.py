@@ -186,7 +186,9 @@ def test_settings_uses_sunnypilot_button_placement_and_removes_vehicle_state_til
   menu = next(node for node in ast.walk(tree) if isinstance(node, ast.Call) and
               isinstance(node.func, ast.Attribute) and node.func.attr == "add_widgets")
   assert [ast.unparse(item) for item in menu.args[0].elts] == [
-    "disable_forced_offroad", "enable_offroad_onroad", "toggles_btn", "network_btn", "device_btn",
+    "disable_forced_offroad", "enable_offroad_onroad", "toggles_btn", "ford_btn", "network_btn", "device_btn",
     "software_btn", "PairBigButton()", "firehose_btn", "developer_btn", "enable_offroad_offroad",
   ]
   assert "FlashPilotOffroadToggle" not in source.read_text()
+  offroad_source = Path(__file__).parents[1] / "layouts/flashpilot_offroad.py"
+  assert "Car-with-X entry glyph" in offroad_source.read_text()

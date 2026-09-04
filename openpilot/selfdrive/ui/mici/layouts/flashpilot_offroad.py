@@ -1,5 +1,6 @@
 """SunnyPilot-style Comma 4 offroad controls backed by FlashPilot safety checks."""
 import time
+import pyray as rl
 
 from openpilot.selfdrive.ui.mici.widgets.button import BigCircleButton
 from openpilot.selfdrive.ui.mici.widgets.dialog import BigConfirmationDialog, BigDialog
@@ -78,6 +79,38 @@ class FlashPilotOffroadButton(BigCircleButton):
       gui_app.push_widget(BigDialog(title, status.get("reason", "")))
       return
     gui_app.push_widget(FlashPilotOffroadConfirmation(self._enable_offroad, self._slider_icon))
+
+  def _draw_content(self, btn_y: float):
+    if not self._enable_offroad:
+      super()._draw_content(btn_y)
+      return
+
+    # Car-with-X entry glyph. Drawn natively to avoid adding a fork-specific
+    # bitmap to openpilot's shared upstream Git LFS asset store.
+    color = rl.Color(255, 255, 255, int(255 * (0.9 if self.enabled else 0.35)))
+    x, y = self._rect.x + 22, btn_y + 27
+
+    def line(x1, y1, x2, y2, width=7):
+      rl.draw_line_ex(rl.Vector2(x + x1, y + y1), rl.Vector2(x + x2, y + y2), width, color)
+
+    # Vehicle roof, body, lamps and wheels.
+    line(17, 65, 27, 34)
+    line(27, 34, 43, 22)
+    line(43, 22, 85, 22)
+    line(85, 22, 101, 34)
+    line(101, 34, 111, 65)
+    line(10, 65, 118, 65)
+    line(10, 65, 10, 96)
+    line(10, 96, 118, 96)
+    line(118, 96, 118, 65)
+    line(25, 96, 25, 108, 8)
+    line(103, 96, 103, 108, 8)
+    line(24, 79, 37, 79, 6)
+    line(91, 79, 104, 79, 6)
+
+    # X overlays the upper-right of the vehicle.
+    line(81, 5, 121, 45, 9)
+    line(121, 5, 81, 45, 9)
 
 
 def forced_offroad_requested() -> bool:
