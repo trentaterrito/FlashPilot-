@@ -38,21 +38,20 @@ def test_confirmation_requires_parked_settle_time_and_completed_shutdown():
   assert not p.update(10, "offroad", PARK)["inhibit"]
   enter(p)
   assert p.update(11.5, "offroad", STOPPED)["active"]
-  assert not p.update(11.8, "onroad", STOPPED)["can_select"]
+  assert not p.update(11.8, "off", STOPPED)["can_select"]
   assert p.inhibit
-  assert not p.update(12.5, "onroad", STOPPED)["inhibit"]
+  assert not p.update(12.5, "off", STOPPED)["inhibit"]
 
 
-@pytest.mark.parametrize("selection", ["off", "onroad"])
-def test_release_requires_fresh_park_and_shutdown(selection):
+def test_release_requires_fresh_park_and_shutdown():
   p = OffroadPolicy()
   enter(p)
   e = replace(STOPPED, parked=False)
-  assert p.update(12, selection, e)["phase"] == "fault"
-  assert p.update(20, selection, e)["inhibit"]
+  assert p.update(12, "off", e)["phase"] == "fault"
+  assert p.update(20, "off", e)["inhibit"]
   p.update(21, "offroad", STOPPED)
-  r = p.update(22, selection, STOPPED)
-  assert not r["inhibit"] and r["selection"] == selection
+  r = p.update(22, "off", STOPPED)
+  assert not r["inhibit"] and r["selection"] == "off" and r["phase"] == "standard"
 
 
 def test_shutdown_timeout_never_claims_active():
@@ -80,6 +79,7 @@ def test_ignition_loss_clears_request_but_stale_panda_does_not():
 def test_reboot_policy_starts_standard_and_invalid_requests_do_nothing():
   p = OffroadPolicy()
   assert not p.update(10, "bogus", PARK)["inhibit"]
+  assert not p.update(12, "onroad", PARK)["inhibit"]
   assert p.selection == "off"
 
 
@@ -178,10 +178,10 @@ def test_supervisor_requires_process_and_panda_ack_then_allows_clean_release():
   panda.safetyModel = "noOutput"
   assert tick(14, False)
   assert s.params["FlashPilotOffroadStatus"]["active"]
-  s.params["FlashPilotForceOffroad"] = "onroad"
+  s.params["FlashPilotForceOffroad"] = "off"
   assert not tick(15.1, False)
   assert not s.params["FlashPilotOffroadLease"]
-  assert s.params["FlashPilotOffroadStatus"]["phase"] == "normal_startup"
+  assert s.params["FlashPilotOffroadStatus"]["phase"] == "standard"
 
 
 def test_new_params_clear_on_manager_start_not_on_offroad_transition(tmp_path):

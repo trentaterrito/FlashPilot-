@@ -6,7 +6,7 @@ observe Park/motion after card exits; no CarState value is held as proof of Park
 import math
 from dataclasses import dataclass
 
-MODES = ("off", "offroad", "onroad")
+MODES = ("off", "offroad")
 FRESH_S = 0.5
 SETTLE_S = 1.0
 SHUTDOWN_TIMEOUT_S = 10.0
@@ -56,9 +56,9 @@ class OffroadPolicy:
         self.reason = "Waiting for process shutdown and panda NO_OUTPUT"
         self.entered_at, self.safe_since = now, None
       else:
-        self.inhibit, self.selection = False, requested
-        self.phase = "standard" if requested == "off" else "normal_startup"
-        self.reason = "Standard comma behavior" if requested == "off" else "Normal startup; ignition and all startup checks still required"
+        self.inhibit, self.selection = False, "off"
+        self.phase = "standard"
+        self.reason = "Standard comma behavior; normal startup checks still required"
         self.safe_since = None
 
     if self.inhibit:
