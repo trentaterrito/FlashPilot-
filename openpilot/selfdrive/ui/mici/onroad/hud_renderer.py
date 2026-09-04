@@ -3,7 +3,6 @@ import pyray as rl
 from dataclasses import dataclass
 from openpilot.common.constants import CV
 from openpilot.selfdrive.ui.mici.onroad.torque_bar import TorqueBar
-from openpilot.selfdrive.ui.onroad.mads_feedback import draw_mads_status
 from openpilot.selfdrive.ui.ui_state import ui_state, UIStatus, ChestnutState
 from openpilot.system.ui.lib.application import gui_app, FontWeight
 from openpilot.system.ui.lib.multilang import tr
@@ -189,7 +188,9 @@ class HudRenderer(Widget):
     self._draw_model_source(rect)
 
     self._draw_steering_wheel(rect)
-    draw_mads_status(ui_state.mads_display, rect, self._font_medium)
+    # No permanent bottom MADS status: MADS state changes are surfaced as a
+    # transient top-banner notification (see mads_notification.py / Aurora),
+    # matching the Experimental Mode confirmation presentation.
 
   def _draw_model_source(self, rect: rl.Rectangle) -> None:
     if ui_state.sm.recv_frame['selfdriveState'] < ui_state.started_frame:

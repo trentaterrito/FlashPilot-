@@ -109,6 +109,14 @@ class Car:
           if self.params.get_bool("ExperimentalFordSteerAssistRadarShadow"):
             self.CI.CP.flags = int(self.CI.CP.flags | FordFlags.STEER_ASSIST_RADAR_SHADOW)
           self.CI.CP.radarUnavailable = False
+      # FlashPilot: display-only Ford Lightning cluster hands-free option -- see
+      # docs/flashpilot/FLASHPILOT_UI_FORD_HANDS_FREE_CLUSTER.md. No steering,
+      # engagement, driver monitoring, or longitudinal behavior implication;
+      # independently re-checked by CarController too (defense-in-depth).
+      if self.params.get_bool("FlashPilotFordHandsFreeCluster"):
+        from opendbc.car.ford.values import CAR as FORD_CAR, FordFlags
+        if self.CI.CP.carFingerprint == FORD_CAR.FORD_F_150_LIGHTNING_MK1:
+          self.CI.CP.flags = int(self.CI.CP.flags | FordFlags.HANDS_FREE_CLUSTER)
       self.RI = interfaces[self.CI.CP.carFingerprint].RadarInterface(self.CI.CP)
       self.CP = self.CI.CP
 

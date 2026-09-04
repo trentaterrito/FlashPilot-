@@ -13,9 +13,11 @@ from openpilot.selfdrive.ui.mici.onroad.hud_renderer import HudRenderer
 from openpilot.selfdrive.ui.mici.onroad.model_renderer import ModelRenderer
 from openpilot.selfdrive.ui.mici.onroad.confidence_ball import ConfidenceBall
 from openpilot.selfdrive.ui.mici.onroad.experimental_notification import ExperimentalNotification
+from openpilot.selfdrive.ui.mici.onroad.mode_notification import ModeNotificationView
+from openpilot.selfdrive.ui.mici.onroad.mads_notification import MadsNotification
 from openpilot.selfdrive.ui.mici.onroad.cameraview import CameraView
 from openpilot.system.ui.lib.application import FontWeight, gui_app, MousePos, MouseEvent, TextAlignment, TextAlignmentVertical
-from openpilot.system.ui.widgets.label import UnifiedLabel, gui_label
+from openpilot.system.ui.widgets.label import UnifiedLabel
 from openpilot.system.ui.widgets import Widget
 from openpilot.common.filter_simple import BounceFilter
 from openpilot.common.transformations.camera import DEVICE_CAMERAS, DeviceCameraConfig, view_frame_from_device_frame
@@ -158,6 +160,8 @@ class AugmentedRoadView(CameraView):
     self._driver_state_renderer = DriverStateRenderer()
     self._confidence_ball = ConfidenceBall()
     self._experimental_notification = ExperimentalNotification()
+    self._mads_notification = MadsNotification()
+    self._mode_notification = ModeNotificationView()
     self._offroad_label = UnifiedLabel("start the car to\nuse openpilot", 54, FontWeight.DISPLAY,
                                        text_color=rl.Color(255, 255, 255, int(255 * 0.9)),
                                        alignment=TextAlignment.CENTER,
@@ -278,12 +282,15 @@ class AugmentedRoadView(CameraView):
     text = self._experimental_notification.update(
       now, bool(sm['selfdriveState'].experimentalMode) if fresh else None,
       sm['selfdriveState'].enabled, ui_state.started_frame, alert is not None)
-    if text:
-      width = min(330, self._content_rect.width - 40)
-      rect = rl.Rectangle(self._content_rect.x + (self._content_rect.width - width) / 2,
-                          self._content_rect.y + self._content_rect.height - 68, width, 42)
-      rl.draw_rectangle_rounded(rect, 0.35, 8, rl.Color(20, 20, 20, 235))
-      gui_label(rect, text, font_size=28, color=rl.WHITE, alignment=TextAlignment.CENTER)
+    # MADS state changes get the same large, top-banner confirmation as an
+    # Experimental Mode change or a "Driving Personality changed"-style alert
+    # (see mode_notification.py / mads_notification.py). Experimental Mode
+    # takes priority if both would fire in the same frame; MADS never claims
+    # lateral is active unless mads_notification.py sees panda authorization.
+    if not text:
+      text = self._mads_notification.update(now, ui_state.mads_display, ui_state.started_frame, alert is not None)
+    self._mode_notification.set_text(text)
+    self._mode_notification.render(self._content_rect)
 
   def _switch_stream_if_needed(self, sm):
     if sm['selfdriveState'].experimentalMode and WIDE_CAM in self.available_streams:

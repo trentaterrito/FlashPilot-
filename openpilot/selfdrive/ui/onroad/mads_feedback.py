@@ -8,7 +8,14 @@ class MadsDisplay:
   title: str = ""
   detail: str = ""
   warning: str = ""
-  active: bool = False
+  active: bool = False  # fully-gated lateral-active (includes panda authorization)
+  # Raw signals for consumers that render their own presentation (e.g. the
+  # transient mode-change notification) rather than this module's own status
+  # box. Read-only mirrors of already-computed state -- no new semantics.
+  feature: bool = False
+  requested: bool = False
+  panda_authorized: bool = False
+  long_active: bool = False
 
 
 class MadsFeedback:
@@ -55,16 +62,19 @@ class MadsFeedback:
       self.warning = ""
     warning = self.warning if now < self.warning_until else ""
     if not fresh:
-      return MadsDisplay(True, "MADS STATE STALE", "Steer manually | LAT/LONG unknown", warning, False)
+      return MadsDisplay(True, "MADS STATE STALE", "Steer manually | LAT/LONG unknown", warning, False,
+                        feature=feature, requested=requested, panda_authorized=authorized, long_active=long_active)
     if not feature:
       if not warning:
         self.seen = False
         return MadsDisplay()
-      return MadsDisplay(True, "MADS OFF", "Steer manually", warning, False)
+      return MadsDisplay(True, "MADS OFF", "Steer manually", warning, False,
+                        feature=False, requested=requested, panda_authorized=authorized, long_active=long_active)
     state = "ACTIVE" if active else "REQUESTED" if requested else "NOT REQUESTED"
     long_state = "ON" if long_active else "OFF"
     detail = f"REQ {'ON' if requested else 'OFF'} | PANDA {'YES' if authorized else 'NO'}"
-    return MadsDisplay(True, f"MADS ON | LAT {state} | LONG {long_state}", detail, warning, active)
+    return MadsDisplay(True, f"MADS ON | LAT {state} | LONG {long_state}", detail, warning, active,
+                        feature=feature, requested=requested, panda_authorized=authorized, long_active=long_active)
 
 
 def update_feedback(feedback, sm, cp, onroad, now):

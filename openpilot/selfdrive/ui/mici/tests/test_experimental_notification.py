@@ -50,11 +50,22 @@ def test_actual_renderer_gates_and_alert_priority(monkeypatch, bad):
                                            openpilotLongitudinalControl=True), started=True, started_frame=10, sm=sm)
   monkeypatch.setattr(view, 'ui_state', state)
   drawn = []
-  monkeypatch.setattr(view, 'gui_label', lambda rect, text, **kwargs: drawn.append(text))
-  monkeypatch.setattr(view.rl, 'draw_rectangle_rounded', lambda *args: None)
+
+  class FakeModeNotification:
+    """Stands in for the real ModeNotificationView -- this test is about the
+    gating/text logic in _draw_experimental_notification, not the (separately
+    tested, see test_mode_notification.py) rendering presentation."""
+    def set_text(self, text):
+      if text:
+        drawn.append(text)
+
+    def render(self, rect):
+      pass
+
   widget = SimpleNamespace()
   widget._content_rect = view.rl.Rectangle(0, 0, 480, 240)
   widget._experimental_notification = ExperimentalNotification()
+  widget._mode_notification = FakeModeNotification()
   view.AugmentedRoadView._draw_experimental_notification(widget, None)
   clock[0] = 1.1
   sm['selfdriveState'].experimentalMode = True
