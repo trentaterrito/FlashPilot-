@@ -23,23 +23,19 @@ STATIONARY_LEAD_RELEASE_TICKS = 3
 
 def long_control_state_trans(active, long_control_state, should_stop, brake_pressed, cruise_standstill,
                             allow_stopping_to_pid=False):
-  starting_condition = (not should_stop and
-                        not cruise_standstill and
-                        not brake_pressed and
-                        allow_stopping_to_pid)
+  normal_starting = (not should_stop and
+                     not cruise_standstill and
+                     not brake_pressed)
 
   if not active:
     long_control_state = LongCtrlState.off
 
   else:
     if long_control_state == LongCtrlState.off:
-      if not starting_condition:
-        long_control_state = LongCtrlState.stopping
-      else:
-        long_control_state = LongCtrlState.pid
+      long_control_state = LongCtrlState.pid if normal_starting else LongCtrlState.stopping
 
     elif long_control_state == LongCtrlState.stopping:
-      if starting_condition:
+      if normal_starting and allow_stopping_to_pid:
         long_control_state = LongCtrlState.pid
 
     elif long_control_state == LongCtrlState.pid:
