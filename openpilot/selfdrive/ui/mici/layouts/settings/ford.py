@@ -57,7 +57,7 @@ def restore_angle_defaults(params) -> None:
 
 
 def toggle_bool_param(params, param: str) -> bool:
-  enabled = not params.get_bool(param)
+  enabled = not bool(params.get(param, return_default=True))
   params.put_bool(param, enabled, block=True)
   return enabled
 
@@ -75,7 +75,7 @@ class StateParamButton(BigButton):
     self.set_click_callback(self._toggle)
 
   def refresh(self):
-    self.set_value(self._enabled_value if self._params.get_bool(self._param) else self._disabled_value)
+    self.set_value(self._enabled_value if self._params.get(self._param, return_default=True) else self._disabled_value)
 
   def _toggle(self):
     enabled = toggle_bool_param(self._params, self._param)

@@ -60,6 +60,13 @@ class ParamsStub:
   def get_bool(self, key):
     return self.values.get(key, False)
 
+  def get(self, key, return_default=False):
+    if key in self.values:
+      return self.values[key]
+    if return_default and key == 'FlashPilotFordExperimentalModeShortcut':
+      return True
+    return None
+
   def put_bool(self, key, value):
     self.values[key] = value
     self.writes.append((key, value))
@@ -170,3 +177,10 @@ def test_disabled_shortcut_blocks_hold_but_preserves_short_press(integration):
   tick(4.02, [True])
   tick(4.10, [False])
   assert d.params.writes[-1] == ('LongitudinalPersonality', 0)
+
+
+def test_missing_shortcut_param_uses_default_enabled(integration):
+  d, _, hold, _ = integration
+  del d.params.values['FlashPilotFordExperimentalModeShortcut']
+  hold()
+  assert d.params.writes == [('ExperimentalMode', True)]
