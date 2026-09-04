@@ -14,6 +14,15 @@ class SM(dict):
   def all_checks(self, sources):
     return True
 
+  def all_alive(self, sources):
+    return True
+
+  def all_valid(self, sources):
+    return True
+
+  def all_freq_ok(self, sources):
+    return True
+
 
 class Scenario:
   def __init__(self):
@@ -106,3 +115,27 @@ def test_fault_reset_and_offroad_revoke_lateral():
     else:
       s.controls.sm['deviceState'].started = False
     assert not s.step().latActive
+
+
+def test_acc_master_off_revokes_and_set_does_not_bypass_it():
+  s = Scenario()
+  assert s.step().latActive
+  s.cs.cruiseState.available = False
+  assert not s.step(log.OnroadEvent.EventName.pcmEnable).latActive
+  s.cs.cruiseState.available = True
+  assert not s.step().latActive  # old panda grant cannot be adopted
+  s.panda.controlsAllowedLateral = False
+  s.step()
+  s.step()
+  s.panda.controlsAllowedLateral = True
+  assert s.step().latActive
+
+
+def test_event_frequency_failure_does_not_drop_or_reset_lateral():
+  s = Scenario()
+  assert s.step().latActive
+  s.controls.LaC.reset.reset_mock()
+  s.controls.sm.all_freq_ok = lambda sources: 'onroadEvents' not in sources
+  assert s.step(log.OnroadEvent.EventName.steerOverride).latActive
+  assert s.step().latActive
+  s.controls.LaC.reset.assert_not_called()

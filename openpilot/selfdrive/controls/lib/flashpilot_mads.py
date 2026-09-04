@@ -4,6 +4,20 @@ from dataclasses import dataclass
 from openpilot.cereal import log
 
 EventName = log.OnroadEvent.EventName
+LATERAL_SOURCES = ('carState', 'pandaStates', 'deviceState', 'onroadEvents',
+                   'driverMonitoringState', 'selfdriveState', 'modelV2')
+
+
+def lateral_sources_healthy(sm):
+  """Keep event validity/liveness without treating event changes as bad cadence.
+
+  onroadEvents publishes once a second *or on change*. Its burst rate is not
+  a health signal. All periodic sources retain their normal frequency checks.
+  """
+  periodic = [s for s in LATERAL_SOURCES if s != 'onroadEvents']
+  return sm.all_alive(LATERAL_SOURCES) and sm.all_valid(LATERAL_SOURCES) and sm.all_freq_ok(periodic)
+
+
 LONGITUDINAL_ONLY_EVENTS = {
   EventName.pcmDisable, EventName.buttonCancel, EventName.pedalPressed,
   EventName.wrongCruiseMode, EventName.wrongCarMode, EventName.cruiseDisabled,

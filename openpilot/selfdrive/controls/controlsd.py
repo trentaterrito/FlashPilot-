@@ -21,7 +21,7 @@ from openpilot.selfdrive.controls.lib.latcontrol_torque import LatControlTorque
 from openpilot.selfdrive.controls.lib.longcontrol import LongControl
 from openpilot.selfdrive.modeld.modeld import LAT_SMOOTH_SECONDS
 from openpilot.selfdrive.locationd.helpers import PoseCalibrator, Pose
-from openpilot.selfdrive.controls.lib.flashpilot_mads import AlwaysOnLateralHost
+from openpilot.selfdrive.controls.lib.flashpilot_mads import AlwaysOnLateralHost, lateral_sources_healthy
 
 State = log.SelfdriveState.OpenpilotState
 LaneChangeState = log.LaneChangeState
@@ -104,8 +104,7 @@ class Controls:
     # Always-On Lateral reuses the existing independent host/panda handshake.
     # Fresh vehicle state and panda authorization remain mandatory.
     pandas = self.sm['pandaStates']
-    sources = ['carState', 'pandaStates', 'deviceState', 'onroadEvents', 'driverMonitoringState', 'selfdriveState', 'modelV2']
-    fresh = self.sm.all_checks(sources)
+    fresh = lateral_sources_healthy(self.sm)
     valid_panda = (len(pandas) == 1 and str(pandas[0].safetyModel) == "ford" and len(self.CP.safetyConfigs) == 1
                    and pandas[0].safetyParam == self.CP.safetyConfigs[0].safetyParam)
     panda_enabled = valid_panda and pandas[0].madsSafetyEnabled
