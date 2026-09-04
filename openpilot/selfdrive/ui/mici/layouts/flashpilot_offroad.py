@@ -1,64 +1,88 @@
-"""Three-position parked-development selector; hardwared authorizes requests."""
+"""SunnyPilot-style Comma 4 offroad controls backed by FlashPilot safety checks."""
 import time
 
+from openpilot.selfdrive.ui.mici.widgets.button import BigCircleButton
+from openpilot.selfdrive.ui.mici.widgets.dialog import BigConfirmationDialog, BigDialog
 from openpilot.selfdrive.ui.ui_state import ui_state
-from openpilot.selfdrive.ui.mici.widgets.button import BigMultiToggle
-from openpilot.system.hardware.flashpilot_offroad import MODES
+from openpilot.system.ui.lib.application import gui_app
+from openpilot.system.ui.lib.multilang import tr
+
+
+STATUS_TIMEOUT_S = 2.0
+STANDARD_MODE = "off"
+OFFROAD_MODE = "offroad"
 
 
 def offroad_status():
   status = ui_state.params.get("FlashPilotOffroadStatus") or {}
   try:
-    valid = isinstance(status, dict) and status.get("selection") in MODES and 0 <= time.monotonic() - status.get("timestamp", 0) < 2
+    valid = (isinstance(status, dict) and status.get("selection") in (STANDARD_MODE, OFFROAD_MODE)
+             and 0 <= time.monotonic() - status.get("timestamp", 0) < STATUS_TIMEOUT_S)
   except TypeError:
     valid = False
   if not valid:
-    return {"selection": "off", "can_select": False, "phase": "unavailable", "reason": "Status unavailable — do not assume parked mode is active"}
+    return {"selection": STANDARD_MODE, "can_select": False, "phase": "unavailable",
+            "reason": "Status unavailable — do not assume parked mode is active", "inhibit": False, "active": False}
   return status
 
 
-def request_next_mode():
+def transition_target(enable: bool) -> str:
+  return OFFROAD_MODE if enable else STANDARD_MODE
+
+
+def can_request_transition(enable: bool) -> bool:
   status = offroad_status()
-  if not status.get("can_select", False):
+  target = transition_target(enable)
+  pending = ui_state.params.get("FlashPilotForceOffroad") or STANDARD_MODE
+  return status.get("can_select", False) and status["selection"] != target and pending != target
+
+
+def request_transition(enable: bool) -> bool:
+  """Submit one request after rechecking fresh, acknowledged backend status."""
+  if not can_request_transition(enable):
     return False
-  selection = MODES[(MODES.index(status["selection"]) + 1) % len(MODES)]
-  ui_state.params.put("FlashPilotForceOffroad", selection, block=True)
+  ui_state.params.put("FlashPilotForceOffroad", transition_target(enable), block=True)
   return True
 
 
-class FlashPilotOffroadToggle(BigMultiToggle):
-  """Settings tile beside Network; display acknowledged state, not the request."""
-  def __init__(self):
-    super().__init__("Vehicle\nState", list(MODES))
-    self._sub_label.set_font_size(28)
-    self.set_enabled(False)
-
-  def _get_label_font_size(self):
-    return 44
-
-  def _title_width_hint(self):
-    # Reserve a separate column for the three state indicators.
-    return super()._title_width_hint() - 84
-
-  def _subtitle_width_hint(self):
-    return self._title_width_hint()
-
-  def _handle_mouse_release(self, mouse_pos):
-    # Recheck after the tap, not just when rendering. Backend independently
-    # validates fresh CAN, actual control state, and completed shutdown.
-    # Do not use BigMultiToggle's optimistic state change while awaiting ACK.
-    request_next_mode()
+class FlashPilotOffroadConfirmation(BigConfirmationDialog):
+  """SunnyPilot slider that cancels if backend Park/safety evidence is lost."""
+  def __init__(self, enable: bool, icon):
+    self._enable_offroad = enable
+    title = tr("slide to force offroad") if enable else tr("slide to exit forced offroad")
+    super().__init__(title, icon, confirm_callback=lambda: request_transition(enable), red=enable)
 
   def _update_state(self):
     super()._update_state()
-    status = offroad_status()
-    self.set_value(status["selection"])
-    self.set_enabled(status.get("can_select", False))
-    # Keep the heading stable; show transition/fault information below it.
-    # self.value remains the actual selection used by the three indicators.
-    detail = {
-      "stopping": f"{status['selection']}: WAIT",
-      "fault": f"{status['selection']}: FAULT",
-      "unavailable": "no data",
-    }.get(status["phase"], status["selection"])
-    self._sub_label.set_text(detail)
+    self._sync_safety()
+
+  def _sync_safety(self):
+    safe = can_request_transition(self._enable_offroad)
+    self._slider.set_enabled(lambda: self.enabled and not self.is_dismissing and safe)
+    if not safe and not self._slider.confirmed:
+      self._slider.reset()
+
+
+class FlashPilotOffroadButton(BigCircleButton):
+  """Circular Comma 4 entry/exit button matching SunnyPilot placement and color."""
+  def __init__(self, enable: bool, icon, slider_icon):
+    super().__init__(icon, red=enable)
+    self._enable_offroad = enable
+    self._slider_icon = slider_icon
+    self.set_click_callback(self._show_confirmation)
+
+  def _show_confirmation(self):
+    if not can_request_transition(self._enable_offroad):
+      status = offroad_status()
+      title = tr("park to enable forced offroad") if self._enable_offroad else tr("park to exit forced offroad")
+      gui_app.push_widget(BigDialog(title, status.get("reason", "")))
+      return
+    gui_app.push_widget(FlashPilotOffroadConfirmation(self._enable_offroad, self._slider_icon))
+
+
+def forced_offroad_requested() -> bool:
+  status = offroad_status()
+  # The lease survives hardwared-only failure. Keep showing the exit/fault side
+  # of the control if acknowledged status becomes unavailable while inhibited.
+  return (ui_state.params.get_bool("FlashPilotOffroadLease") or status.get("inhibit", False)
+          or status.get("selection") == OFFROAD_MODE)

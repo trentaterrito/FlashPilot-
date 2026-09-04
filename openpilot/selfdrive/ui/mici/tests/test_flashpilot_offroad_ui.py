@@ -1,84 +1,192 @@
-"""UI request behavior; no window or vehicle access required."""
-from types import SimpleNamespace
+"""Deterministic Comma 4 forced-offroad UI and SunnyPilot slider tests."""
+import ast
+from pathlib import Path
+import sys
+from types import ModuleType, SimpleNamespace
 
 import pytest
 
 
-@pytest.mark.parametrize("selection,expected", [("off", "offroad"), ("offroad", "onroad"), ("onroad", "off")])
-def test_settings_selector_cycles_only_when_authorized(monkeypatch, selection, expected):
-  from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
-  writes = []
-  monkeypatch.setattr(ui, "ui_state", SimpleNamespace(params=SimpleNamespace(put=lambda *a, **k: writes.append(a))))
-  monkeypatch.setattr(ui, "offroad_status", lambda: {"selection": selection, "can_select": True})
-  assert ui.request_next_mode()
-  assert writes == [("FlashPilotForceOffroad", expected)]
-  monkeypatch.setattr(ui, "offroad_status", lambda: {"selection": selection, "can_select": False})
-  assert not ui.request_next_mode()
-  assert len(writes) == 1
+class FakeParams(dict):
+  def get(self, key, *args, **kwargs):
+    return super().get(key)
+
+  def put(self, key, value, **kwargs):
+    self[key] = value
+    self.setdefault("writes", []).append((key, value))
+
+  def get_bool(self, key):
+    return bool(self.get(key, False))
 
 
-@pytest.mark.parametrize("status", [None, {}, {"timestamp": 1, "selection": "offroad"},
-                                     {"timestamp": None, "selection": "offroad"},
-                                     {"timestamp": 99, "selection": "bogus"},
-                                     {"timestamp": 101, "selection": "offroad"}])
-def test_unknown_or_stale_status_disables_ui(monkeypatch, status):
+@pytest.fixture(autouse=True)
+def stub_runtime_ui_state(monkeypatch):
+  """Keep these logic tests independent of generated msgq/cereal extensions."""
+  module_name = "openpilot.selfdrive.ui.ui_state"
+  target_name = "openpilot.selfdrive.ui.mici.layouts.flashpilot_offroad"
+  fake_module = ModuleType(module_name)
+  fake_module.ui_state = SimpleNamespace(params=FakeParams(), started=False)
+  monkeypatch.setitem(sys.modules, module_name, fake_module)
+  sys.modules.pop(target_name, None)
+  yield
+  sys.modules.pop(target_name, None)
+
+
+def install_params(monkeypatch, ui, current_status, pending="off"):
+  params = FakeParams(FlashPilotOffroadStatus=current_status, FlashPilotForceOffroad=pending)
+  monkeypatch.setattr(ui, "ui_state", SimpleNamespace(params=params))
+  monkeypatch.setattr(ui.time, "monotonic", lambda: 100.0)
+  return params
+
+
+def status(selection="off", can_select=True, phase="standard", inhibit=False, timestamp=99.0):
+  return {"timestamp": timestamp, "selection": selection, "can_select": can_select, "phase": phase,
+          "reason": "test", "inhibit": inhibit, "active": inhibit and phase == "offroad"}
+
+
+@pytest.mark.parametrize("raw", [None, {}, {"timestamp": 1, "selection": "offroad"},
+                                  {"timestamp": None, "selection": "offroad"},
+                                  {"timestamp": 99, "selection": "onroad"},
+                                  {"timestamp": 101, "selection": "offroad"}])
+def test_unknown_stale_future_or_removed_onroad_status_is_unsafe(monkeypatch, raw):
   from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
-  monkeypatch.setattr(ui, "ui_state", SimpleNamespace(params=SimpleNamespace(get=lambda _: status)))
-  monkeypatch.setattr(ui.time, "monotonic", lambda: 100)
+  install_params(monkeypatch, ui, raw)
   assert not ui.offroad_status()["can_select"]
 
 
-def test_valid_status_is_not_confused_with_request(monkeypatch):
+def test_enable_and_exit_requests_are_binary_and_idempotent(monkeypatch):
   from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
-  status = {"timestamp": 99, "selection": "offroad", "can_select": False, "phase": "stopping", "active": False}
-  monkeypatch.setattr(ui, "ui_state", SimpleNamespace(params=SimpleNamespace(get=lambda _: status)))
-  monkeypatch.setattr(ui.time, "monotonic", lambda: 100)
-  assert ui.offroad_status() == status
+  params = install_params(monkeypatch, ui, status())
+  assert ui.request_transition(True)
+  assert not ui.request_transition(True)
+  assert params["writes"] == [("FlashPilotForceOffroad", "offroad")]
+
+  params = install_params(monkeypatch, ui, status("offroad", inhibit=True), pending="offroad")
+  assert ui.request_transition(False)
+  assert not ui.request_transition(False)
+  assert params["writes"] == [("FlashPilotForceOffroad", "off")]
 
 
-def test_settings_preserves_menu_and_places_mode_after_network():
-  import ast
-  from pathlib import Path
+@pytest.mark.parametrize("unsafe", [status(can_select=False), status(timestamp=90.0),
+                                     status("offroad", can_select=False, inhibit=True)])
+def test_unsafe_or_unacknowledged_state_cannot_request(monkeypatch, unsafe):
+  from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
+  params = install_params(monkeypatch, ui, unsafe)
+  assert not ui.request_transition(True)
+  assert "writes" not in params
+
+
+def test_stale_status_keeps_fail_closed_exit_ui_when_lease_is_set(monkeypatch):
+  from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
+  params = install_params(monkeypatch, ui, None)
+  params["FlashPilotOffroadLease"] = True
+  assert ui.forced_offroad_requested()
+  assert not ui.can_request_transition(False)
+
+
+def test_leaving_safe_state_during_swipe_resets_and_disables_slider(monkeypatch):
+  from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
+
+  class Slider:
+    confirmed = False
+    resets = 0
+    enabled = None
+
+    def set_enabled(self, enabled):
+      self.enabled = enabled
+
+    def reset(self):
+      self.resets += 1
+
+  dialog = object.__new__(ui.FlashPilotOffroadConfirmation)
+  dialog._enable_offroad = True
+  dialog._slider = Slider()
+  dialog._enabled = True
+  dialog._dragging_down = False
+  dialog._playing_dismiss_animation = False
+  safe = {"value": False}
+  monkeypatch.setattr(ui, "can_request_transition", lambda _: safe["value"])
+  dialog._sync_safety()
+  assert dialog._slider.resets == 1
+  assert not dialog._slider.enabled()
+
+  safe["value"] = True
+  dialog._sync_safety()
+  assert dialog._slider.resets == 1
+  assert dialog._slider.enabled()
+
+
+def slider_harness(monkeypatch):
+  from openpilot.system.ui.widgets import slider as slider_module
+
+  class Filter:
+    def __init__(self, value=0.0):
+      self.x = value
+
+    def update(self, value):
+      self.x = value
+      return value
+
+  clock = {"now": 10.0}
+  calls = []
+  slider = object.__new__(slider_module.BigSlider)
+  slider._rect = SimpleNamespace(x=0, y=0, width=536, height=180)
+  slider._bg_txt = SimpleNamespace(width=520)
+  slider._circle_bg_txt = SimpleNamespace(width=180)
+  slider._drag_threshold = -slider._rect.width // 2
+  assert slider._drag_threshold == -268
+  slider._scroll_x_circle_filter = Filter()
+  slider._scroll_x_circle = 0.0
+  slider._is_dragging_circle = False
+  slider._circle_press_time = None
+  slider._confirmed_time = 0.0
+  slider._confirm_callback_called = False
+  slider._confirm_callback = lambda: calls.append("confirm")
+  monkeypatch.setattr(slider_module.rl, "get_time", lambda: clock["now"])
+  monkeypatch.setattr(slider_module.rl, "check_collision_point_rec", lambda pos, rect: rect.x <= pos.x <= rect.x + rect.width)
+  return slider_module, slider, clock, calls
+
+
+def event(x, pressed=False, released=False):
+  return SimpleNamespace(pos=SimpleNamespace(x=x, y=90), left_pressed=pressed, left_released=released)
+
+
+def swipe(slider, end_x):
+  slider._handle_mouse_event(event(500, pressed=True))
+  slider._handle_mouse_event(event(end_x))
+  slider._update_state()
+  slider._handle_mouse_event(event(end_x, released=True))
+
+
+def test_sunnypilot_slider_tap_and_partial_swipe_cancel(monkeypatch):
+  _, slider, _, calls = slider_harness(monkeypatch)
+  swipe(slider, 500)
+  slider._update_state()
+  assert not slider.confirmed and calls == []
+
+  slider._scroll_x_circle = slider._scroll_x_circle_filter.x = 0
+  swipe(slider, 300)  # 200 px, short of SunnyPilot's 268 px threshold
+  slider._update_state()
+  assert not slider.confirmed and calls == []
+
+
+def test_sunnypilot_full_left_swipe_confirms_exactly_once(monkeypatch):
+  _, slider, clock, calls = slider_harness(monkeypatch)
+  swipe(slider, 150)  # 350 px left, clamped to the 340 px full travel
+  assert slider.confirmed and calls == []
+  clock["now"] += slider.CONFIRM_DELAY + 0.01
+  slider._update_state()
+  slider._update_state()
+  assert calls == ["confirm"]
+
+
+def test_settings_uses_sunnypilot_button_placement_and_removes_vehicle_state_tile():
   source = Path(__file__).parents[1] / "layouts/settings/settings.py"
   tree = ast.parse(source.read_text())
   menu = next(node for node in ast.walk(tree) if isinstance(node, ast.Call) and
               isinstance(node.func, ast.Attribute) and node.func.attr == "add_widgets")
   assert [ast.unparse(item) for item in menu.args[0].elts] == [
-    "toggles_btn", "network_btn", "FlashPilotOffroadToggle()", "device_btn", "software_btn",
-    "PairBigButton()", "firehose_btn", "developer_btn",
+    "disable_forced_offroad", "enable_offroad_onroad", "toggles_btn", "network_btn", "device_btn",
+    "software_btn", "PairBigButton()", "firehose_btn", "developer_btn", "enable_offroad_offroad",
   ]
-
-
-def test_tile_tap_waits_for_acknowledged_selection(monkeypatch):
-  from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
-  tile = object.__new__(ui.FlashPilotOffroadToggle)
-  tile.value = "off"
-  calls = []
-  monkeypatch.setattr(ui, "request_next_mode", lambda: calls.append(True))
-  tile._handle_mouse_release(None)
-  assert calls == [True]
-  assert tile.value == "off"
-
-
-@pytest.mark.parametrize("phase,detail", [("offroad", "offroad"), ("stopping", "offroad: WAIT"),
-                                         ("fault", "offroad: FAULT"), ("unavailable", "no data")])
-def test_tile_reflects_acknowledged_status(monkeypatch, phase, detail):
-  from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
-  tile = object.__new__(ui.FlashPilotOffroadToggle)
-  values = {}
-  monkeypatch.setattr(tile, "set_value", lambda value: values.update(value=value))
-  tile._sub_label = SimpleNamespace(set_text=lambda text: values.update(detail=text))
-  monkeypatch.setattr(tile, "set_enabled", lambda enabled: values.update(enabled=enabled))
-  monkeypatch.setattr(ui, "offroad_status", lambda: {"selection": "offroad", "can_select": False, "phase": phase})
-  tile._update_state()
-  assert values == {"value": "offroad", "detail": detail, "enabled": False}
-
-
-def test_tile_reserves_indicator_column():
-  from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
-  tile = object.__new__(ui.FlashPilotOffroadToggle)
-  tile._rect = SimpleNamespace(width=402)
-  tile._txt_icon = None
-  assert tile._get_label_font_size() == 44
-  assert tile._title_width_hint() == tile._subtitle_width_hint() == 238
-  assert tile.LABEL_HORIZONTAL_PADDING + tile._title_width_hint() < 402 - 84
+  assert "FlashPilotOffroadToggle" not in source.read_text()
