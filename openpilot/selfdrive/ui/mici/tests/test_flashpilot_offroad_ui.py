@@ -191,4 +191,4 @@ def test_settings_uses_sunnypilot_button_placement_and_removes_vehicle_state_til
   ]
   assert "FlashPilotOffroadToggle" not in source.read_text()
   offroad_source = Path(__file__).parents[1] / "layouts/flashpilot_offroad.py"
-  assert "Car-with-X entry glyph" in offroad_source.read_text()
+  assert "Lightning-front-with-X entry glyph" in offroad_source.read_text()

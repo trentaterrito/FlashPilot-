@@ -1,4 +1,7 @@
 import pytest
+import inspect
+from types import SimpleNamespace
+from openpilot.selfdrive.ui.mici.layouts.settings import ford
 
 from openpilot.selfdrive.ui.mici.layouts.settings.ford import (
   ANGLE_SETTINGS, AUTO_LANE_CHANGE_OPTIONS, bounded_angle_value, restore_angle_defaults,
@@ -70,3 +73,20 @@ def test_state_param_button_reuses_existing_param():
   params.values["FlashPilotFordHandsFreeCluster"] = False
   assert toggle_bool_param(params, "FlashPilotFordHandsFreeCluster") is True
   assert params.values["FlashPilotFordHandsFreeCluster"] is True
+
+
+def test_readonly_always_on_row_removed():
+  assert 'always_on_lateral' not in inspect.getsource(ford.FordSettingsLayout)
+
+
+@pytest.mark.parametrize('increase,count', [(False, 1), (True, 2)])
+def test_step_symbols_are_native_strokes(monkeypatch, increase, count):
+  calls = []
+  monkeypatch.setattr(ford.BigButton, '_draw_content', lambda *args: None)
+  monkeypatch.setattr(ford.rl, 'draw_line_ex', lambda *args: calls.append(args))
+  button = object.__new__(ford.AngleStepButton)
+  button._increase = increase
+  button._enabled = True
+  button._rect = SimpleNamespace(x=0, width=180)
+  button._draw_content(0)
+  assert len(calls) == count

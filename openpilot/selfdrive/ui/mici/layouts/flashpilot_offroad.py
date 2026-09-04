@@ -85,7 +85,7 @@ class FlashPilotOffroadButton(BigCircleButton):
       super()._draw_content(btn_y)
       return
 
-    # Car-with-X entry glyph. Drawn natively to avoid adding a fork-specific
+    # Lightning-front-with-X entry glyph. Drawn natively to avoid adding a fork-specific
     # bitmap to openpilot's shared upstream Git LFS asset store.
     color = rl.Color(255, 255, 255, int(255 * (0.9 if self.enabled else 0.35)))
     x, y = self._rect.x + 22, btn_y + 27
@@ -93,20 +93,24 @@ class FlashPilotOffroadButton(BigCircleButton):
     def line(x1, y1, x2, y2, width=7):
       rl.draw_line_ex(rl.Vector2(x + x1, y + y1), rl.Vector2(x + x2, y + y2), width, color)
 
-    # Vehicle roof, body, lamps and wheels.
-    line(17, 65, 27, 34)
-    line(27, 34, 43, 22)
-    line(43, 22, 85, 22)
-    line(85, 22, 101, 34)
-    line(101, 34, 111, 65)
-    line(10, 65, 118, 65)
-    line(10, 65, 10, 96)
-    line(10, 96, 118, 96)
-    line(118, 96, 118, 65)
-    line(25, 96, 25, 108, 8)
-    line(103, 96, 103, 108, 8)
-    line(24, 79, 37, 79, 6)
-    line(91, 79, 104, 79, 6)
+    # Upright cab, squared nose, mirrors and Lightning-style light bar/C lamps.
+    line(24, 52, 29, 24, 5)
+    line(29, 24, 91, 24, 5)
+    line(91, 24, 98, 52, 5)
+    line(13, 44, 23, 44, 6)
+    line(100, 44, 110, 44, 6)
+    line(13, 57, 13, 98, 5)
+    line(13, 98, 111, 98, 5)
+    line(111, 98, 111, 57, 5)
+    line(24, 99, 24, 108, 9)
+    line(100, 99, 100, 108, 9)
+    line(23, 57, 101, 57, 6)
+    line(23, 57, 23, 79, 6)
+    line(23, 79, 34, 79, 6)
+    line(101, 57, 101, 79, 6)
+    line(101, 79, 90, 79, 6)
+    line(43, 76, 81, 76, 3)
+    line(38, 88, 86, 88, 3)
 
     # X overlays the upper-right of the vehicle.
     line(81, 5, 121, 45, 9)

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
+import pyray as rl
 
 from opendbc.car.ford.values import CAR as FORD_CAR
 
@@ -84,6 +85,21 @@ class StateParamButton(BigButton):
       self._toggle_callback(enabled)
 
 
+class AngleStepButton(BigButton):
+  """Native marks avoid missing plus/minus glyphs in the device font."""
+  def __init__(self, increase: bool):
+    super().__init__("", "increase by 0.01" if increase else "decrease by 0.01")
+    self._increase = increase
+
+  def _draw_content(self, btn_y: float):
+    super()._draw_content(btn_y)
+    x, y = self._rect.x + self._rect.width / 2, btn_y + 55
+    color = rl.Color(255, 255, 255, 230 if self.enabled else 89)
+    rl.draw_line_ex(rl.Vector2(x - 22, y), rl.Vector2(x + 22, y), 7, color)
+    if self._increase:
+      rl.draw_line_ex(rl.Vector2(x, y - 22), rl.Vector2(x, y + 22), 7, color)
+
+
 class AngleValueEditor(NavScroller):
   def __init__(self, setting: AngleSetting, params: Params, on_change):
     super().__init__()
@@ -92,8 +108,8 @@ class AngleValueEditor(NavScroller):
     self._on_change = on_change
 
     self._value_btn = GreyBigButton(setting.label, self._formatted_value())
-    decrement = BigButton("−", "decrease by 0.01")
-    increment = BigButton("+", "increase by 0.01")
+    decrement = AngleStepButton(False)
+    increment = AngleStepButton(True)
     reset = BigButton("reset", f"default {setting.default:.2f}")
     decrement.set_click_callback(lambda: self._step(-0.01))
     increment.set_click_callback(lambda: self._step(0.01))
@@ -155,12 +171,6 @@ class FordSettingsLayout(NavScroller):
   def __init__(self):
     super().__init__()
 
-    # Always-On Lateral is currently intrinsic to the canonical Lightning
-    # configuration. There is no final user Param/API, so expose its acknowledged
-    # state without inventing a second authorization system or reviving MADS.
-    always_on_lateral = BigButton("always-on lateral", "on")
-    always_on_lateral.set_enabled(False)
-
     self._auto_lane_change = BigMultiParamToggle(
       "auto lane change", "FlashPilotNudgelessLaneChange", AUTO_LANE_CHANGE_OPTIONS)
 
@@ -173,7 +183,6 @@ class FordSettingsLayout(NavScroller):
       "experimental mode shortcut", "FlashPilotFordExperimentalModeShortcut")
 
     self._scroller.add_widgets([
-      always_on_lateral,
       self._auto_lane_change,
       angle_control,
       self._bluecruise,
