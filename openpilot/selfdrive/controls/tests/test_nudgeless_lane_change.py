@@ -6,7 +6,8 @@ from openpilot.cereal import log
 from openpilot.common.constants import CV
 from openpilot.common.realtime import DT_MDL
 from openpilot.selfdrive.controls.lib.desire_helper import (
-  DesireHelper, NUDGELESS_CONFIRMATION_TIME, carstate_source_valid, nudgeless_lane_change_enabled,
+  DesireHelper, NUDGELESS_CONFIRMATION_TIME, auto_lane_change_mode, carstate_source_valid,
+  nudgeless_lane_change_confirmation_time, nudgeless_lane_change_enabled,
 )
 
 
@@ -127,16 +128,30 @@ def test_lane_change_abort_behavior_unchanged():
   assert helper.lane_change_state == LaneChangeState.preLaneChange
 
 
-@pytest.mark.parametrize(("fingerprint", "enable_bsm", "param", "expected"), [
-  ("FORD_F_150_LIGHTNING_MK1", True, True, True),
-  ("FORD_F_150_LIGHTNING_MK1", False, True, False),
-  ("FORD_F_150_LIGHTNING_MK1", True, False, False),
-  ("FORD_F_150_MK14", True, True, False),
+@pytest.mark.parametrize(("fingerprint", "enable_bsm", "param", "expected_mode", "expected_time"), [
+  ("FORD_F_150_LIGHTNING_MK1", True, 0, 0, None),
+  ("FORD_F_150_LIGHTNING_MK1", True, 1, 1, 0.5),
+  ("FORD_F_150_LIGHTNING_MK1", True, 2, 2, 1.0),
+  ("FORD_F_150_LIGHTNING_MK1", False, 1, 0, None),
+  ("FORD_F_150_MK14", True, 1, 0, None),
 ])
-def test_lightning_only_startup_gate(fingerprint, enable_bsm, param, expected):
+def test_lightning_only_startup_gate(fingerprint, enable_bsm, param, expected_mode, expected_time):
   cp = SimpleNamespace(carFingerprint=fingerprint, enableBsm=enable_bsm)
-  params = SimpleNamespace(get_bool=lambda key: param if key == "FlashPilotNudgelessLaneChange" else False)
-  assert nudgeless_lane_change_enabled(cp, params) is expected
+  params = SimpleNamespace(get=lambda key, return_default=False: param if key == "FlashPilotNudgelessLaneChange" else None)
+  assert auto_lane_change_mode(cp, params) == expected_mode
+  assert nudgeless_lane_change_enabled(cp, params) is (expected_mode != 0)
+  assert nudgeless_lane_change_confirmation_time(cp, params) == expected_time
+
+
+def test_one_second_mode_waits_one_second():
+  helper = DesireHelper(nudgeless_enabled=True, nudgeless_confirmation_time=1.0)
+  state = car_state(left=True)
+  enter_pre_lane_change(helper, state)
+  for _ in range(round(1.0 / DT_MDL) - 1):
+    helper.update(state, True, 1.0, left_blindspot_valid=True, right_blindspot_valid=True)
+    assert helper.lane_change_state == LaneChangeState.preLaneChange
+  helper.update(state, True, 1.0, left_blindspot_valid=True, right_blindspot_valid=True)
+  assert helper.lane_change_state == LaneChangeState.laneChangeStarting
 
 
 @pytest.mark.parametrize(("valid", "alive", "freq_ok", "age", "expected"), [

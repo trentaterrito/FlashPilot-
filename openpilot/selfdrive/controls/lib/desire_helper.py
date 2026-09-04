@@ -9,11 +9,25 @@ LANE_CHANGE_SPEED_MIN = 20 * CV.MPH_TO_MS
 LANE_CHANGE_TIME_MAX = 10.
 LANE_CHANGE_START_TIME = 0.5
 NUDGELESS_CONFIRMATION_TIME = 0.5
+AUTO_LANE_CHANGE_CONFIRMATION_TIMES = {1: 0.5, 2: 1.0}
 FORD_LIGHTNING = "FORD_F_150_LIGHTNING_MK1"
 
 
+def auto_lane_change_mode(CP, params) -> int:
+  if CP.carFingerprint != FORD_LIGHTNING or not CP.enableBsm:
+    return 0
+  try:
+    return int(params.get("FlashPilotNudgelessLaneChange", return_default=True) or 0)
+  except (TypeError, ValueError):
+    return 0
+
+
 def nudgeless_lane_change_enabled(CP, params) -> bool:
-  return CP.carFingerprint == FORD_LIGHTNING and CP.enableBsm and params.get_bool("FlashPilotNudgelessLaneChange")
+  return auto_lane_change_mode(CP, params) in AUTO_LANE_CHANGE_CONFIRMATION_TIMES
+
+
+def nudgeless_lane_change_confirmation_time(CP, params) -> float | None:
+  return AUTO_LANE_CHANGE_CONFIRMATION_TIMES.get(auto_lane_change_mode(CP, params))
 
 
 def carstate_source_valid(valid: bool, alive: bool, freq_ok: bool, age_seconds: float, max_age_seconds: float) -> bool:

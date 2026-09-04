@@ -53,7 +53,8 @@ def test_orphan_and_duplicate_release_do_not_change_personality():
 
 class ParamsStub:
   def __init__(self, confirmed=True, enabled=False):
-    self.values = {'ExperimentalMode': enabled, 'ExperimentalModeConfirmed': confirmed}
+    self.values = {'ExperimentalMode': enabled, 'ExperimentalModeConfirmed': confirmed,
+                   'FlashPilotFordExperimentalModeShortcut': True}
     self.writes = []
 
   def get_bool(self, key):
@@ -158,3 +159,14 @@ def test_other_button_cannot_trigger_shortcut(integration):
   for i in range(1, 301): tick(1 + i / 100)
   tick(4.01, [False], event_type=module.ButtonType.cancel)
   assert d.params.writes == []
+
+
+def test_disabled_shortcut_blocks_hold_but_preserves_short_press(integration):
+  d, tick, hold, _ = integration
+  d.params.values['FlashPilotFordExperimentalModeShortcut'] = False
+  hold()
+  assert not any(key == 'ExperimentalMode' for key, _ in d.params.writes)
+  assert d.personality == 1
+  tick(4.02, [True])
+  tick(4.10, [False])
+  assert d.params.writes[-1] == ('LongitudinalPersonality', 0)

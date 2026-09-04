@@ -25,7 +25,9 @@ from openpilot.common.realtime import config_realtime_process, DT_MDL
 from openpilot.common.transformations.camera import DEVICE_CAMERAS
 from openpilot.system.camerad.cameras.nv12_info import get_nv12_info
 from openpilot.common.transformations.model import get_warp_matrix
-from openpilot.selfdrive.controls.lib.desire_helper import DesireHelper, carstate_source_valid, nudgeless_lane_change_enabled
+from openpilot.selfdrive.controls.lib.desire_helper import (
+  DesireHelper, NUDGELESS_CONFIRMATION_TIME, carstate_source_valid, nudgeless_lane_change_confirmation_time,
+)
 from openpilot.selfdrive.controls.lib.drive_helpers import get_accel_from_plan, should_stop, smooth_value, get_curvature_from_plan
 from openpilot.selfdrive.modeld.parse_model_outputs import Parser
 from openpilot.selfdrive.modeld.compile_modeld import make_input_queues, nv12_copy_size, MODELD_INPUTS
@@ -351,8 +353,9 @@ def main(demo=False):
   long_delay = CP.longitudinalActuatorDelay + LONG_SMOOTH_SECONDS
   prev_action = log.ModelDataV2.Action()
 
-  nudgeless_enabled = nudgeless_lane_change_enabled(CP, params)
-  DH = DesireHelper(nudgeless_enabled=nudgeless_enabled)
+  nudgeless_confirmation_time = nudgeless_lane_change_confirmation_time(CP, params)
+  DH = DesireHelper(nudgeless_enabled=nudgeless_confirmation_time is not None,
+                    nudgeless_confirmation_time=nudgeless_confirmation_time or NUDGELESS_CONFIRMATION_TIME)
 
   while True:
     # Keep receiving frames until we are at least 1 frame ahead of previous extra frame

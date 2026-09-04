@@ -14,7 +14,7 @@ import pytest
   (None, False),
 ])
 def test_visibility_gated_to_lightning(monkeypatch, fingerprint, expected):
-  from openpilot.selfdrive.ui.mici.layouts.settings import toggles as ui
+  from openpilot.selfdrive.ui.mici.layouts.settings import ford as ui
   cp = None if fingerprint is None else SimpleNamespace(carFingerprint=getattr(ui.FORD_CAR, fingerprint))
   monkeypatch.setattr(ui, "ui_state", SimpleNamespace(CP=cp))
   assert ui.ford_lightning_connected() is expected

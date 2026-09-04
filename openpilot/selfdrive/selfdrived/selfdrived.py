@@ -474,6 +474,8 @@ class SelfdriveD:
       edges = [be.pressed for be in CS.buttonEvents if be.type == ButtonType.gapAdjustCruise] if self._car_state_updated else []
       action = self._distance_button.update(now, edges, valid)
       if action == 'hold':
+        if not self.params.get_bool('FlashPilotFordExperimentalModeShortcut'):
+          return
         current = self.params.get_bool('ExperimentalMode')
         if current or self.params.get_bool('ExperimentalModeConfirmed'):
           self.params.put_bool('ExperimentalMode', not current)

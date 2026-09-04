@@ -117,6 +117,15 @@ class Car:
         from opendbc.car.ford.values import CAR as FORD_CAR, FordFlags
         if self.CI.CP.carFingerprint == FORD_CAR.FORD_F_150_LIGHTNING_MK1:
           self.CI.CP.flags = int(self.CI.CP.flags | FordFlags.HANDS_FREE_CLUSTER)
+      # FlashPilot: pass bounded, startup-only user factors into the existing
+      # Lightning angle controller. Defaults reproduce the prior constants.
+      angle_controller = getattr(self.CI.CC, "flashpilot_angle", None) if self.CI.CC is not None else None
+      if angle_controller is not None:
+        angle_controller.set_adjustment_factors(
+          self.params.get("FordLowSpeedFactor_ang", return_default=True),
+          self.params.get("FordHighSpeedFactor_ang", return_default=True),
+          self.params.get("FordHighSpeedDampening_ang", return_default=True),
+        )
       self.RI = interfaces[self.CI.CP.carFingerprint].RadarInterface(self.CI.CP)
       self.CP = self.CI.CP
 

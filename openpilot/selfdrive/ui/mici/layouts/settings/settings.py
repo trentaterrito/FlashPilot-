@@ -7,6 +7,7 @@ from openpilot.selfdrive.ui.mici.layouts.settings.device import DeviceLayoutMici
 from openpilot.selfdrive.ui.mici.layouts.settings.developer import DeveloperLayoutMici
 from openpilot.selfdrive.ui.mici.layouts.settings.software import SoftwareLayoutMici
 from openpilot.selfdrive.ui.mici.layouts.settings.firehose import FirehoseLayout
+from openpilot.selfdrive.ui.mici.layouts.settings.ford import FordSettingsLayout, ford_lightning_connected
 from openpilot.selfdrive.ui.mici.layouts.flashpilot_offroad import FlashPilotOffroadButton, forced_offroad_requested
 from openpilot.selfdrive.ui.ui_state import ui_state
 from openpilot.system.ui.lib.application import gui_app, FontWeight
@@ -25,6 +26,11 @@ class SettingsLayout(NavScroller):
     toggles_panel = TogglesLayoutMici()
     toggles_btn = SettingsBigButton("toggles", "", gui_app.texture("icons_mici/settings.png", 64, 64))
     toggles_btn.set_click_callback(lambda: gui_app.push_widget(toggles_panel))
+
+    ford_panel = FordSettingsLayout()
+    ford_btn = SettingsBigButton("ford", "", gui_app.texture("icons_mici/settings/device/lkas.png", 72, 72))
+    ford_btn.set_click_callback(lambda: gui_app.push_widget(ford_panel))
+    ford_btn.set_visible(ford_lightning_connected)
 
     network_panel = NetworkLayoutMici()
     network_btn = SettingsBigButton("network", "", gui_app.texture("icons_mici/settings/network/wifi_strength_full.png", 76, 56))
@@ -64,6 +70,7 @@ class SettingsLayout(NavScroller):
       disable_forced_offroad,
       enable_offroad_onroad,
       toggles_btn,
+      ford_btn,
       network_btn,
       device_btn,
       software_btn,
