@@ -20,7 +20,7 @@ from opendbc.car.car_helpers import get_car, interfaces
 from opendbc.car.interfaces import CarInterfaceBase, RadarInterfaceBase
 from openpilot.selfdrive.pandad import can_capnp_to_list, can_list_to_can_capnp
 from openpilot.selfdrive.car.cruise import VCruiseHelper
-from openpilot.selfdrive.car.flashpilot_mads import configure_mads
+from openpilot.selfdrive.car.flashpilot_mads import configure_always_on_lateral
 
 REPLAY = "REPLAY" in os.environ
 
@@ -135,10 +135,8 @@ class Car:
       safety_config.safetyModel = structs.CarParams.SafetyModel.noOutput
       self.CP.safetyConfigs = [safety_config]
 
-    # Read once during card initialization, before publishing CarParams. Never
-    # live-toggle authorization from Params; restart offroad to change selection.
-    configure_mads(self.CP, self.params.get_bool("FlashPilotMads"),
-                   os.environ.get("FLASHPILOT_ANGLE_ENABLED", "0") == "1")
+    # Select only the exact Lightning path-angle platform at initialization.
+    configure_always_on_lateral(self.CP, os.environ.get("FLASHPILOT_ANGLE_ENABLED", "0") == "1")
 
     if self.CP.secOcRequired:
       # Copy user key if available

@@ -1,14 +1,13 @@
-"""Startup-only, default-OFF selection of the existing Lightning MADS adapter."""
+"""Select Always-On Lateral using the existing Lightning safety transport."""
 from opendbc.car.ford.values import CAR, FordFlags, FordSafetyFlags
 from opendbc.car.structs import CarParams
 
 
-def configure_mads(cp, requested: bool, path_angle_enabled: bool) -> bool:
-  # Clear any cached selection first; a previous drive is never opt-in intent.
+def configure_always_on_lateral(cp, path_angle_enabled: bool) -> bool:
   for cfg in cp.safetyConfigs:
     if cfg.safetyModel == CarParams.SafetyModel.ford:
       cfg.safetyParam &= ~int(FordSafetyFlags.LIGHTNING_MADS)
-  selected = (requested and path_angle_enabled and
+  selected = (path_angle_enabled and
               cp.carFingerprint == CAR.FORD_F_150_LIGHTNING_MK1 and
               bool(cp.flags & FordFlags.CANFD) and not cp.passive and
               not cp.dashcamOnly and not cp.secOcRequired and

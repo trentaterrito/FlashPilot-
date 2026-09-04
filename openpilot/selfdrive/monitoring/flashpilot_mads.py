@@ -1,7 +1,7 @@
 """Monitoring-only engagement latch. Cannot authorize steering or longitudinal."""
 
 
-class MadsMonitoring:
+class IndependentLateralMonitoring:
   def __init__(self):
     self.engaged = False
 
@@ -11,3 +11,7 @@ class MadsMonitoring:
     if fresh:
       self.engaged = bool(requested or authorized)
     return self.engaged
+
+
+# Temporary compatibility alias for the existing focused unit tests.
+MadsMonitoring = IndependentLateralMonitoring

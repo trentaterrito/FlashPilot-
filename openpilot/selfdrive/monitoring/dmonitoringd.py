@@ -4,7 +4,7 @@ import time
 from openpilot.common.params import Params
 from openpilot.common.realtime import config_realtime_process
 from openpilot.selfdrive.monitoring.policy import DriverMonitoring
-from openpilot.selfdrive.monitoring.flashpilot_mads import MadsMonitoring
+from openpilot.selfdrive.monitoring.flashpilot_mads import IndependentLateralMonitoring
 
 
 def dmonitoringd_thread():
@@ -14,7 +14,7 @@ def dmonitoringd_thread():
   pm = messaging.PubMaster(['driverMonitoringState'])
   standard_sources = ['driverStateV2', 'extrinsicsCalibration', 'carState', 'selfdriveState', 'modelV2']
   sm = messaging.SubMaster([*standard_sources, 'controlsState'], poll='driverStateV2')
-  mads_monitoring = MadsMonitoring()
+  lateral_monitoring = IndependentLateralMonitoring()
 
   DM = DriverMonitoring(rhd_saved=params.get_bool("IsRhdDetected"), always_on=params.get_bool("AlwaysOnDM"))
   demo_mode=False
@@ -26,17 +26,17 @@ def dmonitoringd_thread():
       # iterate when model has new output
       continue
 
-    # Optional MADS telemetry must not break the existing non-MADS DM lifecycle.
+    # Independent lateral authorization keeps normal driver monitoring active.
     valid = sm.all_checks(standard_sources)
     host_age = time.monotonic_ns() - sm.logMonoTime['controlsState']
     host_fresh = sm.all_checks(['controlsState']) and 0 <= host_age <= 100_000_000
-    mads_engaged = mads_monitoring.update(fresh=host_fresh,
-                                         requested=sm['controlsState'].madsState.enabled,
-                                         authorized=sm['controlsState'].madsAuthorized)
+    lateral_engaged = lateral_monitoring.update(fresh=host_fresh,
+                                                requested=sm['controlsState'].madsState.enabled,
+                                                authorized=sm['controlsState'].madsAuthorized)
     if demo_mode and sm.valid['driverStateV2']:
       DM.run_step(sm, demo=True)
     elif valid:
-      DM.run_step(sm, demo=demo_mode, independent_lateral_engaged=mads_engaged)
+      DM.run_step(sm, demo=demo_mode, independent_lateral_engaged=lateral_engaged)
 
     # publish
     dat = DM.get_state_packet(valid=valid)

@@ -14,7 +14,6 @@ from openpilot.system.ui.lib.application import gui_app
 from openpilot.common.hardware import HARDWARE, PC
 from openpilot.common.hardware.usb import TYPEC_CC_ORIENTATION_PATH, get_usb_state, is_chestnut_usb_id, read_int
 from openpilot.selfdrive.modeld.helpers import chestnut_compiled
-from openpilot.selfdrive.ui.onroad.mads_feedback import MadsFeedback, MadsDisplay, update_feedback
 
 BACKLIGHT_OFFROAD = 65 if HARDWARE.get_device_type() == "mici" else 50
 PARAM_UPDATE_TIME = 1 / 5.0
@@ -79,8 +78,6 @@ class UIState:
     self.status: UIStatus = UIStatus.DISENGAGED
     self.started_frame: int = 0
     self.started_time: float = 0.0
-    self._mads_feedback = MadsFeedback()
-    self.mads_display = MadsDisplay()
     self._engaged_prev: bool = False
     self._started_prev: bool = False
 
@@ -143,7 +140,6 @@ class UIState:
 
     self.sm.update(0)
     self._update_state()
-    self.mads_display = update_feedback(self._mads_feedback, self.sm, self.CP, self.started, time.monotonic())
     self._update_status()
     self._update_chestnut_state()
     device.update()

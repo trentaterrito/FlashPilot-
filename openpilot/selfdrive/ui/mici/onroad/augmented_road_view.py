@@ -14,7 +14,6 @@ from openpilot.selfdrive.ui.mici.onroad.model_renderer import ModelRenderer
 from openpilot.selfdrive.ui.mici.onroad.confidence_ball import ConfidenceBall
 from openpilot.selfdrive.ui.mici.onroad.experimental_notification import ExperimentalNotification
 from openpilot.selfdrive.ui.mici.onroad.mode_notification import ModeNotificationView
-from openpilot.selfdrive.ui.mici.onroad.mads_notification import MadsNotification
 from openpilot.selfdrive.ui.mici.onroad.cameraview import CameraView
 from openpilot.system.ui.lib.application import FontWeight, gui_app, MousePos, MouseEvent, TextAlignment, TextAlignmentVertical
 from openpilot.system.ui.widgets.label import UnifiedLabel
@@ -160,7 +159,6 @@ class AugmentedRoadView(CameraView):
     self._driver_state_renderer = DriverStateRenderer()
     self._confidence_ball = ConfidenceBall()
     self._experimental_notification = ExperimentalNotification()
-    self._mads_notification = MadsNotification()
     self._mode_notification = ModeNotificationView()
     self._offroad_label = UnifiedLabel("start the car to\nuse openpilot", 54, FontWeight.DISPLAY,
                                        text_color=rl.Color(255, 255, 255, int(255 * 0.9)),
@@ -282,13 +280,6 @@ class AugmentedRoadView(CameraView):
     text = self._experimental_notification.update(
       now, bool(sm['selfdriveState'].experimentalMode) if fresh else None,
       sm['selfdriveState'].enabled, ui_state.started_frame, alert is not None)
-    # MADS state changes get the same large, top-banner confirmation as an
-    # Experimental Mode change or a "Driving Personality changed"-style alert
-    # (see mode_notification.py / mads_notification.py). Experimental Mode
-    # takes priority if both would fire in the same frame; MADS never claims
-    # lateral is active unless mads_notification.py sees panda authorization.
-    if not text:
-      text = self._mads_notification.update(now, ui_state.mads_display, ui_state.started_frame, alert is not None)
     self._mode_notification.set_text(text)
     self._mode_notification.render(self._content_rect)
 
