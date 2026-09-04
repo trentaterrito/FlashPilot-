@@ -16,11 +16,20 @@ class ExperimentalNotification:
       return ''
     if self.previous is not None and mode != self.previous:
       self.expires = now + self.DURATION
-      self.text = ('Experimental active' if engaged else 'Experimental enabled') if mode else 'Experimental disabled'
+      self.text = self._text_for(mode, engaged)
     self.previous = mode
     if alert_present:
       # Do not replay a stale confirmation after a safety alert clears.
       self.expires = 0.0
     if mode and now < self.expires:
-      self.text = 'Experimental active' if engaged else 'Experimental enabled'
+      self.text = self._text_for(mode, engaged)
     return self.text if now < self.expires else ''
+
+  @staticmethod
+  def _text_for(mode: bool, engaged: bool) -> str:
+    # Same two-line "Title\nStatus" shape as the MADS notification and a
+    # personality-change alert -- presentation only, same active/enabled/
+    # disabled distinction as before.
+    if not mode:
+      return 'Experimental Mode\nDisabled'
+    return 'Experimental Mode\nActive' if engaged else 'Experimental Mode\nEnabled'

@@ -8,18 +8,18 @@ from openpilot.selfdrive.ui.mici.onroad.experimental_notification import Experim
 def test_no_startup_message_then_actual_changes_and_expiry():
   n = ExperimentalNotification()
   assert n.update(1, False, True, 10) == ''
-  assert n.update(2, True, True, 10) == 'Experimental active'
-  assert n.update(4.99, True, True, 10) == 'Experimental active'
+  assert n.update(2, True, True, 10) == 'Experimental Mode\nActive'
+  assert n.update(4.99, True, True, 10) == 'Experimental Mode\nActive'
   assert n.update(5, True, True, 10) == ''
-  assert n.update(6, False, True, 10) == 'Experimental disabled'
+  assert n.update(6, False, True, 10) == 'Experimental Mode\nDisabled'
 
 
 def test_selected_but_not_engaged_is_not_called_active():
   n = ExperimentalNotification()
   n.update(1, False, False, 10)
-  assert n.update(2, True, False, 10) == 'Experimental enabled'
-  assert n.update(2.1, True, True, 10) == 'Experimental active'
-  assert n.update(2.2, True, False, 10) == 'Experimental enabled'
+  assert n.update(2, True, False, 10) == 'Experimental Mode\nEnabled'
+  assert n.update(2.1, True, True, 10) == 'Experimental Mode\nActive'
+  assert n.update(2.2, True, False, 10) == 'Experimental Mode\nEnabled'
 
 
 def test_alert_cancels_notification_instead_of_delaying_it():
@@ -76,4 +76,4 @@ def test_actual_renderer_gates_and_alert_priority(monkeypatch, bad):
   if bad == 'other_car': state.CP.carFingerprint = 'OTHER_FORD'
   if bad == 'offroad': state.started = False
   view.AugmentedRoadView._draw_experimental_notification(widget, object() if bad == 'alert' else None)
-  assert drawn == (['Experimental active'] if bad is None else [])
+  assert drawn == (['Experimental Mode\nActive'] if bad is None else [])
