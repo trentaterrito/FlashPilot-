@@ -1,0 +1,65 @@
+FlashPilot MADS release checkpoint: B. BLOCKED
+Date: 2026-09-02
+Final code: a34aacb4675594acf4ed0316981bfd6dc0d252b1
+opendbc: cd2e5923e82cc0c4b69fb4070448863d6bd058d1
+panda: e01740407d1b346bf1fa8700a1163da2d9878fc2
+Counts overlap; do not sum suites.
+
+SOURCE /tmp/flashpilot-mads-rc-final-functional.log
+........................................................................ [ 99%]
+....................................                                     [100%]
+3101 passed, 1328 skipped, 9287 subtests passed in 22.04s
+
+SOURCE /tmp/flashpilot-mads-rc-release.log
+........................................................................ [ 62%]
+............................................                             [100%]
+116 passed in 0.24s
+
+SOURCE /tmp/flashpilot-mads-rc-interfaces.log
+............                                                             [100%]
+12 passed, 238 deselected in 1.06s
+
+SOURCE /tmp/flashpilot-mads-rc-controls.log
+.......................                                                  [100%]
+23 passed in 0.81s
+
+SOURCE /tmp/flashpilot-mads-rc-host-lifecycle.log
+.........................                                                [100%]
+25 passed in 0.14s
+
+SOURCE /tmp/flashpilot-mads-rc-clean-tests.log
+........................................................................ [ 91%]
+............................                               [100%]
+242 passed, 74 skipped, 9014 subtests passed in 2.98s
+
+SOURCE /tmp/flashpilot-mads-rc-clean-full-tests.log
+........................................................................ [ 99%]
+....................................                                     [100%]
+3101 passed, 1328 skipped, 9287 subtests passed in 22.87s
+
+SOURCE /tmp/flashpilot-mads-rc-clean-controls.log
+.......................                                                  [100%]
+23 passed in 0.75s
+
+SOURCE /tmp/flashpilot-mads-rc-build.log
+xcrun: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+arm-none-eabi-gcc -o board/obj/panda_h7/main.elf -Wl,--section-start,.isr_vector=0x8020000 -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tboard/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g board/stm32h7/board/obj/panda_h7startup_stm32h7x5xx.o board/board/obj/panda_h7main.o
+scons: done building targets.
+
+SOURCE /tmp/flashpilot-mads-rc-clean-build.log
+xcrun: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+arm-none-eabi-gcc -o board/obj/panda_h7/main.elf -Wl,--section-start,.isr_vector=0x8020000 -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tboard/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g board/stm32h7/board/obj/panda_h7startup_stm32h7x5xx.o board/board/obj/panda_h7main.o
+scons: done building targets.
+
+SOURCE /tmp/flashpilot-mads-rc-clean-full-build-hydrated.log
+  [LINK] rednose_repo/rednose/helpers/ekf_sym_pyx.so
+ld: warning: ignoring duplicate libraries: '-lzmq'
+scons: done building targets.
+
+C++ syntax exit 0; Python compile/import pass; whitespace pass.
+Cppcheck 2.21.0 direct opendbc and H7 MISRA: exit 0, coverageTableMatches=true for both.
+Ruff not installed. Full MISRA mutation wrapper not rerun.
+Local replay: 6 segments, 0 physical TJA edges, 0 host requests, 0 authorization grants.
+Zero active intervals cannot prove no false active revocations.
+No panda found; no hardware HIL, vehicle UI or deployment.
+Fresh build uses local Git URL overrides; remote cloneability remains blocked.

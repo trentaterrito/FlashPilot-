@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/sunnypilot/sunnypilot",
+  "commit": "e87dbbaba710bbfe7661d9ff064d46170cac9442",
+  "git_blobs": {
+    "openpilot/sunnypilot/mads/state.py": "a8e5e1892f7fbacf80ae89279436bbf78ed5e6c7",
+    "openpilot/sunnypilot/LICENSE.md": "650b6f55b3764720f9cc11251b0d8921eae60792"
+  }
+}

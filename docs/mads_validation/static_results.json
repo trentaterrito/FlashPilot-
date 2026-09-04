@@ -1,0 +1,20 @@
+{
+  "cppcheck": "Cppcheck 2.21.0",
+  "opendbcCommit": "813120438c029b67ccb196f9241f5ccfe21672e6",
+  "pandaCommit": "e01740407d1b346bf1fa8700a1163da2d9878fc2",
+  "scopes": {
+    "opendbc": {
+      "exitCode": 0,
+      "violations": false,
+      "coverageTableMatches": true,
+      "pass": true
+    },
+    "panda_h7": {
+      "exitCode": 0,
+      "violations": false,
+      "coverageTableMatches": true,
+      "pass": true
+    }
+  },
+  "note": "Real direct analyzers; mutation wrapper and physical hardware validation not included."
+}

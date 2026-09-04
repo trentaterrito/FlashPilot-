@@ -1,4 +1,5 @@
 #include "selfdrive/pandad/pandad.h"
+#include "selfdrive/pandad/mads_lifecycle.h"
 
 #include <array>
 #include <bitset>
@@ -114,6 +115,8 @@ void fill_panda_state(cereal::PandaState::Builder &ps, cereal::PandaState::Panda
   ps.setIgnitionLine((health.flags_pkt & HEALTH_FLAG_IGNITION_LINE) != 0U);
   ps.setIgnitionCan((health.flags_pkt & HEALTH_FLAG_IGNITION_CAN) != 0U);
   ps.setControlsAllowed((health.flags_pkt & HEALTH_FLAG_CONTROLS_ALLOWED) != 0U);
+  ps.setControlsAllowedLateral((health.flags_pkt & HEALTH_FLAG_CONTROLS_ALLOWED_LATERAL) != 0U);
+  ps.setMadsSafetyEnabled((health.flags_pkt & HEALTH_FLAG_MADS_SAFETY_ENABLED) != 0U);
   ps.setTxBufferOverflow(health.tx_buffer_overflow_pkt);
   ps.setRxBufferOverflow(health.rx_buffer_overflow_pkt);
   ps.setPandaType(hw_type);
@@ -258,7 +261,7 @@ void send_peripheral_state(Panda *panda, PubMaster *pm) {
   pm->send("peripheralState", msg);
 }
 
-void process_panda_state(Panda *panda, PubMaster *pm, bool engaged, bool is_onroad, bool spoofing_started) {
+void process_panda_state(Panda *panda, PubMaster *pm, bool engaged, bool is_onroad, bool spoofing_started, bool mads_eligible) {
   auto ignition_opt = send_panda_states(pm, panda, is_onroad, spoofing_started);
   if (!ignition_opt) {
     LOGE("Failed to get ignition_opt");
@@ -273,7 +276,7 @@ void process_panda_state(Panda *panda, PubMaster *pm, bool engaged, bool is_onro
     }
   }
 
-  panda->send_heartbeat(engaged);
+  panda->send_heartbeat(engaged, mads_eligible);
 }
 
 void process_peripheral_state(Panda *panda, PubMaster *pm, bool no_fan_control, bool is_onroad) {
@@ -366,7 +369,7 @@ void pandad_run(Panda *panda) {
   std::thread send_thread(can_send_thread, panda, fake_send);
 
   RateKeeper rk("pandad", 100);
-  SubMaster sm({"selfdriveState", "deviceState"});
+  SubMaster sm({"selfdriveState", "deviceState", "controlsState"});
   PubMaster pm({"can", "pandaStates", "peripheralState"});
   PandaSafety panda_safety(panda);
   bool engaged = false;
@@ -381,14 +384,24 @@ void pandad_run(Panda *panda) {
       process_peripheral_state(panda, &pm, no_fan_control, is_onroad);
     }
 
-    // Process panda state at 10 Hz
-    if (rk.frame() % 10 == 0) {
-      sm.update(0);
+    sm.update(0);
+    // Use the reference 10 Hz heartbeat/status cadence in both modes.
+    const bool mads_selected = sm.allAliveAndValid({"controlsState"}) &&
+                                sm["controlsState"].getControlsState().getMadsState().getAvailable();
+    if (rk.frame() % mads_state_period(mads_selected) == 0) {
       engaged = sm.allAliveAndValid({"selfdriveState"}) && sm["selfdriveState"].getSelfdriveState().getEnabled();
-      if (sm.updated("deviceState")) {
-        is_onroad = sm["deviceState"].getDeviceState().getStarted();
-      }
-      process_panda_state(panda, &pm, engaged, is_onroad, spoofing_started);
+      // SubMaster is polled more often than this block. Read its retained latest
+      // value: updated() may already be false after an intervening loop tick.
+      is_onroad = sm["deviceState"].getDeviceState().getStarted();
+      // Separate host eligibility is a veto, never a request to grant lateral.
+      const uint64_t now = nanos_since_boot();
+      const uint64_t host_time = sm["controlsState"].getLogMonoTime();
+      const bool host_fresh = mads_host_fresh(sm.allAliveAndValid({"controlsState"}), now, host_time);
+      const bool mads_eligible = is_onroad && !spoofing_started && sm.allAliveAndValid({"controlsState", "deviceState"}) &&
+                                 host_fresh && sm["controlsState"].getControlsState().getMadsEligible();
+      process_panda_state(panda, &pm, engaged, is_onroad, spoofing_started, mads_eligible);
+    }
+    if (rk.frame() % 10 == 0) {
       panda_safety.configureSafetyMode(is_onroad);
     }
 

@@ -1,0 +1,40 @@
+Ford 0x3CC offline investigation — 2026-09-02
+Source checkpoint: cde0ba3899fb65aae646bbe5ae3b2659e85eecce
+opendbc unchanged: cd2e5923e82cc0c4b69fb4070448863d6bd058d1
+panda unchanged: e01740407d1b346bf1fa8700a1163da2d9878fc2
+
+pytest -q tools/mads/tests/test_ford_3cc_analysis.py
+36 passed in 0.56s
+
+pytest -q tools/mads/tests
+  opendbc_repo/opendbc/safety/tests/test_ford_sunnypilot_mads.py
+  opendbc_repo/opendbc/safety/tests/test_ford.py
+  opendbc_repo/opendbc/safety/tests/test_flashpilot_ford_safety.py
+365 passed, 74 skipped, 9000 subtests passed in 3.38s
+Counts overlap. Tests documenting replay/corruption acceptance are evidence of
+the known blocker, not successful replay/corruption protection.
+
+Checksum corpus: 377209 frames, 631 distinct payloads, zero candidate rejects.
+Protected-bit injection: 19 bits x 631 payloads = 11989 rejected mutations.
+Original missing-limit formula: 2795 rejects in wider identified corpus.
+Original six-segment mismatch: 108 = 49 limit1 + 47 limit2 + 12 limit3.
+Additional unidentified partials: 2309 frames, zero candidate checksum rejects.
+Container audit: 195 content-unique files, 193 without warnings,
+two salvaged partials (both outside 189 fingerprint-confirmed primary files).
+No parser exceptions; warnings are recorded, not silently discarded.
+
+Python compileall: passed.
+Git whitespace/diff check: passed.
+No production safety/C++/firmware changes; no new H7/MISRA result claimed.
+No vehicle access, no CAN transmission, no MADS enablement, no deployment.
+
+Generated raw extraction: /tmp/ford-3cc-all.jsonl.gz
+Original six-segment extraction: /tmp/ford-3cc-six.jsonl.gz
+Container warning audit: /tmp/ford-3cc-container-audit.json
+Full source inventory/measurements: docs/mads_3cc/corpus_summary.json
+Regression output: /tmp/ford-3cc-regression-tests.log
+Focused output: /tmp/ford-3cc-tests.log
+
+Result B: keep 0x3CC as a negative veto with different integrity semantics.
+Checksum arithmetic discrepancy resolved. Full counter/replay/integration
+blocker remains open. Do not claim readiness to enable MADS.

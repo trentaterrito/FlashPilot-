@@ -1,0 +1,2298 @@
+{
+  "totals": {
+    "eligible_frames": 374089,
+    "recorded_gaps_over_100ms": 0,
+    "checksum_reject": 0,
+    "eligible_status_false_reject": 0,
+    "unavailable_status_false_accept": 0,
+    "unexpected_authorization": 0,
+    "pre_rx_progress_false_expiry": 0,
+    "frames": 377209,
+    "unavailable_frames": 3120
+  },
+  "counter_deltas": {
+    "7": 198840,
+    "8": 99439,
+    "6": 77332,
+    "4": 409,
+    "5": 995,
+    "0": 5
+  },
+  "eligible_max_age_since_counter_change_us": 0,
+  "files": [
+    {
+      "path": "/Users/trentterrito/Documents/ChatGPT/OpenAi, BluePilot/work/claude_proposed_fixes/rlogs/137-seg.zst",
+      "sha256": "613d1a1f05c7e51954b4f46f57681d3ade1cdc6016fa04cb7390738964b88bf9",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/Users/trentterrito/Documents/ChatGPT/OpenAi, BluePilot/work/claude_proposed_fixes/rlogs/144-seg.zst",
+      "sha256": "34c977b17e08e46451ca563c732e41b21cf4f83dd47f67ef27ed9e22f9143267",
+      "frames": 2002,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/Users/trentterrito/Documents/ChatGPT/OpenAi, BluePilot/work/claude_proposed_fixes/rlogs/42-seg.zst",
+      "sha256": "3557c19fef98da00209c7cb077632f60b5ccba7a02efbe7252e4604884944077",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/Users/trentterrito/Documents/ChatGPT/OpenAi, BluePilot/work/drive_review_129_12b/129_2.rlog.zst",
+      "sha256": "3722ea6cad851aead3d9c9dfde86904663b921d8e3c2c8623111367dd73e10c7",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/Users/trentterrito/Documents/ChatGPT/OpenAi, BluePilot/work/drive_review_129_12b/12b_1.rlog.zst",
+      "sha256": "e7f329cd58865fa8979d918063ca1d27699a40acf53af5c88d298303638c1a46",
+      "frames": 2007,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/Users/trentterrito/Documents/ChatGPT/OpenAi, BluePilot/work/drive_review_129_12b/12b_2.rlog.zst",
+      "sha256": "40f1c0f17b44acdf2f45b94d78f1fe70445afa44cfabdf16251aead310e653e8",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/Users/trentterrito/Documents/ChatGPT/OpenAi, BluePilot/work/drive_review_129_12b/12c_1.rlog.zst",
+      "sha256": "672c26fafdb362080477b06d931620b2f529fd35239c8e9735fa8be22d549433",
+      "frames": 2008,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/Users/trentterrito/Documents/ChatGPT/OpenAi, BluePilot/work/drive_review_129_12b/12c_17.rlog.zst",
+      "sha256": "89a31e6e6e9ce500ceedd7f8d5a3f841aa760cf4f278d3afb80a407ebf61023f",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/Users/trentterrito/Documents/ChatGPT/OpenAi, BluePilot/work/drive_review_129_12b/12c_18.rlog.zst",
+      "sha256": "8026d4538fa8840f392f41c1a60ff34c50276a8fa3d7de7a53fd03a783c0ab27",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg0.zst",
+      "sha256": "efc64191a83adbffdf3ab673558b00a86b7605f292ae56a646bc6d22ef791d60",
+      "frames": 2054,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg1.zst",
+      "sha256": "037c305deffba4979cabfc4c82433ac47be2cc8717a849282e3c30a18d2ffa4b",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg10.zst",
+      "sha256": "288a3d18fb135e811e491a669b23825bc388fcab6cd93f0753ea4ff0537ea739",
+      "frames": 2007,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg11.zst",
+      "sha256": "7d4d41db70293dbfc56cfca16b23e0552c52e3bed367c25536d2b41d118f8f00",
+      "frames": 2002,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg12.zst",
+      "sha256": "835a1c0cbc3a5068bf50548d926daaeb2107bd8aedee3e30ee91d44336061bfd",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg13.zst",
+      "sha256": "6411d2756a93866266b717806c05365978cf247f9f15264562bc0bdb7982fbca",
+      "frames": 2003,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg14.zst",
+      "sha256": "b7ecfc9ff57c0c5f0304d459b7fe100998f9e9c446cdc4b12a21cdda5affc9e0",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg15.zst",
+      "sha256": "e969daad987e3bd167f0501e5eab3442142f817b91401444c5230fe9b741443d",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg16.zst",
+      "sha256": "711c7c0ce56333b901f5c2268a447a0e77a1b72a07df37a7c71f744e71ab3764",
+      "frames": 2004,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg17.zst",
+      "sha256": "f930d8ca0d363867cd3149b116e2d03e7b80e57e79ba96e0e83684e5323adb4f",
+      "frames": 2006,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg18.zst",
+      "sha256": "b183b61ee032b7f77c5be66ad8dfe747037b1459eafe5cd2e6150a0a8abdd1d9",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg19.zst",
+      "sha256": "d721673125cd897c28b0baa9407c1a5f622ac508c973ffdb3f450e43520544a8",
+      "frames": 2004,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg2.zst",
+      "sha256": "9cefbca6b34cdd99e76d84745f9f682072e56e8810e15a96bb677121afa6da31",
+      "frames": 2012,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg20.zst",
+      "sha256": "8be62fd6110bb6ef696d3073e8370be76a608f033ea0ea25c947bf05fc05fce4",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg21.zst",
+      "sha256": "dc7822de1a192cc52eec54a1d15b39611474dbe0db65f82f9585f212221ba394",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg3.zst",
+      "sha256": "b1547eceb20972d43ac56a35b55840257f33ad0c92f40be86fcbd30aefb6b308",
+      "frames": 2002,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg4.zst",
+      "sha256": "745801c4dba1d2fc8cd0083043ecae0a5328954e30f1555b68a9353489300f20",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg5.zst",
+      "sha256": "4b35df20c6f9b3cd7078bcf04c03325b9763c9362c5f383a8eb840fe9a55cd5a",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg6.zst",
+      "sha256": "e41891c17052838fa0e97f9b6e1cba7f2bca0ac820534ba89066e74aa88086aa",
+      "frames": 2003,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg7.zst",
+      "sha256": "d44880271e2e8766110f4b19eb25e75a2d36828332ec62e618eb76670e65ade7",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg8.zst",
+      "sha256": "3b79f2b17b6aa4bbdee78963391ddf20854f82953fa8b2ed035439128d345c97",
+      "frames": 2003,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/calib_seg115/seg9.zst",
+      "sha256": "524a8def1d615357df3edc8e56db8f5410661ab2a2ebb0c60e8cecb568731399",
+      "frames": 2007,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/family_tune_test/40-seg.zst",
+      "sha256": "c2afb5a2544b250c7d6c7e3970e482167b096652e5f21e7c2b2d4823e8692560",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_0.zst",
+      "sha256": "87eaed61950c2818bd3a8ba1c54f68f400bf558360a159a5b6963a2763e0c642",
+      "frames": 2054,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_1.zst",
+      "sha256": "4cf1a11e41bea0f51cb94f96385c5d25bc911b4cd13c0b0ea07202bef85bc575",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_10.zst",
+      "sha256": "1f12e9e83d550e0a39229c8dc4c584c9bb841490b75a65ade4c96942b72ff4d9",
+      "frames": 1999,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_11.zst",
+      "sha256": "6537a6d4c2ad7b90fe3cf3ce9f2ba1236f97d7e0f20d28c918095b9a0c50eff6",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_12.zst",
+      "sha256": "46171c248881368631f121770e5a2976f526f96c927f1de3bd284f0fdc677d95",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_13.zst",
+      "sha256": "5b891ed66050c455cd20c40ad89907e29fa554f4a46ae662a39e22532d8d25d9",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_14.zst",
+      "sha256": "ad5f92d0f830c26f9b32b8ee99138808014ec4e451a9734b24ed2fc9aa05a80c",
+      "frames": 1999,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_15.zst",
+      "sha256": "01539c452f7a980b1daa5995d4aa2a1a4a1aa72cf53cbefcb20df6d7643b6fc2",
+      "frames": 2003,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_16.zst",
+      "sha256": "6b6f98c26c63b740e040209aa4afce613c3ffe119e2eb39fc1c0a968318f3e03",
+      "frames": 1999,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_17.zst",
+      "sha256": "7003f03c1074b467d29b92d0252fa253beb0051c7277e3191fa8841b76db883a",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_18.zst",
+      "sha256": "f1b6bbb3000ba699866334eb48c14596c871c4e84ad46b4b91ca421368b29e85",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_19.zst",
+      "sha256": "7d53ca0b5bbffbdfc6995b5a4bac6f56c56fd19dd5956a126a5f4ac7542fb70b",
+      "frames": 2004,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_2.zst",
+      "sha256": "04aadef25ead039b790a8ad43adf5259ae70260c2dc671a17f6315a4f1891de5",
+      "frames": 2002,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_20.zst",
+      "sha256": "58f0dfadb8143c4e18ab6c80783aeaa5b5dbe1369f6aedc7c6fbc94afdb01531",
+      "frames": 1999,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_21.zst",
+      "sha256": "1241e399ed2469b6067dabf69778b1682c15a3bf915f6936be62ec1b563cd6d1",
+      "frames": 2003,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_22.zst",
+      "sha256": "da8605b4820944792142dd15ff0411424dfda7082dbd05291d260239c246b5d8",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_23.zst",
+      "sha256": "7ac49596df35a611f5b1b9cdbd2ba6d00f30c2f874d3f8d73f58494e8b2c1205",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_24.zst",
+      "sha256": "8518a3f4388274074c1c54de93849f9a830063dca8865141b2a175d1766d0965",
+      "frames": 1999,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_25.zst",
+      "sha256": "bd7e9d6bfc6e7280f2246ca583539c90f7a55121bba7d0ff0210f47a504035d7",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_26.zst",
+      "sha256": "42051a9b4a60a645058a8b93db7c6ece47365e136cfe607f0ca36a677ec6d9c5",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_27.zst",
+      "sha256": "ad0f9c71d732f6f759d176d15cebaabd7d7257f610b0aeb2dd50bb5885e6f3c4",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_28.zst",
+      "sha256": "e0e9afc2fd339864306dae7f12aeb973478fcf5827b1ad70edf2cf51ff60ed2f",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_29.zst",
+      "sha256": "6a13a69b07b14c500eb50ac2c4b88b0ee5335023565f54c2fb1ea1b7add86ca6",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_3.zst",
+      "sha256": "cd8bf19916f4dbc803a397515d2a9521e294c39dd81ad0b0228ac187c0a416ad",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_30.zst",
+      "sha256": "ad8c200130aa4bbb8bb78bab47b8163d7e6fba5cafc3cf4f97301f35b84da0d0",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_31.zst",
+      "sha256": "74b00e7305ccb4838ea2fc61474ff2fd6448b77f3a9025159860342fd5ab4049",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_32.zst",
+      "sha256": "68c57b7429e18f6a0f160b6c70704886f913c5447c5c29b5c4ab86660f35c2e1",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_33.zst",
+      "sha256": "0b96d1fe80198adc293f03d9619060b1e40c66c01f1d573eb7fd4dc72edd2cdb",
+      "frames": 1999,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_34.zst",
+      "sha256": "27436f8e8517fd4e028d0774bcce40a262151b538dfceb790d3b90a25037314f",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_35.zst",
+      "sha256": "29bbd6cf8ba8c3ead825430d2b62659992bb55da273ebc0f6b65bb9024510234",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_36.zst",
+      "sha256": "73f80508b829baa8993fa87242a2a68f7175a038d657db7b9ce670d0ca702c07",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_37.zst",
+      "sha256": "185961f289f0486d1b9e089fcc303b06c25d98bbd69467aeb05a0ed34889d602",
+      "frames": 2004,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_38.zst",
+      "sha256": "271b85194fde94dffbd611cae4c05f9893159d9af754de0c07903e61f3903d04",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_39.zst",
+      "sha256": "56f26a4af69d56cc8743d8d247b25b0f11a9da304c9a6ba6c2dc23c9bcb3a95f",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_4.zst",
+      "sha256": "535522b5ea3d2c2575ca529c85db071421a778db7d215b41265656ef47c53609",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_40.zst",
+      "sha256": "092f41a2aad70697cd600e974ef1132925311dbcfe8035eee2d4b96e617e9d12",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_41.zst",
+      "sha256": "8d5bcab802df2e915fedf197ce1b4ec3385b9a472e2bd65940ebf7aaa715627e",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_42.zst",
+      "sha256": "5ab93352d8dff03d522a408adf9514542b506e138279a62dabafcec0c9d3ca31",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_43.zst",
+      "sha256": "be244ca5b68928be9162cba1c1fd08e3fe393b4dbf172f775750f90def5eac11",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_44.zst",
+      "sha256": "9ed9cdd1a393afcaa01c84803955f5f1879164f046dec3c92ef17d064a9df3a6",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_45.zst",
+      "sha256": "d6e939ae140b8a6d28bf69c4178afeaf7de6a3242553888a8d1a4427909bd196",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_46.zst",
+      "sha256": "6661a98a248ed8be48388d7e74379b70a0cbf73109e0bb644bcf016ea09c150a",
+      "frames": 1999,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_47.zst",
+      "sha256": "7fdc8620dab9796fd520d697eb6cababc9464bae078c3ebcb25049cff1d01cd1",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_48.zst",
+      "sha256": "d9bf36ab3f63c1ed5b7e7c73a8df254fb6b20202e155ee41bfc862127aff9f54",
+      "frames": 2007,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_49.zst",
+      "sha256": "b2fa19affae14364878c5db1279f27a4940caf5b479cf6b361809ad83aaf38d3",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_5.zst",
+      "sha256": "c4269b16001f36319f7f2e5f45aedf84d3112776e63d24eb3606513f120d070d",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_50.zst",
+      "sha256": "7efef5381c4d1f31e30d3350d2be538190e5f19a6fdef78b1e1e1f2473756af2",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_51.zst",
+      "sha256": "8475e32f6d7fcdbf7c0c47d0457a15906b62510eb3c6802a3d21ec614c3720b7",
+      "frames": 1999,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_52.zst",
+      "sha256": "a3c149d6f3637f19649eb9e86bd2ccc5770bf283fa99559a3bf66b2f3f46c0fa",
+      "frames": 2002,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_53.zst",
+      "sha256": "b0b2b5a6e6867b1fcad0f843aa64b03e289e011d15e60c95304be97b0d2bfbc0",
+      "frames": 2007,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_54.zst",
+      "sha256": "d010eb9b0b07957e045e7099ff4757ac9eccc4c455fc7e3f98280de9230a9a32",
+      "frames": 2003,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_55.zst",
+      "sha256": "dae1e51f012f68d0206b82a4b8fac38cd450efcf239a63984597f990536cd61b",
+      "frames": 2005,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_56.zst",
+      "sha256": "45f21c0828f19f0f4f534e915a5fbcd958f3aac3b777a8de9df5c14dff38dc74",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_57.zst",
+      "sha256": "332bc4fb4e9ee9e0f04c5c71a4d57758ce38387d73658976d863ae9a22c438a4",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_58.zst",
+      "sha256": "20dcf9f4dbdd16e3bfc3a890d1b2f0e306f31640926a5813cf1ee60701257807",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_59.zst",
+      "sha256": "dccae00b8710a65b5660a2b1ddfaeba5d4fc3b148c1bb7eb0608ba3ab6f55f72",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_6.zst",
+      "sha256": "6bcf436a39920c12c0a5a780941f88cd7e082e5dcb876ef06b96fa482ccd06c9",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_60.zst",
+      "sha256": "ff663aac4ec4bc5788aea02075df33fa19729e800fa319c70b7dcaf571888592",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_61.zst",
+      "sha256": "5c90b6a301705c3bd29d773bb6d526e4fca069cb152be34df413f696d3e2481e",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_62.zst",
+      "sha256": "c5a9682f05a0095443f1975e882ec0360797b4d2de5649a6a1b698d13d69ebce",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_63.zst",
+      "sha256": "8c2ebffcc6b462c5363b5777eeb11eca7329f2ba8d510365952fc1e1dbfc575b",
+      "frames": 2002,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_64.zst",
+      "sha256": "2d1cfb37ec56cdbfd364a7d87b2d882921af92bd9764b3b424106a409ac1c810",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_65.zst",
+      "sha256": "19afb9ea208e6b494b374e13b167ae73ab169050662f39634c289b18693d72a8",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_66.zst",
+      "sha256": "21619c8c0472e85a5facbf5e86869f256d61409947b7cfd009bcbce0f8909706",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_67.zst",
+      "sha256": "824a831ac383580fea8751dceb20240ab7592ca0f45f23e16fb3bbc50c250900",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_68.zst",
+      "sha256": "83a0265464c1b64ffd4c75cf5e70c332b031c003815f4f37aad1577bc410033b",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_69.zst",
+      "sha256": "9361becd0bb07705b7d29e52cc77bc2f0dd22cbde9d5f300085fa03fefb04e59",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_7.zst",
+      "sha256": "4e51c5194c44c4b21f690d665d0bbacb05b5e968102649fe6c5eac6a1abe24f7",
+      "frames": 2002,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_70.zst",
+      "sha256": "8d55110d6ccceba90f6cfb4c0249a81a77f3a9e7ef3caf0f7f7722b5682aa7cc",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_71.zst",
+      "sha256": "68eec2e2cb2e408fc72a3b8b41c6ef63531db1e94aef9f5b055486250a3ef0c5",
+      "frames": 2011,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_72.zst",
+      "sha256": "2396f2198850157d38eb715a45c910e28da0c7bf3312c1c7489a411aba22488e",
+      "frames": 2006,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_73.zst",
+      "sha256": "52c41547a8ec695b0b2dad646f7f41531afb733adbd3733bd6401347a24df54d",
+      "frames": 2013,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_8.zst",
+      "sha256": "4378d9ab1fd26009068d92450283e9e022715d000622c82c2e9229f1d01c20ef",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260830/seg_9.zst",
+      "sha256": "f3740218ca8e93cc221c02c9de6a21972a3cfd2011b62a71b84475e373d5dac1",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260831/darksouls_seg0.zst",
+      "sha256": "e73a578baa116c2252a4495c415fa825089be3fbe0a6d78a991471f1000a1db9",
+      "frames": 2054,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260831/darksouls_seg1.zst",
+      "sha256": "eb762f1182996f73358a23ae4c727fc4a26b3353ff59b8d035b4608f428f4622",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260831/darksouls_seg2.zst",
+      "sha256": "f6bf1dab4c00d643c5b11767880da401880e02fcdc87af2cc50b1250053409b8",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260831/darksouls_seg4.zst",
+      "sha256": "4067385f67238bf41baa5a2b49976c6dee62733920725c37ec4ad2592354fb45",
+      "frames": 523,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260831/popv2_seg0.zst",
+      "sha256": "85b107fdfea7f8ce7562fde53da05d58090e74534b9d0bfae7e28ec7136f747c",
+      "frames": 2056,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260831/popv2_seg1.zst",
+      "sha256": "794d39e253864d67b4e5c49d0465fb3db4961009b0313966b1f7eea68707477f",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260831/popv2_seg2.zst",
+      "sha256": "2eec6abe9050496ed8741f33375afb329b7fb2cbeee9564f4653f87a614f6b21",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260831/popv2_seg3.zst",
+      "sha256": "b14bc421b230e3b7f40e7c7001f180b74cca1df58b0d0f5045814d4c52ca04d5",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260831/popv2_seg4.zst",
+      "sha256": "c34e21afa6c807d8352c3331724ea10f5319bcbbfde9a40cdc2a55f218a0790f",
+      "frames": 2002,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260831/popv2_seg5.zst",
+      "sha256": "26748337b4b35119f2e80c5a2431e0e3b4a07ffd3df242f1c00b7f20cea324c2",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260831/popv2_seg6.zst",
+      "sha256": "3011299c15c2263dcaf33b608f469bd4cf0c610239c4470af0df6b1af638a875",
+      "frames": 2005,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260831/popv2_seg7.zst",
+      "sha256": "0e4647e1135bbc8f9df8e87740bffd9a668191b954439aab8e9ddc7e19ed7ebb",
+      "frames": 1860,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260831/rdfv4_seg0.zst",
+      "sha256": "d9a0d871a9e9136d60a9b93619e38985a3d720a4694d6c197dad19740aff8b44",
+      "frames": 2058,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260831/rdfv4_seg1.zst",
+      "sha256": "2f537f2c50c2788629002e3653ed6133cedf02f253893fb3aa812b614ecf6d97",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260831/rdfv4_seg2.zst",
+      "sha256": "becf7dc600e9ee17bca6ba9158400e0ac887920990ba9017f158b58039804230",
+      "frames": 2009,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260831/rdfv4_seg3.zst",
+      "sha256": "a3f608dd29bace1e0ac7db0fa9f1d0d15b6aae6e5a964975c188c190330b8c83",
+      "frames": 1999,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260831/rdfv4_seg4.zst",
+      "sha256": "dab2a002d881f3766bbf84febb031f8135573cacfc17213ae4fb5dde24c70561",
+      "frames": 2010,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260831/rdfv4_seg5.zst",
+      "sha256": "594f4f1fc37bbd60826497791e618a8506de5de3a6da9bc55a65613be1e9894c",
+      "frames": 1993,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_0.zst",
+      "sha256": "55140d32ac7687ae9185a8928c10f6aec6c50ec9c20a834e10f902bfd575d509",
+      "frames": 2058,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_1.zst",
+      "sha256": "fc47f9892a66964a0cd4b875ebaeb5fee7ab1e8037a1462fb5cffc109fa117ab",
+      "frames": 2017,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_10.zst",
+      "sha256": "b6bf1fe1ce8d2c80335bf17a565c77b8bc846922b4900a5d583a43ca47dfa36c",
+      "frames": 2029,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_11.zst",
+      "sha256": "a64bcae5d694e0cbcf23471c2864f4e45dfb2625f0cc463edcdeb8be22981768",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_12.zst",
+      "sha256": "29fcf1e733412a5363c6b8e026a0dfd967b44da4ea4988ead11e3ce9aa70039a",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_13.zst",
+      "sha256": "45a00d5f825a94c0e138bf86a54b12e6e5524f6aee52ed466179165dc78a973d",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_14.zst",
+      "sha256": "42c2ee2287c02e15abe36c6c8d66b348fc5b8f40314363b05359f6fb270cc3db",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_15.zst",
+      "sha256": "49bc351876797ec4309ca7b379d9f9470900ff099a0b5ca3e1e48178df65fe28",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_16.zst",
+      "sha256": "c3ad8fa3bfdebc353f9031695a08005a9e2fffc832ff4939db0ec25f6defca8d",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_17.zst",
+      "sha256": "be638dc32ea0f1ceeaee8dac309be1e9af191846a1e5d22904b2959351c233e4",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_18.zst",
+      "sha256": "57b0832d32b511d829d5b75be5c362ddc46646417946bbdf0411526402aac355",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_19.zst",
+      "sha256": "85bf929dbdd4f35e5e023edcec8a4af7d054907b041592659c79b3217cb9e53f",
+      "frames": 2004,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_2.zst",
+      "sha256": "8a8dfc353b64cce6b4a8530f04e84c15a20046825669535d685544e1fca8b7f7",
+      "frames": 2011,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_20.zst",
+      "sha256": "a82b36707537c0f391dbadea4e3830b50cc64ea557e9f5dae539f317be5b3a5c",
+      "frames": 2002,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_21.zst",
+      "sha256": "91a4370decbda591593da87df2254fc3646747904adcfe4d41a29958285955bd",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_22.zst",
+      "sha256": "98669ea8986e700440f6f17904b14281f3ae600cee4a46be7fd3b05dff25561b",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_23.zst",
+      "sha256": "86f43bfc9185aad38a30c3d27d3a1955a41a9694ddcd47fc7bdaa96c6a565de1",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_24.zst",
+      "sha256": "e4e4482e4745d80a289df9aeb297100abe04a5c6048b4bca978ef41e610fc123",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_25.zst",
+      "sha256": "520bcc517d80adece9f28f48ec7103ba8b76652c8f7c78cfdff0eb108fa2062e",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_26.zst",
+      "sha256": "cc94f057290f92fd5657e047f9b094c8623b71d90554abebf199471489d8f2f0",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_27.zst",
+      "sha256": "2a792e68f0ce659cab69269247b06d2fb1eda6576a0fb90ece29ff53d3a103f1",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_28.zst",
+      "sha256": "ce5fccf31096eba545fd1a7ccfbe659a8a360682d3072a475770f3fdd95c0541",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_29.zst",
+      "sha256": "6dd20e3227c2e308659d72e48672f01e6d69da842515a0187233dcf89d127b34",
+      "frames": 2003,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_3.zst",
+      "sha256": "f1a9f5cd49e55e2881e5641b58dc4ff2d2fda9a8caf4bb0a283dd01261450e92",
+      "frames": 2002,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_30.zst",
+      "sha256": "6c023122e450f4c8bf0ff5c153bd8891dd1125eee516ccd8208349e119a07318",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_31.zst",
+      "sha256": "b634460dedd16f593c1e59fdc42dee75addc669a0c2eae781671c8944319aa27",
+      "frames": 2004,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_32.zst",
+      "sha256": "4be2438fdb9e6b881b29b70f7fff8bbf792a2fb1f19a699fa7077bbe89c479a8",
+      "frames": 2002,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_33.zst",
+      "sha256": "352bc1cf430d4e64cea7f3628a247621927ab88a535cc92e6e47b2d349fbe778",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_34.zst",
+      "sha256": "b8dd1e0f7b8c0bc83be56dfa713173a2349757329de0ef1a11a4cb8432a39afa",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_35.zst",
+      "sha256": "1dca6bfa8329cd1728d50be79e443f79ac05922d26504c908e25bfe3c156cf26",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_36.zst",
+      "sha256": "dcbf820e82d3cb9fa9c563570921ecd42a21aff125e299d5a447ba670bfa8760",
+      "frames": 2014,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_37.zst",
+      "sha256": "0f335bdb2a24a47ce972203362b1ebe8028b514f193ec3497128cc46e1d89c62",
+      "frames": 2005,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_38.zst",
+      "sha256": "c07ad3a36ab1b314313a6231902eea2280357fc95f44fbcadfea83a32caebd41",
+      "frames": 2022,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_4.zst",
+      "sha256": "462c0d9aa148334f1debcf191a4a79279acc8c7dfb6eeb1977a3fdd8663d9e04",
+      "frames": 1999,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_5.zst",
+      "sha256": "9701ec143ece98d3dea8cb035dc100f77a4930c2107f0229fb7641cedaed95e4",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_6.zst",
+      "sha256": "b53eebf46fb17525091a1bcb5ec66e341da9e27325dde6f5b2164a4d483e81a3",
+      "frames": 1999,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_7.zst",
+      "sha256": "23ebb24c856ff637cd78e95d327983f4857e18554af0ae29637eacb9621ef453",
+      "frames": 2003,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_8.zst",
+      "sha256": "19fb559ea27172fdb3c720345257826bfedf9f270f6ba0af21c496fe8be44c7a",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901/seg_9.zst",
+      "sha256": "a3cad41c25c6635394ac23b305221738d975cb874618fd3001f1d5929be4c600",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_0.zst",
+      "sha256": "66867d6c0a72debf2e721a9a1dc6578dce7e155ba0abe7081640c7be15431d48",
+      "frames": 2056,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_1.zst",
+      "sha256": "7e2d30ce06a6cec92beca338b347b78e709ad5e05d9247c4c904c4cc4492a1ba",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_10.zst",
+      "sha256": "ca0818a802a75c38dc0958f4856bfc8373fd6ab9ee41d061f8a63ada15288a4d",
+      "frames": 1999,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_11.zst",
+      "sha256": "49e4a4bdab035d6078f6443a69fc30c9e89dd03ee91ec0fedf3fb39febb49ffc",
+      "frames": 2006,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_12.zst",
+      "sha256": "8de30c5fec3e64615e2fc15e89dd4d6953a67f1c744b100b8c5be5aea168c8fa",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_13.zst",
+      "sha256": "d7c0059df62f63a04243a2c4fabc5c9ea5ff698ebbf2fa92912f13514ab5c885",
+      "frames": 2004,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_14.zst",
+      "sha256": "b28eebadeed875e0a7989cef5b9dcecd0029a9e9064820a678c9a9346879e755",
+      "frames": 2007,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_15.zst",
+      "sha256": "f209be5278fb6d685fe0ddac74f769d1c8ebe508d87589f48c70e5bd706bffb6",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_16.zst",
+      "sha256": "cfe4be22b868e40ad5fcf54d832c9ac868b3f042bb72df3648304823003e906e",
+      "frames": 2008,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_17.zst",
+      "sha256": "6abde48b263ae0fb85e50c3fe1c79b9aecaa198381c0c18429148a2d4524279d",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_18.zst",
+      "sha256": "8e7f5c115d99875220cc3702fdb594d4718bf65c1e05b0c603dfcff1e211fcf6",
+      "frames": 2000,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_19.zst",
+      "sha256": "2a8d48775ccdd5a77fc3023b8dc38538035a3aec63afaaab7549d210baed7311",
+      "frames": 2011,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_2.zst",
+      "sha256": "8e5f9be07556147f415df4f569ba1f257db78085326b7aec096f5e7400a35d10",
+      "frames": 2008,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_20.zst",
+      "sha256": "4d4aa6f09ea3a6f8d829a15b3ad61cbfc38170fbfd10aeccab5a454a0ddd8108",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_21.zst",
+      "sha256": "6796648692e67dad8c7f204db035928998593555ed691304b5327ed5e30fb91d",
+      "frames": 1999,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_22.zst",
+      "sha256": "b647156a42e38dd37236d9e7825acd5cf84a25dde94577c38678cf79f1a47fc0",
+      "frames": 2014,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_23.zst",
+      "sha256": "cc3c7e95a6116c32f9640a7368fc2beffb1bdcd3642fc7ea302509d2fc5d1656",
+      "frames": 2003,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_24.zst",
+      "sha256": "7ecaa0df2be76a73c8ec12e65353390226acfb9201c3572995ddb04fe317b888",
+      "frames": 2016,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_25.zst",
+      "sha256": "ee4ad8fc175de1f095ac9c942357a0c032379bf8670c24b42401be3eb75dc69b",
+      "frames": 2009,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_26.zst",
+      "sha256": "2ff4c3f2fdc3a5174f187af103f81fe9521cbf481fa62b13f9f6188aa7cf009c",
+      "frames": 2016,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_4.zst",
+      "sha256": "53180d38def468483c9d4417be02b409123e625c10c7b4c5412e999e97bdd9d1",
+      "frames": 2015,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_5.zst",
+      "sha256": "420d54abd24c0872270b11ad777c133264d3ffa9eb656b9226f90343bd53d91a",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_6.zst",
+      "sha256": "d53185bb934c8dde6302a2675cadd355a2cd600610b3f48bf812583a96287381",
+      "frames": 2001,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_7.zst",
+      "sha256": "18883067025ac27942f2f2834fc6bf306d46cda54e8aeac77a88185b3d59d31f",
+      "frames": 2002,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_8.zst",
+      "sha256": "1ab47ec8828f29845b47c2d73f406dfd9598d1f98ae7b1221d013e15d44dac61",
+      "frames": 2015,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    },
+    {
+      "path": "/tmp/claude-501/-Users-trentterrito-AI-Claude/d9e8c982-1ad8-46a4-9cd8-33bf9a18b20e/scratchpad/rlogs_20260901_2e/seg_9.zst",
+      "sha256": "7cb370a22eb0ccc32bd6c979d0175a9f07198cf6983d68e6a8d76454b1f09f17",
+      "frames": 2002,
+      "failures": {
+        "checksum_reject": 0,
+        "eligible_status_false_reject": 0,
+        "unavailable_status_false_accept": 0,
+        "unexpected_authorization": 0,
+        "pre_rx_progress_false_expiry": 0
+      }
+    }
+  ],
+  "maximum_pre_rx_age_from_previously_eligible_counter_us": 48985,
+  "limitations": [
+    "Actual C status checks only, not a whole-vehicle/HIL eligibility test.",
+    "No physical TJA request synthesized; no positive engagement validation.",
+    "Changing captured sequences remain replayable; this is frozen-source detection, not authentication."
+  ]
+}

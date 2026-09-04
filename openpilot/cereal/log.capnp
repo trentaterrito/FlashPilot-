@@ -569,8 +569,8 @@ struct PandaState @0xa7649e2575e4591e {
 
   # these fields are not used by openpilot, but they're
   # reserved for forks building alternate experiences.
-  controlsAllowedRESERVED1 @38 :Bool;
-  controlsAllowedRESERVED2 @39 :Bool;
+  controlsAllowedLateral @38 :Bool;
+  madsSafetyEnabled @39 :Bool;
 
   enum FaultStatus {
     none @0;
@@ -867,6 +867,10 @@ struct SelfdriveState {
 }
 
 struct ControlsState @0x97ff69c53601abf1 {
+  madsState @67 :Custom.ModularAssistiveDrivingSystem;
+  madsAuthorized @68 :Bool;
+  madsEligible @69 :Bool;
+  madsSoftDisableTimer @70 :UInt16;  # Existing lifecycle countdown, for takeover alerts only
   longitudinalPlanMonoTime @28 :UInt64;
   lateralPlanMonoTime @50 :UInt64;
 
@@ -2635,7 +2639,7 @@ struct Event {
     customReserved0 @107 :Custom.CustomReserved0;
     customReserved1 @108 :Custom.CustomReserved1;
     customReserved2 @109 :Custom.CustomReserved2;
-    customReserved3 @110 :Custom.CustomReserved3;
+    customReserved3 @110 :Custom.OnroadEventSP;
     customReserved4 @111 :Custom.CustomReserved4;
     customReserved5 @112 :Custom.CustomReserved5;
     customReserved6 @113 :Custom.CustomReserved6;

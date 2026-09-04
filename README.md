@@ -1,3 +1,9 @@
+> FlashPilot MADS development: this branch contains an **offline-only** sunnypilot
+> reference core, not active vehicle MADS. This project uses software from Haibin
+> Wen and SUNNYPILOT LLC and is licensed under a custom license requiring permission
+> for use. See [the MADS port status](docs/FLASHPILOT_MADS_DESIGN.md) and the
+> [upstream license](opendbc_repo/opendbc/safety/sunnypilot/LICENSE.md).
+
 <div align="center" style="text-align: center;">
 
 <h1>openpilot</h1>

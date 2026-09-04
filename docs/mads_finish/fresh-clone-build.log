@@ -1,0 +1,976 @@
+scons: Reading SConscript files ...
+kj/filesystem-disk-unix.c++:1734: warning: PWD environment variable doesn't match current directory; pwd = /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo
+scons: done reading SConscript files.
+scons: Building targets ...
+progress: 0.1
+progress: 0.3
+progress: 0.4
+progress: 0.6
+progress: 0.7
+progress: 0.9
+progress: 1.0
+progress: 1.2
+progress: 1.3
+progress: 1.5
+progress: 1.6
+progress: 1.8
+progress: 1.9
+progress: 2.1
+progress: 2.2
+progress: 2.4
+progress: 2.5
+progress: 2.7
+progress: 2.8
+progress: 3.0
+progress: 3.1
+progress: 3.3
+progress: 3.4
+progress: 3.5
+progress: 3.7
+progress: 3.8
+progress: 4.0
+progress: 4.1
+progress: 4.3
+progress: 4.4
+progress: 4.6
+progress: 4.7
+progress: 4.9
+progress: 5.0
+progress: 5.2
+Building compilation database compile_commands.json
+progress: 5.3
+progress: 5.5
+progress: 5.6
+progress: 5.8
+progress: 5.9
+progress: 6.1
+progress: 6.2
+progress: 6.4
+progress: 6.5
+progress: 6.7
+progress: 6.8
+progress: 6.9
+progress: 7.1
+progress: 7.2
+progress: 7.4
+progress: 7.5
+progress: 7.7
+progress: 7.8
+progress: 8.0
+progress: 8.1
+progress: 8.3
+progress: 8.4
+progress: 8.6
+progress: 8.7
+progress: 8.9
+progress: 9.0
+progress: 9.2
+progress: 9.3
+progress: 9.5
+progress: 9.6
+progress: 9.8
+progress: 9.9
+progress: 10.1
+progress: 10.2
+progress: 10.3
+progress: 10.5
+progress: 10.6
+progress: 10.8
+progress: 10.9
+progress: 11.1
+progress: 11.2
+progress: 11.4
+progress: 11.5
+progress: 11.7
+progress: 11.8
+progress: 12.0
+progress: 12.1
+progress: 12.3
+progress: 12.4
+progress: 12.6
+progress: 12.7
+progress: 12.9
+progress: 13.0
+progress: 13.2
+progress: 13.3
+progress: 13.4
+progress: 13.6
+progress: 13.7
+progress: 13.9
+progress: 14.0
+  [CXX] openpilot/cereal/gen/cpp/car.capnp.o
+progress: 14.2
+  [CXX] openpilot/cereal/gen/cpp/custom.capnp.o
+  [CXX] openpilot/cereal/gen/cpp/deprecated.capnp.o
+  [CXX] openpilot/cereal/gen/cpp/log.capnp.o
+progress: 14.3
+progress: 14.5
+progress: 14.6
+progress: 14.8
+progress: 14.9
+progress: 15.1
+progress: 15.2
+progress: 15.4
+progress: 15.5
+progress: 15.7
+progress: 15.8
+progress: 16.0
+progress: 16.1
+progress: 16.3
+progress: 16.4
+progress: 16.6
+progress: 16.7
+progress: 16.8
+progress: 17.0
+progress: 17.1
+  [CXX] openpilot/common/tests/test_swaglog.o
+progress: 17.3
+progress: 17.4
+progress: 17.6
+progress: 17.7
+progress: 17.9
+progress: 18.0
+progress: 18.2
+progress: 18.3
+progress: 18.5
+progress: 18.6
+progress: 18.8
+progress: 18.9
+progress: 19.1
+progress: 19.2
+progress: 19.4
+progress: 19.5
+progress: 19.7
+  [CC] openpilot/selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code/acados_ocp_solver_pyx.o
+  [CC] openpilot/selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code/acados_solver_long.os
+progress: 19.8
+  [CC] openpilot/selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code/long_cost/long_cost_y_fun_jac_ut_xt.os
+progress: 20.0
+  [CC] openpilot/selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code/long_cost/long_cost_y_e_fun_jac_ut_xt.os
+  [CC] openpilot/selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code/long_cost/long_cost_y_0_fun_jac_ut_xt.os
+progress: 20.1
+  [CC] openpilot/selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code/long_constraints/long_constr_h_fun_jac_uxt_zt.os
+progress: 20.2
+  [LINK] openpilot/selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code/libacados_ocp_solver_long.dylib
+progress: 20.4
+progress: 20.5
+progress: 20.7
+progress: 20.8
+progress: 21.0
+progress: 21.1
+progress: 21.3
+progress: 21.4
+progress: 21.6
+progress: 21.7
+progress: 21.9
+progress: 22.0
+progress: 22.2
+progress: 22.3
+progress: 22.5
+progress: 22.6
+progress: 22.8
+progress: 22.9
+progress: 23.1
+progress: 23.2
+progress: 23.4
+progress: 23.5
+progress: 23.6
+progress: 23.8
+progress: 23.9
+progress: 24.1
+progress: 24.2
+progress: 24.4
+progress: 24.5
+progress: 24.7
+progress: 24.8
+progress: 25.0
+progress: 25.1
+progress: 25.3
+progress: 25.4
+progress: 25.6
+progress: 25.7
+progress: 25.9
+progress: 26.0
+progress: 26.2
+progress: 26.3
+progress: 26.5
+progress: 26.6
+progress: 26.8
+progress: 26.9
+progress: 27.0
+progress: 27.2
+progress: 27.3
+progress: 27.5
+progress: 27.6
+progress: 27.8
+  [LINK] openpilot/selfdrive/locationd/models/generated/libcar.dylib
+progress: 27.9
+  [LINK] openpilot/selfdrive/locationd/models/generated/libpose.dylib
+progress: 28.1
+progress: 28.2
+progress: 28.4
+progress: 28.5
+progress: 28.7
+progress: 28.8
+progress: 29.0
+progress: 29.1
+progress: 29.3
+progress: 29.4
+progress: 29.6
+progress: 29.7
+progress: 29.9
+progress: 30.0
+progress: 30.2
+progress: 30.3
+progress: 30.4
+progress: 30.6
+progress: 30.7
+progress: 30.9
+progress: 31.0
+progress: 31.2
+progress: 31.3
+progress: 31.5
+progress: 31.6
+progress: 31.8
+progress: 31.9
+progress: 32.1
+progress: 32.2
+progress: 32.4
+progress: 32.5
+progress: 32.7
+progress: 32.8
+progress: 33.0
+progress: 33.1
+progress: 33.3
+progress: 33.4
+progress: 33.6
+progress: 33.7
+progress: 33.8
+progress: 34.0
+progress: 34.1
+progress: 34.3
+progress: 34.4
+progress: 34.6
+progress: 34.7
+progress: 34.9
+progress: 35.0
+progress: 35.2
+progress: 35.3
+progress: 35.5
+progress: 35.6
+progress: 35.8
+progress: 35.9
+progress: 36.1
+progress: 36.2
+progress: 36.4
+progress: 36.5
+progress: 36.7
+progress: 36.8
+progress: 36.9
+progress: 37.1
+progress: 37.2
+progress: 37.4
+progress: 37.5
+progress: 37.7
+progress: 37.8
+progress: 38.0
+progress: 38.1
+progress: 38.3
+progress: 38.4
+progress: 38.6
+progress: 38.7
+progress: 38.9
+progress: 39.0
+progress: 39.2
+progress: 39.3
+progress: 39.5
+progress: 39.6
+progress: 39.8
+progress: 39.9
+progress: 40.1
+progress: 40.2
+progress: 40.3
+progress: 40.5
+progress: 40.6
+progress: 40.8
+progress: 40.9
+progress: 41.1
+progress: 41.2
+progress: 41.4
+progress: 41.5
+progress: 41.7
+progress: 41.8
+progress: 42.0
+progress: 42.1
+progress: 42.3
+progress: 42.4
+progress: 42.6
+progress: 42.7
+progress: 42.9
+progress: 43.0
+progress: 43.2
+progress: 43.3
+progress: 43.5
+progress: 43.6
+progress: 43.7
+progress: 43.9
+progress: 44.0
+progress: 44.2
+progress: 44.3
+progress: 44.5
+progress: 44.6
+progress: 44.8
+progress: 44.9
+progress: 45.1
+progress: 45.2
+progress: 45.4
+progress: 45.5
+progress: 45.7
+progress: 45.8
+progress: 46.0
+progress: 46.1
+progress: 46.3
+progress: 46.4
+progress: 46.6
+progress: 46.7
+progress: 46.9
+progress: 47.0
+progress: 47.1
+progress: 47.3
+progress: 47.4
+progress: 47.6
+progress: 47.7
+progress: 47.9
+progress: 48.0
+progress: 48.2
+progress: 48.3
+progress: 48.5
+progress: 48.6
+progress: 48.8
+progress: 48.9
+progress: 49.1
+progress: 49.2
+progress: 49.4
+progress: 49.5
+progress: 49.7
+progress: 49.8
+progress: 50.0
+progress: 50.1
+progress: 50.3
+progress: 50.4
+progress: 50.5
+progress: 50.7
+progress: 50.8
+progress: 51.0
+progress: 51.1
+progress: 51.3
+progress: 51.4
+progress: 51.6
+progress: 51.7
+progress: 51.9
+progress: 52.0
+progress: 52.2
+progress: 52.3
+progress: 52.5
+progress: 52.6
+progress: 52.8
+progress: 52.9
+progress: 53.1
+progress: 53.2
+progress: 53.4
+progress: 53.5
+progress: 53.7
+progress: 53.8
+progress: 53.9
+progress: 54.1
+progress: 54.2
+progress: 54.4
+progress: 54.5
+progress: 54.7
+progress: 54.8
+progress: 55.0
+progress: 55.1
+progress: 55.3
+progress: 55.4
+progress: 55.6
+progress: 55.7
+progress: 55.9
+progress: 56.0
+progress: 56.2
+progress: 56.3
+progress: 56.5
+progress: 56.6
+progress: 56.8
+progress: 56.9
+progress: 57.0
+progress: 57.2
+progress: 57.3
+progress: 57.5
+progress: 57.6
+progress: 57.8
+progress: 57.9
+progress: 58.1
+progress: 58.2
+progress: 58.4
+progress: 58.5
+progress: 58.7
+progress: 58.8
+progress: 59.0
+progress: 59.1
+progress: 59.3
+progress: 59.4
+progress: 59.6
+progress: 59.7
+progress: 59.9
+progress: 60.0
+progress: 60.2
+progress: 60.3
+progress: 60.4
+progress: 60.6
+progress: 60.7
+progress: 60.9
+progress: 61.0
+progress: 61.2
+progress: 61.3
+progress: 61.5
+progress: 61.6
+progress: 61.8
+progress: 61.9
+progress: 62.1
+progress: 62.2
+progress: 62.4
+progress: 62.5
+progress: 62.7
+progress: 62.8
+progress: 63.0
+progress: 63.1
+progress: 63.3
+progress: 63.4
+progress: 63.6
+progress: 63.7
+progress: 63.8
+progress: 64.0
+progress: 64.1
+progress: 64.3
+progress: 64.4
+progress: 64.6
+progress: 64.7
+progress: 64.9
+progress: 65.0
+progress: 65.2
+progress: 65.3
+progress: 65.5
+progress: 65.6
+progress: 65.8
+progress: 65.9
+progress: 66.1
+progress: 66.2
+progress: 66.4
+progress: 66.5
+progress: 66.7
+progress: 66.8
+progress: 67.0
+progress: 67.1
+progress: 67.2
+progress: 67.4
+progress: 67.5
+progress: 67.7
+progress: 67.8
+progress: 68.0
+progress: 68.1
+progress: 68.3
+progress: 68.4
+progress: 68.6
+progress: 68.7
+progress: 68.9
+progress: 69.0
+progress: 69.2
+progress: 69.3
+progress: 69.5
+progress: 69.6
+progress: 69.8
+progress: 69.9
+progress: 70.1
+progress: 70.2
+progress: 70.4
+progress: 70.5
+progress: 70.6
+progress: 70.8
+progress: 70.9
+progress: 71.1
+progress: 71.2
+progress: 71.4
+progress: 71.5
+progress: 71.7
+progress: 71.8
+progress: 72.0
+progress: 72.1
+progress: 72.3
+progress: 72.4
+progress: 72.6
+progress: 72.7
+progress: 72.9
+progress: 73.0
+progress: 73.2
+progress: 73.3
+progress: 73.5
+progress: 73.6
+progress: 73.8
+progress: 73.9
+progress: 74.0
+progress: 74.2
+progress: 74.3
+progress: 74.5
+DEV=CPU HOME=/Users/trentterrito python3 /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/openpilot/selfdrive/modeld/compile_dm_warp.py --camera-resolution 1344x760 --warp-to 1440x960 --output /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/openpilot/selfdrive/modeld/models/dm_warp_1344x760_tinygrad.pkl
+DEV=CPU HOME=/Users/trentterrito python3 /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/openpilot/selfdrive/modeld/compile_dm_warp.py --camera-resolution 1928x1208 --warp-to 1440x960 --output /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/openpilot/selfdrive/modeld/models/dm_warp_1928x1208_tinygrad.pkl
+progress: 74.6
+progress: 74.8
+DEV=CPU HOME=/Users/trentterrito python3 /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/openpilot/selfdrive/modeld/get_model_metadata.py /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/openpilot/selfdrive/modeld/models/dmonitoring_model.onnx
+Compiling DM warp for 1344x760 -> 1440x960...
+Compiling DM warp for 1928x1208 -> 1440x960...
+saved metadata to /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/openpilot/selfdrive/modeld/models/dmonitoring_model_metadata.pkl
+PYTHONPATH=":/private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/tinygrad_repo" DEV=CPU python3 /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/tinygrad_repo/examples/openpilot/compile3.py /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/openpilot/selfdrive/modeld/models/dmonitoring_model.onnx /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/openpilot/selfdrive/modeld/models/dmonitoring_model_tinygrad.pkl
+loaded model
+  [1/10] enqueue 201.59 ms -- total 201.60 ms
+  [2/10] enqueue  29.45 ms -- total  29.46 ms
+  [3/10] enqueue   6.03 ms -- total   6.03 ms
+  [4/10] enqueue  13.57 ms -- total  13.59 ms
+  [5/10] enqueue   5.98 ms -- total   5.99 ms
+  [6/10] enqueue   5.25 ms -- total   5.26 ms
+  [7/10] enqueue   7.98 ms -- total   8.00 ms
+  [8/10] enqueue   5.90 ms -- total   5.91 ms
+  [9/10] enqueue  19.27 ms -- total  19.30 ms
+  [10/10] enqueue   5.26 ms -- total   5.27 ms
+  Saved to /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/openpilot/selfdrive/modeld/models/dm_warp_1344x760_tinygrad.pkl
+progress: 74.9
+  [1/10] enqueue 190.01 ms -- total 190.03 ms
+  [2/10] enqueue  25.69 ms -- total  25.70 ms
+  [3/10] enqueue   7.35 ms -- total   7.36 ms
+  [4/10] enqueue   5.97 ms -- total   5.98 ms
+  [5/10] enqueue   5.54 ms -- total   5.54 ms
+  [6/10] enqueue  14.16 ms -- total  14.18 ms
+  [7/10] enqueue  25.10 ms -- total  25.12 ms
+  [8/10] enqueue   7.89 ms -- total   7.90 ms
+  [9/10] enqueue  13.49 ms -- total  13.52 ms
+  [10/10] enqueue   6.02 ms -- total   6.03 ms
+  Saved to /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/openpilot/selfdrive/modeld/models/dm_warp_1928x1208_tinygrad.pkl
+progress: 75.1
+DEV=CPU HOME=/Users/trentterrito python3 /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/openpilot/selfdrive/modeld/compile_modeld.py --model-size 512x256 --camera-resolutions 1928x1208 1344x760 --onnx /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/openpilot/selfdrive/modeld/models/driving_supercombo.onnx --output /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/openpilot/selfdrive/modeld/models/driving_tinygrad.pkl --frame-skip 4
+progress: 75.2
+progress: 75.4
+progress: 75.5
+progress: 75.7
+progress: 75.8
+progress: 76.0
+progress: 76.1
+progress: 76.3
+progress: 76.4
+progress: 76.6
+progress: 76.7
+progress: 76.9
+progress: 77.0
+progress: 77.2
+  [CXX] openpilot/system/loggerd/bootlog.o
+  [LINK] openpilot/selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code/acados_ocp_solver_pyx.so
+progress: 77.3
+  [CXX] openpilot/system/loggerd/logger.o
+progress: 77.4
+  [CXX] openpilot/system/loggerd/zstd_writer.o
+compiling:   0%|                                         | 0/44 [00:00<?, ?it/s]compiling r[90m_[0m[97m64[0m[90m_[0m[97m30[0m[90m_[0m[97m15[0m[90m_[0m[33m3[0m[90m_[0m[31m5[0m[90m_[0m[35m5[0m                        :   2%| | 1/44 [00:00<00:08,  4.83it/s]compiling r[90m_[0m[97m16[0m[90m_[0m[97m450[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m24[0m[90m_[0m[35m4[0m                       :   5%| | 2/44 [00:00<00:08,  4.74it/s]compiling r[90m_[0m[97m64[0m[90m_[0m[97m450[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m16[0m[90m_[0m[35m4[0m                       :   7%| | 3/44 [00:00<00:07,  5.62it/s]compiling r[90m_[0m[97m32[0m[90m_[0m[97m115[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m48[0m[90m_[0m[35m4[0m                       :   9%| | 4/44 [00:00<00:06,  5.78it/s]compiling r[90m_[0m[97m192[0m[90m_[0m[97m5[0m[90m_[0m[97m23[0m[90m_[0m[33m3[0m[90m_[0m[31m5[0m[90m_[0m[35m5[0m                        :  11%| | 5/44 [00:00<00:06,  6.44it/s]progress: 77.6
+progress: 77.7
+progress: 77.9
+progress: 78.0
+progress: 78.2
+progress: 78.3
+progress: 78.5
+  [CXX] openpilot/system/loggerd/video_writer.o
+  [CXX] openpilot/system/loggerd/encoder/encoder.o
+compiling r[90m_[0m[97m64[0m[90m_[0m[97m115[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m24[0m[90m_[0m[35m4[0m                       :  14%|▏| 6/44 [00:01<00:06,  5.67it/s]compiling r[90m_[0m[97m192[0m[90m_[0m[97m5[0m[90m_[0m[97m23[0m[90m_[0m[33m3[0m[90m_[0m[35m3[0m[90m_[0m[35m3[0m                        :  16%|▏| 7/44 [00:01<00:06,  6.01it/s]compiling r[90m_[0m[97m32[0m[90m_[0m[97m30[0m[90m_[0m[97m15[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m32[0m[90m_[0m[35m3[0m[90m_[0m[35m3[0m                   :  18%|▏| 8/44 [00:01<00:05,  6.76it/s]compiling r[90m_[0m[97m8[0m[90m_[0m[97m60[0m[90m_[0m[97m30[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m32[0m[90m_[0m[35m3[0m[90m_[0m[35m3[0m                    :  20%|▏| 9/44 [00:01<00:04,  7.47it/s]compiling r[90m_[0m[97m32[0m[90m_[0m[97m115[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m48[0m[90m_[0m[35m4[0m                       :  23%|▏| 10/44 [00:01<00:04,  8.16it/s]compiling r[90m_[0m[97m8[0m[90m_[0m[97m120[0m[90m_[0m[97m60[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m4[0m[90m_[0m[31m4[0m[90m_[0m[35m3[0m[90m_[0m[35m3[0m                  :  25%|▎| 11/44 [00:01<00:03,  8.90it/s]compiling r[90m_[0m[97m32[0m[90m_[0m[97m115[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m96[0m[90m_[0m[35m4[0m                       :  27%|▎| 12/44 [00:01<00:03,  8.74it/s]compiling r[90m_[0m[97m96[0m[90m_[0m[97m5[0m[90m_[0m[97m23[0m[90m_[0m[33m3[0m[90m_[0m[35m3[0m[90m_[0m[35m3[0m                         :  30%|▎| 13/44 [00:01<00:03,  9.00it/s]compiling r[90m_[0m[97m8[0m[90m_[0m[97m1800[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[35m32[0m                         :  32%|▎| 14/44 [00:01<00:03,  9.65it/s]compiling r[90m_[0m[97m128[0m[90m_[0m[97m115[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m24[0m[90m_[0m[35m4[0m                      :  34%|▎| 15/44 [00:01<00:02, 10.04it/s]compiling r[90m_[0m[97m192[0m[90m_[0m[97m115[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m24[0m[90m_[0m[35m4[0m                      :  36%|▎| 16/44 [00:01<00:02, 10.53it/s]compiling r[90m_[0m[97m32[0m[90m_[0m[97m32[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m144[0m[90m_[0m[35m4[0m                       :  39%|▍| 17/44 [00:01<00:02, 10.79it/s]compiling r[90m_[0m[97m128[0m[90m_[0m[97m8[0m[90m_[0m[97m4[0m[90m_[0m[33m3[0m[90m_[0m[31m5[0m[90m_[0m[35m5[0m                         :  41%|▍| 18/44 [00:01<00:02, 11.33it/s]compiling r[90m_[0m[97m512[0m[90m_[0m[97m8[0m[90m_[0m[97m4[0m[90m_[0m[33m3[0m[90m_[0m[31m5[0m[90m_[0m[35m5[0m                         :  43%|▍| 19/44 [00:01<00:02, 11.27it/s]compiling r[90m_[0m[97m32[0m[90m_[0m[97m32[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m128[0m[90m_[0m[35m4[0m                       :  45%|▍| 20/44 [00:01<00:02, 11.61it/s]compiling r[90m_[0m[97m384[0m[90m_[0m[97m8[0m[90m_[0m[97m4[0m[90m_[0m[33m3[0m[90m_[0m[31m5[0m[90m_[0m[35m5[0m                         :  48%|▍| 21/44 [00:01<00:01, 11.61it/s]compiling r[90m_[0m[97m128[0m[90m_[0m[97m32[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m32[0m[90m_[0m[35m4[0m                       :  50%|▌| 22/44 [00:01<00:01, 11.94it/s]compiling r[90m_[0m[97m960[0m[90m_[0m[31m128[0m[90m_[0m[31m24[0m[90m_[0m[35m4[0m                          :  52%|▌| 23/44 [00:01<00:01, 12.08it/s]compiling r[90m_[0m[97m128[0m[90m_[0m[97m32[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m32[0m[90m_[0m[35m4[0m                       :  55%|▌| 24/44 [00:01<00:01, 12.59it/s]compiling r[90m_[0m[97m32[0m[90m_[0m[97m32[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m96[0m[90m_[0m[35m4[0m                        :  57%|▌| 25/44 [00:01<00:01, 13.06it/s]compiling r[90m_[0m[97m512[0m[90m_[0m[31m320[0m[90m_[0m[35m4[0m                             :  59%|▌| 26/44 [00:01<00:01, 13.56it/s]compiling E[90m_[0m[97m515[0m                                   :  61%|▌| 27/44 [00:01<00:01, 14.02it/s]compiling r[90m_[0m[97m64[0m[90m_[0m[31m128[0m[90m_[0m[35m4[0m                              :  64%|▋| 28/44 [00:01<00:01, 14.50it/s]compiling r[90m_[0m[97m576[0m[90m_[0m[97m8[0m[90m_[0m[97m4[0m[90m_[0m[33m3[0m[90m_[0m[35m3[0m[90m_[0m[35m3[0m                         :  66%|▋| 29/44 [00:01<00:01, 15.00it/s]compiling r[90m_[0m[97m32[0m[90m_[0m[31m128[0m[90m_[0m[35m4[0m                              :  68%|▋| 30/44 [00:01<00:00, 15.47it/s]compiling r[90m_[0m[97m48[0m[90m_[0m[31m16[0m[90m_[0m[35m4[0m                               :  70%|▋| 31/44 [00:01<00:00, 15.75it/s]compiling r[90m_[0m[97m48[0m[90m_[0m[31m128[0m[90m_[0m[35m4[0m                              :  73%|▋| 32/44 [00:01<00:00, 16.25it/s]compiling r[90m_[0m[97m12[0m[90m_[0m[33m4[0m[90m_[0m[31m515[0m                              :  75%|▊| 33/44 [00:01<00:00, 16.64it/s]compiling r[90m_[0m[97m32[0m[90m_[0m[31m12[0m[90m_[0m[35m4[0m                               :  77%|▊| 34/44 [00:01<00:00, 17.08it/s]compiling r[90m_[0m[97m320[0m[90m_[0m[33m4[0m[90m_[0m[31m240[0m[90m_[0m[35m4[0m                           :  80%|▊| 35/44 [00:01<00:00, 17.53it/s]compiling r[90m_[0m[97m8[0m[90m_[0m[33m4[0m[90m_[0m[31m515[0m                               :  82%|▊| 36/44 [00:01<00:00, 18.01it/s]compiling r[90m_[0m[97m2[0m[90m_[0m[35m16[0m                                  :  84%|▊| 37/44 [00:02<00:00, 18.18it/s]compiling r[90m_[0m[97m24[0m[90m_[0m[35m32[0m                                 :  86%|▊| 38/44 [00:02<00:00, 18.63it/s]compiling r[90m_[0m[97m3[0m[90m_[0m[35m16[0m                                  :  89%|▉| 39/44 [00:02<00:00, 19.06it/s]compiling r[90m_[0m[97m16[0m[90m_[0m[35m24[0m                                 :  91%|▉| 40/44 [00:02<00:00, 19.49it/s]compiling r[90m_[0m[97m512[0m[90m_[0m[97m8[0m[90m_[0m[97m4[0m[90m_[0m[33m3[0m[90m_[0m[35m3[0m[90m_[0m[35m3[0m                         :  93%|▉| 41/44 [00:02<00:00, 19.68it/s]compiling r[90m_[0m[97m553[0m[90m_[0m[31m32[0m[90m_[0m[35m24[0m                             :  95%|▉| 42/44 [00:02<00:00, 19.51it/s]compiling r[90m_[0m[97m553[0m[90m_[0m[31m24[0m[90m_[0m[31m16[0m[90m_[0m[31m32[0m[90m_[0m[35m16[0m                       :  98%|▉| 43/44 [00:02<00:00, 19.84it/s]compiling r[90m_[0m[97m553[0m[90m_[0m[31m32[0m[90m_[0m[31m24[0m[90m_[0m[31m16[0m[90m_[0m[31m32[0m[90m_[0m[31m24[0m[90m_[0m[31m24[0m[90m_[0m[31m16[0m[90m_[0m[31m32[0m[90m_[0m[31m24[0m[90m_[0m[35m16[0m     : 100%|█| 44/44 [00:02<00:00, 19.47it/s]compiling r[90m_[0m[97m553[0m[90m_[0m[31m32[0m[90m_[0m[31m24[0m[90m_[0m[31m16[0m[90m_[0m[31m32[0m[90m_[0m[31m24[0m[90m_[0m[31m24[0m[90m_[0m[31m16[0m[90m_[0m[31m32[0m[90m_[0m[31m24[0m[90m_[0m[35m16[0m     : 100%|█| 44/44 [00:02<00:00, 19.47it/s]
+progress: 78.6
+  [CXX] openpilot/system/loggerd/encoder/jpeg_encoder.o
+progress: 78.8
+  [CXX] openpilot/system/loggerd/encoder/ffmpeg_encoder.o
+created tensors
+run 0
+scheduled   288 kernels in  1090.18 ms | CACHE MISS 216f0d53 |   23651 uops in cache | /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/tinygrad_repo/examples/openpilot/compile3.py:70
+memory reduced from 6.82 MB -> 1.73 MB, 86 -> 1 bufs
+run 1
+scheduled    88 kernels in   369.22 ms | CACHE MISS 837f7075 |   39603 uops in cache | /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/tinygrad_repo/examples/openpilot/compile3.py:70
+JIT captured 1 linears with 2 inputs
+pruned from 88 -> 88 kernels
+memory reduced from 6.82 MB -> 1.73 MB, 86 -> 1 bufs
+jit execs 88 calls
+run 2
+jit execs 88 calls
+[35m*** CPU        1[0m [33mcopy       12 B,     CPU <- NPY    [0m            arg  2 mem   0.01 GB tm    121.33us/     0.12ms (      0 GFLOPS    0|0      GB/s)
+[35m*** CPU        2[0m r[90m_[0m[97m8[0m[90m_[0m[97m120[0m[90m_[0m[97m60[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m4[0m[90m_[0m[31m4[0m[90m_[0m[35m3[0m[90m_[0m[35m3[0m                         arg  4 mem   0.01 GB tm [33m    25.78ms[0m/    25.91ms (     12 GFLOPS    0|3      GB/s)
+[35m*** CPU        3[0m r[90m_[0m[97m8[0m[90m_[0m[97m60[0m[90m_[0m[97m30[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m32[0m[90m_[0m[35m3[0m[90m_[0m[35m3[0m                           arg  4 mem   0.01 GB tm [33m    11.93ms[0m/    37.84ms (      9 GFLOPS    0|4      GB/s)
+[35m*** CPU        4[0m r[90m_[0m[97m8[0m[90m_[0m[97m1800[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[35m32[0m                                arg  4 mem   0.01 GB tm   1141.00us/    38.98ms (     16 GFLOPS    1|3      GB/s)
+[35m*** CPU        5[0m r[90m_[0m[97m32[0m[90m_[0m[97m30[0m[90m_[0m[97m15[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m32[0m[90m_[0m[35m3[0m[90m_[0m[35m3[0m                          arg  4 mem   0.01 GB tm   9869.67us/    48.85ms (      8 GFLOPS    0|5      GB/s)
+[35m*** CPU        6[0m r[90m_[0m[97m16[0m[90m_[0m[97m450[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m24[0m[90m_[0m[35m4[0m                              arg  4 mem   0.01 GB tm   3054.21us/    51.90ms (      7 GFLOPS    0|3      GB/s)
+[35m*** CPU        7[0m r[90m_[0m[97m64[0m[90m_[0m[97m30[0m[90m_[0m[97m15[0m[90m_[0m[33m3[0m[90m_[0m[31m5[0m[90m_[0m[35m5[0m                               arg  4 mem   0.01 GB tm    892.46us/    52.79ms (      6 GFLOPS    0|4      GB/s)
+[35m*** CPU        8[0m r[90m_[0m[97m64[0m[90m_[0m[97m450[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m16[0m[90m_[0m[35m4[0m                              arg  4 mem   0.01 GB tm   7501.00us/    60.29ms (      6 GFLOPS    0|3      GB/s)
+[35m*** CPU        9[0m r[90m_[0m[97m192[0m[90m_[0m[97m5[0m[90m_[0m[97m23[0m[90m_[0m[33m3[0m[90m_[0m[31m5[0m[90m_[0m[35m5[0m                               arg  4 mem   0.01 GB tm   2187.92us/    62.48ms (      3 GFLOPS    0|2      GB/s)
+[35m*** CPU       10[0m r[90m_[0m[97m32[0m[90m_[0m[97m115[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m48[0m[90m_[0m[35m4[0m                              arg  4 mem   0.01 GB tm   1385.00us/    63.87ms (      9 GFLOPS    0|6      GB/s)
+[35m*** CPU       11[0m r[90m_[0m[97m64[0m[90m_[0m[97m115[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m24[0m[90m_[0m[35m4[0m                              arg  4 mem   0.01 GB tm   1549.58us/    65.42ms (     10 GFLOPS    0|6      GB/s)
+[35m*** CPU       12[0m r[90m_[0m[97m192[0m[90m_[0m[97m5[0m[90m_[0m[97m23[0m[90m_[0m[33m3[0m[90m_[0m[35m3[0m[90m_[0m[35m3[0m                               arg  4 mem   0.01 GB tm   1077.83us/    66.50ms (      4 GFLOPS    0|1      GB/s)
+[35m*** CPU       13[0m r[90m_[0m[97m32[0m[90m_[0m[97m115[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m48[0m[90m_[0m[35m4[0m                              arg  5 mem   0.01 GB tm   2210.92us/    68.71ms (      6 GFLOPS    0|4      GB/s)
+[35m*** CPU       14[0m r[90m_[0m[97m64[0m[90m_[0m[97m115[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m24[0m[90m_[0m[35m4[0m                              arg  4 mem   0.01 GB tm   2510.12us/    71.22ms (      6 GFLOPS    0|3      GB/s)
+[35m*** CPU       15[0m r[90m_[0m[97m192[0m[90m_[0m[97m5[0m[90m_[0m[97m23[0m[90m_[0m[33m3[0m[90m_[0m[35m3[0m[90m_[0m[35m3[0m                               arg  4 mem   0.01 GB tm   1085.25us/    72.30ms (      4 GFLOPS    0|1      GB/s)
+[35m*** CPU       16[0m r[90m_[0m[97m32[0m[90m_[0m[97m115[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m48[0m[90m_[0m[35m4[0m                              arg  5 mem   0.01 GB tm   1351.42us/    73.65ms (      9 GFLOPS    0|6      GB/s)
+[35m*** CPU       17[0m r[90m_[0m[97m64[0m[90m_[0m[97m115[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m24[0m[90m_[0m[35m4[0m                              arg  4 mem   0.01 GB tm   1666.42us/    75.32ms (      9 GFLOPS    0|5      GB/s)
+[35m*** CPU       18[0m r[90m_[0m[97m192[0m[90m_[0m[97m5[0m[90m_[0m[97m23[0m[90m_[0m[33m3[0m[90m_[0m[35m3[0m[90m_[0m[35m3[0m                               arg  4 mem   0.01 GB tm    478.88us/    75.80ms (      9 GFLOPS    1|2      GB/s)
+[35m*** CPU       19[0m r[90m_[0m[97m32[0m[90m_[0m[97m115[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m48[0m[90m_[0m[35m4[0m                              arg  5 mem   0.01 GB tm   1064.71us/    76.86ms (     12 GFLOPS    0|8      GB/s)
+[35m*** CPU       20[0m r[90m_[0m[97m64[0m[90m_[0m[97m115[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m24[0m[90m_[0m[35m4[0m                              arg  4 mem   0.01 GB tm   1666.58us/    78.53ms (      9 GFLOPS    0|5      GB/s)
+[35m*** CPU       21[0m r[90m_[0m[97m192[0m[90m_[0m[97m5[0m[90m_[0m[97m23[0m[90m_[0m[33m3[0m[90m_[0m[35m3[0m[90m_[0m[35m3[0m                               arg  4 mem   0.01 GB tm    474.54us/    79.00ms (      9 GFLOPS    1|2      GB/s)
+[35m*** CPU       22[0m r[90m_[0m[97m32[0m[90m_[0m[97m115[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m48[0m[90m_[0m[35m4[0m                              arg  5 mem   0.01 GB tm   1691.83us/    80.70ms (      8 GFLOPS    0|5      GB/s)
+[35m*** CPU       23[0m r[90m_[0m[97m96[0m[90m_[0m[97m5[0m[90m_[0m[97m23[0m[90m_[0m[33m3[0m[90m_[0m[35m3[0m[90m_[0m[35m3[0m                                arg  4 mem   0.01 GB tm    121.54us/    80.82ms (      5 GFLOPS    1|3      GB/s)
+[35m*** CPU       24[0m r[90m_[0m[97m128[0m[90m_[0m[97m115[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m24[0m[90m_[0m[35m4[0m                             arg  4 mem   0.01 GB tm   5062.04us/    85.88ms (      6 GFLOPS    0|3      GB/s)
+[35m*** CPU       25[0m r[90m_[0m[97m32[0m[90m_[0m[97m115[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m96[0m[90m_[0m[35m4[0m                              arg  5 mem   0.01 GB tm   4405.54us/    90.28ms (      6 GFLOPS    0|4      GB/s)
+[35m*** CPU       26[0m r[90m_[0m[97m96[0m[90m_[0m[97m5[0m[90m_[0m[97m23[0m[90m_[0m[33m3[0m[90m_[0m[35m3[0m[90m_[0m[35m3[0m                                arg  4 mem   0.01 GB tm    121.88us/    90.41ms (      5 GFLOPS    1|3      GB/s)
+[35m*** CPU       27[0m r[90m_[0m[97m192[0m[90m_[0m[97m115[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m24[0m[90m_[0m[35m4[0m                             arg  4 mem   0.01 GB tm   5941.50us/    96.35ms (      8 GFLOPS    0|4      GB/s)
+[35m*** CPU       28[0m r[90m_[0m[97m576[0m[90m_[0m[97m8[0m[90m_[0m[97m4[0m[90m_[0m[33m3[0m[90m_[0m[35m3[0m[90m_[0m[35m3[0m                                arg  4 mem   0.01 GB tm    432.71us/    96.78ms (      8 GFLOPS    1|2      GB/s)
+[35m*** CPU       29[0m r[90m_[0m[97m32[0m[90m_[0m[97m32[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m144[0m[90m_[0m[35m4[0m                              arg  4 mem   0.01 GB tm   1346.54us/    98.13ms (     11 GFLOPS    0|6      GB/s)
+[35m*** CPU       30[0m r[90m_[0m[97m128[0m[90m_[0m[97m8[0m[90m_[0m[97m4[0m[90m_[0m[33m3[0m[90m_[0m[31m5[0m[90m_[0m[35m5[0m                                arg  4 mem   0.01 GB tm    125.79us/    98.25ms (      6 GFLOPS    0|4      GB/s)
+[35m*** CPU       31[0m r[90m_[0m[97m128[0m[90m_[0m[97m32[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m32[0m[90m_[0m[35m4[0m                              arg  4 mem   0.01 GB tm   1370.46us/    99.62ms (     11 GFLOPS    0|5      GB/s)
+[35m*** CPU       32[0m r[90m_[0m[97m512[0m[90m_[0m[97m8[0m[90m_[0m[97m4[0m[90m_[0m[33m3[0m[90m_[0m[31m5[0m[90m_[0m[35m5[0m                                arg  4 mem   0.01 GB tm    533.50us/   100.16ms (     10 GFLOPS    0|4      GB/s)
+[35m*** CPU       33[0m r[90m_[0m[97m32[0m[90m_[0m[97m32[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m128[0m[90m_[0m[35m4[0m                              arg  5 mem   0.01 GB tm    999.13us/   101.16ms (     13 GFLOPS    0|7      GB/s)
+[35m*** CPU       34[0m r[90m_[0m[97m128[0m[90m_[0m[97m32[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m32[0m[90m_[0m[35m4[0m                              arg  4 mem   0.01 GB tm   1246.42us/   102.40ms (     12 GFLOPS    0|6      GB/s)
+[35m*** CPU       35[0m r[90m_[0m[97m512[0m[90m_[0m[97m8[0m[90m_[0m[97m4[0m[90m_[0m[33m3[0m[90m_[0m[31m5[0m[90m_[0m[35m5[0m                                arg  4 mem   0.01 GB tm    489.62us/   102.89ms (     11 GFLOPS    0|4      GB/s)
+[35m*** CPU       36[0m r[90m_[0m[97m32[0m[90m_[0m[97m32[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m128[0m[90m_[0m[35m4[0m                              arg  5 mem   0.01 GB tm    926.38us/   103.82ms (     14 GFLOPS    0|8      GB/s)
+[35m*** CPU       37[0m r[90m_[0m[97m128[0m[90m_[0m[97m32[0m[90m_[0m[33m3[0m[90m_[0m[33m3[0m[90m_[0m[31m32[0m[90m_[0m[35m4[0m                              arg  4 mem   0.01 GB tm   1092.71us/   104.91ms (     10 GFLOPS    0|6      GB/s)
+[35m*** CPU       38[0m r[90m_[0m[97m384[0m[90m_[0m[97m8[0m[90m_[0m[97m4[0m[90m_[0m[33m3[0m[90m_[0m[31m5[0m[90m_[0m[35m5[0m                                arg  4 mem   0.01 GB tm    376.38us/   105.29ms (     10 GFLOPS    0|4      GB/s)
+[35m*** CPU       39[0m r[90m_[0m[97m32[0m[90m_[0m[97m32[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m96[0m[90m_[0m[35m4[0m                               arg  5 mem   0.01 GB tm    696.75us/   105.98ms (     14 GFLOPS    0|8      GB/s)
+[35m*** CPU       40[0m r[90m_[0m[97m128[0m[90m_[0m[97m32[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m32[0m[90m_[0m[35m4[0m                              arg  4 mem   0.01 GB tm   1218.25us/   107.20ms (     12 GFLOPS    0|6      GB/s)
+[35m*** CPU       41[0m r[90m_[0m[97m512[0m[90m_[0m[97m8[0m[90m_[0m[97m4[0m[90m_[0m[33m3[0m[90m_[0m[35m3[0m[90m_[0m[35m3[0m                                arg  4 mem   0.01 GB tm    385.08us/   107.59ms (      8 GFLOPS    1|2      GB/s)
+[35m*** CPU       42[0m r[90m_[0m[97m32[0m[90m_[0m[97m32[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m128[0m[90m_[0m[35m4[0m                              arg  5 mem   0.01 GB tm   1085.54us/   108.67ms (     12 GFLOPS    0|7      GB/s)
+[35m*** CPU       43[0m r[90m_[0m[97m128[0m[90m_[0m[97m32[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m32[0m[90m_[0m[35m4[0m                              arg  4 mem   0.01 GB tm   1364.63us/   110.04ms (     11 GFLOPS    0|5      GB/s)
+[35m*** CPU       44[0m r[90m_[0m[97m512[0m[90m_[0m[97m8[0m[90m_[0m[97m4[0m[90m_[0m[33m3[0m[90m_[0m[35m3[0m[90m_[0m[35m3[0m                                arg  4 mem   0.01 GB tm    382.50us/   110.42ms (      8 GFLOPS    1|2      GB/s)
+[35m*** CPU       45[0m r[90m_[0m[97m32[0m[90m_[0m[97m32[0m[90m_[0m[33m3[0m[90m_[0m[33m4[0m[90m_[0m[31m128[0m[90m_[0m[35m4[0m                              arg  5 mem   0.01 GB tm   1083.38us/   111.50ms (     12 GFLOPS    0|7      GB/s)
+[35m*** CPU       46[0m r[90m_[0m[97m960[0m[90m_[0m[31m128[0m[90m_[0m[31m24[0m[90m_[0m[35m4[0m                                 arg  4 mem   0.01 GB tm   5067.29us/   116.57ms (      5 GFLOPS    0|6      GB/s)
+[35m*** CPU       47[0m r[90m_[0m[97m320[0m[90m_[0m[33m4[0m[90m_[0m[31m240[0m[90m_[0m[35m4[0m                                  arg  4 mem   0.01 GB tm    519.62us/   117.09ms (      5 GFLOPS    5|6      GB/s)
+[35m*** CPU       48[0m r[90m_[0m[97m512[0m[90m_[0m[31m320[0m[90m_[0m[35m4[0m                                    arg  4 mem   0.01 GB tm    663.83us/   117.75ms (      2 GFLOPS    2|4      GB/s)
+[35m*** CPU       49[0m r[90m_[0m[97m64[0m[90m_[0m[31m128[0m[90m_[0m[35m4[0m                                     arg  4 mem   0.01 GB tm     27.63us/   117.78ms (      2 GFLOPS    2|5      GB/s)
+[35m*** CPU       50[0m r[90m_[0m[97m32[0m[90m_[0m[31m128[0m[90m_[0m[35m4[0m                                     arg  4 mem   0.01 GB tm     14.67us/   117.80ms (      2 GFLOPS    2|4      GB/s)
+[35m*** CPU       51[0m r[90m_[0m[97m32[0m[90m_[0m[31m128[0m[90m_[0m[35m4[0m                                     arg  4 mem   0.01 GB tm     14.17us/   117.81ms (      2 GFLOPS    2|5      GB/s)
+[35m*** CPU       52[0m r[90m_[0m[97m32[0m[90m_[0m[31m128[0m[90m_[0m[35m4[0m                                     arg  4 mem   0.01 GB tm     14.08us/   117.83ms (      2 GFLOPS    2|5      GB/s)
+[35m*** CPU       53[0m E[90m_[0m[97m515[0m                                          arg  5 mem   0.01 GB tm      2.13us/   117.83ms (      1 GFLOPS    1|3      GB/s)
+[35m*** CPU       54[0m r[90m_[0m[97m64[0m[90m_[0m[31m128[0m[90m_[0m[35m4[0m                                     arg  4 mem   0.01 GB tm     26.71us/   117.85ms (      2 GFLOPS    3|5      GB/s)
+[35m*** CPU       55[0m r[90m_[0m[97m32[0m[90m_[0m[31m128[0m[90m_[0m[35m4[0m                                     arg  4 mem   0.01 GB tm     13.96us/   117.87ms (      2 GFLOPS    2|5      GB/s)
+[35m*** CPU       56[0m r[90m_[0m[97m32[0m[90m_[0m[31m128[0m[90m_[0m[35m4[0m                                     arg  4 mem   0.01 GB tm     13.79us/   117.88ms (      2 GFLOPS    2|5      GB/s)
+[35m*** CPU       57[0m r[90m_[0m[97m32[0m[90m_[0m[31m128[0m[90m_[0m[35m4[0m                                     arg  4 mem   0.01 GB tm     14.13us/   117.90ms (      2 GFLOPS    2|5      GB/s)
+[35m*** CPU       58[0m r[90m_[0m[97m48[0m[90m_[0m[31m128[0m[90m_[0m[35m4[0m                                     arg  4 mem   0.01 GB tm     20.13us/   117.92ms (      2 GFLOPS    3|5      GB/s)
+[35m*** CPU       59[0m r[90m_[0m[97m48[0m[90m_[0m[31m16[0m[90m_[0m[35m4[0m                                      arg  4 mem   0.01 GB tm      2.46us/   117.92ms (      3 GFLOPS    3|5      GB/s)
+[35m*** CPU       60[0m r[90m_[0m[97m24[0m[90m_[0m[35m32[0m                                        arg  4 mem   0.01 GB tm      1.58us/   117.92ms (      1 GFLOPS    1|1      GB/s)
+[35m*** CPU       61[0m r[90m_[0m[97m24[0m[90m_[0m[35m32[0m                                        arg  4 mem   0.01 GB tm      1.42us/   117.92ms (      1 GFLOPS    1|1      GB/s)
+[35m*** CPU       62[0m r[90m_[0m[97m24[0m[90m_[0m[35m32[0m                                        arg  4 mem   0.01 GB tm      1.58us/   117.92ms (      1 GFLOPS    1|1      GB/s)
+[35m*** CPU       63[0m r[90m_[0m[97m12[0m[90m_[0m[33m4[0m[90m_[0m[31m515[0m                                     arg  4 mem   0.01 GB tm      6.71us/   117.93ms (      7 GFLOPS    8|9      GB/s)
+[35m*** CPU       64[0m r[90m_[0m[97m8[0m[90m_[0m[33m4[0m[90m_[0m[31m515[0m                                      arg  4 mem   0.01 GB tm      5.00us/   117.93ms (      7 GFLOPS    7|8      GB/s)
+[35m*** CPU       65[0m r[90m_[0m[97m12[0m[90m_[0m[33m4[0m[90m_[0m[31m515[0m                                     arg  4 mem   0.01 GB tm      6.71us/   117.94ms (      7 GFLOPS    8|9      GB/s)progress: 78.9
+progress: 79.1
+  [CXX] openpilot/system/loggerd/encoderd.o
+capture + replay
+progress: 79.2
+  [AR] openpilot/system/loggerd/liblogger.a
+  [RANLIB] openpilot/system/loggerd/liblogger.a
+  [LINK] openpilot/system/loggerd/bootlog
+  [CXX] openpilot/system/loggerd/loggerd.o
+
+[35m*** CPU       66[0m r[90m_[0m[97m8[0m[90m_[0m[33m4[0m[90m_[0m[31m515[0m                                      arg  4 mem   0.01 GB tm      5.29us/   117.95ms (      6 GFLOPS    6|8      GB/s)
+[35m*** CPU       67[0m r[90m_[0m[97m48[0m[90m_[0m[31m16[0m[90m_[0m[35m4[0m                                      arg  4 mem   0.01 GB tm      2.46us/   117.95ms (      3 GFLOPS    3|5      GB/s)
+[35m*** CPU       68[0m r[90m_[0m[97m24[0m[90m_[0m[35m32[0m                                        arg  4 mem   0.01 GB tm      1.29us/   117.95ms (      1 GFLOPS    1|1      GB/s)
+[35m*** CPU       69[0m r[90m_[0m[97m24[0m[90m_[0m[35m32[0m                                        arg  4 mem   0.01 GB tm      1.54us/   117.95ms (      1 GFLOPS    1|1      GB/s)
+[35m*** CPU       70[0m r[90m_[0m[97m24[0m[90m_[0m[35m32[0m                                        arg  4 mem   0.01 GB tm      1.50us/   117.95ms (      1 GFLOPS    1|1      GB/s)
+[35m*** CPU       71[0m r[90m_[0m[97m32[0m[90m_[0m[31m12[0m[90m_[0m[35m4[0m                                      arg  4 mem   0.01 GB tm      1.88us/   117.96ms (      2 GFLOPS    2|3      GB/s)
+[35m*** CPU       72[0m r[90m_[0m[97m32[0m[90m_[0m[31m12[0m[90m_[0m[35m4[0m                                      arg  4 mem   0.01 GB tm      1.75us/   117.96ms (      2 GFLOPS    2|4      GB/s)
+[35m*** CPU       73[0m r[90m_[0m[97m16[0m[90m_[0m[35m24[0m                                        arg  4 mem   0.01 GB tm      1.71us/   117.96ms (      0 GFLOPS    1|1      GB/s)
+[35m*** CPU       74[0m r[90m_[0m[97m16[0m[90m_[0m[35m24[0m                                        arg  4 mem   0.01 GB tm      1.25us/   117.96ms (      1 GFLOPS    1|1      GB/s)
+[35m*** CPU       75[0m r[90m_[0m[97m32[0m[90m_[0m[31m12[0m[90m_[0m[35m4[0m                                      arg  4 mem   0.01 GB tm      1.75us/   117.96ms (      2 GFLOPS    2|4      GB/s)
+[35m*** CPU       76[0m r[90m_[0m[97m24[0m[90m_[0m[35m32[0m                                        arg  4 mem   0.01 GB tm      1.42us/   117.96ms (      1 GFLOPS    1|1      GB/s)
+[35m*** CPU       77[0m r[90m_[0m[97m32[0m[90m_[0m[31m12[0m[90m_[0m[35m4[0m                                      arg  4 mem   0.01 GB tm      1.63us/   117.97ms (      2 GFLOPS    2|4      GB/s)
+[35m*** CPU       78[0m r[90m_[0m[97m24[0m[90m_[0m[35m32[0m                                        arg  4 mem   0.01 GB tm      1.29us/   117.97ms (      1 GFLOPS    1|1      GB/s)
+[35m*** CPU       79[0m r[90m_[0m[97m32[0m[90m_[0m[31m12[0m[90m_[0m[35m4[0m                                      arg  4 mem   0.01 GB tm      1.92us/   117.97ms (      2 GFLOPS    2|3      GB/s)
+[35m*** CPU       80[0m r[90m_[0m[97m16[0m[90m_[0m[35m24[0m                                        arg  4 mem   0.01 GB tm      1.42us/   117.97ms (      1 GFLOPS    1|1      GB/s)
+[35m*** CPU       81[0m r[90m_[0m[97m16[0m[90m_[0m[35m24[0m                                        arg  4 mem   0.01 GB tm      1.25us/   117.97ms (      1 GFLOPS    1|1      GB/s)
+[35m*** CPU       82[0m r[90m_[0m[97m3[0m[90m_[0m[35m16[0m                                         arg  4 mem   0.01 GB tm      1.33us/   117.97ms (      0 GFLOPS    0|0      GB/s)
+[35m*** CPU       83[0m r[90m_[0m[97m2[0m[90m_[0m[35m16[0m                                         arg  4 mem   0.01 GB tm      1.33us/   117.97ms (      0 GFLOPS    0|0      GB/s)
+[35m*** CPU       84[0m r[90m_[0m[97m553[0m[90m_[0m[31m32[0m[90m_[0m[35m24[0m                                    arg  6 mem   0.01 GB tm      2.50us/   117.98ms (      2 GFLOPS    1|2      GB/s)
+[35m*** CPU       85[0m r[90m_[0m[97m3[0m[90m_[0m[35m16[0m                                         arg  4 mem   0.01 GB tm      1.12us/   117.98ms (      0 GFLOPS    0|0      GB/s)
+[35m*** CPU       86[0m r[90m_[0m[97m2[0m[90m_[0m[35m16[0m                                         arg  4 mem   0.01 GB tm      1.08us/   117.98ms (      0 GFLOPS    0|0      GB/s)
+[35m*** CPU       87[0m r[90m_[0m[97m553[0m[90m_[0m[31m32[0m[90m_[0m[31m24[0m[90m_[0m[31m16[0m[90m_[0m[31m32[0m[90m_[0m[31m24[0m[90m_[0m[31m24[0m[90m_[0m[31m16[0m[90m_[0m[31m32[0m[90m_[0m[31m24[0m[90m_[0m[35m16[0m            arg 31 mem   0.01 GB tm     27.38us/   118.01ms (      4 GFLOPS    0|6      GB/s)
+[35m*** CPU       88[0m r[90m_[0m[97m553[0m[90m_[0m[31m24[0m[90m_[0m[31m16[0m[90m_[0m[31m32[0m[90m_[0m[35m16[0m                              arg 14 mem   0.01 GB tm      4.08us/   118.01ms (      3 GFLOPS    2|3      GB/s)
+captured 87 kernels
+jit run validated
+kernel_count=87,  read_image_count=0, gated_read_image_count=0
+mdl size is 7.50M
+pkl size is 9.60M
+**** compile done ****
+enqueue 164.19 ms -- total run 164.72 ms
+enqueue 120.60 ms -- total run 120.97 ms
+enqueue 130.92 ms -- total run 131.29 ms
+enqueue 128.36 ms -- total run 128.60 ms
+enqueue 105.16 ms -- total run 105.40 ms
+enqueue 122.34 ms -- total run 122.71 ms
+enqueue 127.27 ms -- total run 127.65 ms
+enqueue 121.79 ms -- total run 122.03 ms
+enqueue 116.19 ms -- total run 116.43 ms
+enqueue 148.35 ms -- total run 148.74 ms
+enqueue 229.97 ms -- total run 230.24 ms
+enqueue 224.34 ms -- total run 224.73 ms
+enqueue 220.31 ms -- total run 220.70 ms
+enqueue 214.54 ms -- total run 214.93 ms
+enqueue 217.75 ms -- total run 218.26 ms
+enqueue 219.59 ms -- total run 219.92 ms
+enqueue 247.30 ms -- total run 247.68 ms
+enqueue 237.74 ms -- total run 237.98 ms
+enqueue 208.80 ms -- total run 209.18 ms
+enqueue 218.52 ms -- total run 218.90 ms
+**** test done ****
+  [CHUNK] openpilot/selfdrive/modeld/models/dmonitoring_model_tinygrad.pkl.chunkmanifest
+progress: 79.4
+progress: 79.5
+progress: 79.7
+progress: 79.8
+progress: 80.0
+  [CXX] openpilot/tools/jotpluggler/app.o
+  [LINK] openpilot/system/loggerd/encoderd
+  [CXX] openpilot/tools/jotpluggler/browser.o
+  [LINK] openpilot/system/loggerd/loggerd
+progress: 80.1
+  [CXX] openpilot/tools/jotpluggler/camera.o
+write_car_fingerprint_to_dbc_header(["openpilot/tools/jotpluggler/car_fingerprint_to_dbc.h"], [])
+progress: 80.3
+  [CXX] openpilot/tools/jotpluggler/common.o
+  [CXX] openpilot/tools/jotpluggler/custom_series.o
+progress: 80.4
+materialize_generated_dbcs(["openpilot/tools/jotpluggler/generated_dbcs/.stamp"], [])
+generate_event_extractors(["openpilot/tools/jotpluggler/generated_event_extractors.h"], ["openpilot/tools/jotpluggler/generate_event_extractors.py", "openpilot/cereal/custom.capnp", "openpilot/cereal/deprecated.capnp", "openpilot/cereal/log.capnp", "openpilot/cereal/include/c++.capnp", "opendbc_repo/opendbc/car/car.capnp", "opendbc_repo/opendbc/car/include/c++.capnp"])
+  [CXX] openpilot/tools/jotpluggler/icons.o
+progress: 80.5
+  [CXX] openpilot/tools/jotpluggler/layout.o
+  [CXX] openpilot/tools/jotpluggler/layout_io.o
+progress: 80.7
+  [CXX] openpilot/tools/jotpluggler/logs.o
+  [CXX] openpilot/tools/jotpluggler/main.o
+  [CXX] openpilot/tools/jotpluggler/map.o
+  [1/3] enqueue 10269.39 ms -- total 10345.21 ms
+  [2/3] enqueue 2023.07 ms -- total 2023.08 ms
+  [3/3] enqueue 159.07 ms -- total 159.09 ms
+pickle round trip (1 runs per seed)
+  [1/1] enqueue 195.23 ms -- total 195.25 ms
+  [1/1] enqueue 162.06 ms -- total 162.08 ms
+capture + replay
+  [1/3] enqueue 3107.12 ms -- total 3112.53 ms
+  [2/3] enqueue 1159.40 ms -- total 1159.42 ms
+  [3/3] enqueue 152.33 ms -- total 152.35 ms
+pickle round trip (1 runs per seed)
+  [1/1] enqueue 208.13 ms -- total 208.15 ms
+  [1/1] enqueue 152.69 ms -- total 152.71 ms
+Saved JITs to /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/openpilot/selfdrive/modeld/models/driving_tinygrad.pkl (79.96 MB)
+progress: 80.8
+  [CXX] openpilot/tools/jotpluggler/plot.o
+  [CXX] openpilot/tools/jotpluggler/render.o
+  [CHUNK] openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunkmanifest
+progress: 81.0
+progress: 81.1
+  [CXX] openpilot/tools/jotpluggler/runtime.o
+  [CXX] openpilot/tools/jotpluggler/session.o
+  [CXX] openpilot/tools/jotpluggler/sidebar.o
+progress: 81.3
+  [CXX] openpilot/tools/jotpluggler/sketch_layout.o
+progress: 81.4
+  [CXX] openpilot/tools/jotpluggler/stream.o
+  [CXX] openpilot/tools/jotpluggler/thumbnail.o
+  [CXX] openpilot/tools/jotpluggler/util.o
+progress: 81.6
+progress: 81.7
+progress: 81.9
+progress: 82.0
+  [CXX] openpilot/tools/replay/replay.o
+progress: 82.2
+  [CXX] openpilot/tools/replay/consoleui.o
+progress: 82.3
+  [CXX] openpilot/tools/replay/camera.o
+  [CXX] openpilot/tools/replay/filereader.o
+progress: 82.5
+  [CXX] openpilot/tools/replay/logreader.o
+  [CXX] openpilot/tools/replay/framereader.o
+  [CXX] openpilot/tools/replay/route.o
+progress: 82.6
+  [CXX] openpilot/tools/replay/util.o
+  [CXX] openpilot/tools/replay/seg_mgr.o
+progress: 82.8
+  [CXX] openpilot/tools/replay/timeline.o
+  [CXX] openpilot/tools/replay/py_downloader.o
+progress: 82.9
+  [CXX] openpilot/tools/replay/main.o
+progress: 83.1
+progress: 83.2
+progress: 83.4
+progress: 83.5
+progress: 83.7
+progress: 83.8
+progress: 83.9
+progress: 84.1
+progress: 84.2
+progress: 84.4
+progress: 84.5
+progress: 84.7
+progress: 84.8
+progress: 85.0
+progress: 85.1
+progress: 85.3
+arm-none-eabi-gcc -o panda/board/board/obj/body_h7bootstub.o -c -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DPANDA_BODY -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g -DBOOTSTUB -Ipanda -Ipanda/board/stm32h7/inc -Iopendbc_repo panda/board/bootstub.c
+progress: 85.4
+  [AR] openpilot/tools/replay/libreplay.a
+  [RANLIB] openpilot/tools/replay/libreplay.a
+arm-none-eabi-gcc -o panda/board/board/obj/panda_h7bootstub.o -c -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g -DBOOTSTUB -Ipanda -Ipanda/board/stm32h7/inc -Iopendbc_repo panda/board/bootstub.c
+progress: 85.6
+progress: 85.7
+arm-none-eabi-gcc -o panda/board/board/obj/panda_h7main.o -c -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g -Ipanda -Ipanda/board/stm32h7/inc -Iopendbc_repo panda/board/main.c
+  [LINK] openpilot/tools/replay/replay
+arm-none-eabi-gcc -o panda/board/board/obj/panda_jungle_h7bootstub.o -c -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DPANDA_JUNGLE -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g -DBOOTSTUB -Ipanda -Ipanda/board/stm32h7/inc -Iopendbc_repo panda/board/bootstub.c
+progress: 85.9
+progress: 86.0
+progress: 86.2
+arm-none-eabi-gcc -o panda/board/body/board/obj/body_h7main.o -c -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DPANDA_BODY -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g -Ipanda -Ipanda/board/stm32h7/inc -Iopendbc_repo panda/board/body/main.c
+progress: 86.3
+arm-none-eabi-gcc -o panda/board/crypto/board/obj/body_h7rsa.o -c -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DPANDA_BODY -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g -DBOOTSTUB -Ipanda -Ipanda/board/stm32h7/inc -Iopendbc_repo panda/board/crypto/rsa.c
+progress: 86.5
+arm-none-eabi-gcc -o panda/board/crypto/board/obj/body_h7sha.o -c -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DPANDA_BODY -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g -DBOOTSTUB -Ipanda -Ipanda/board/stm32h7/inc -Iopendbc_repo panda/board/crypto/sha.c
+arm-none-eabi-gcc -o panda/board/crypto/board/obj/panda_h7rsa.o -c -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g -DBOOTSTUB -Ipanda -Ipanda/board/stm32h7/inc -Iopendbc_repo panda/board/crypto/rsa.c
+arm-none-eabi-gcc -o panda/board/crypto/board/obj/panda_h7sha.o -c -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g -DBOOTSTUB -Ipanda -Ipanda/board/stm32h7/inc -Iopendbc_repo panda/board/crypto/sha.c
+arm-none-eabi-gcc -o panda/board/crypto/board/obj/panda_jungle_h7rsa.o -c -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DPANDA_JUNGLE -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g -DBOOTSTUB -Ipanda -Ipanda/board/stm32h7/inc -Iopendbc_repo panda/board/crypto/rsa.c
+progress: 86.6
+arm-none-eabi-gcc -o panda/board/crypto/board/obj/panda_jungle_h7sha.o -c -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DPANDA_JUNGLE -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g -DBOOTSTUB -Ipanda -Ipanda/board/stm32h7/inc -Iopendbc_repo panda/board/crypto/sha.c
+progress: 86.8
+progress: 86.9
+arm-none-eabi-gcc -o panda/board/jungle/board/obj/panda_jungle_h7main.o -c -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DPANDA_JUNGLE -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g -Ipanda -Ipanda/board/stm32h7/inc -Iopendbc_repo panda/board/jungle/main.c
+progress: 87.1
+arm-none-eabi-gcc -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DPANDA_BODY -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g -o panda/board/stm32h7/board/obj/body_h7startup_stm32h7x5xx.o -c panda/board/stm32h7/startup_stm32h7x5xx.s
+arm-none-eabi-gcc -o panda/board/obj/body_h7/bootstub.elf -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DPANDA_BODY -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g -DBOOTSTUB panda/board/stm32h7/board/obj/body_h7startup_stm32h7x5xx.o panda/board/crypto/board/obj/body_h7rsa.o panda/board/crypto/board/obj/body_h7sha.o panda/board/board/obj/body_h7bootstub.o
+arm-none-eabi-objcopy -O binary panda/board/obj/body_h7/bootstub.elf panda/board/obj/bootstub.body_h7.bin
+progress: 87.2
+arm-none-eabi-gcc -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g -o panda/board/stm32h7/board/obj/panda_h7startup_stm32h7x5xx.o -c panda/board/stm32h7/startup_stm32h7x5xx.s
+arm-none-eabi-gcc -o panda/board/obj/panda_h7/bootstub.elf -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g -DBOOTSTUB panda/board/stm32h7/board/obj/panda_h7startup_stm32h7x5xx.o panda/board/crypto/board/obj/panda_h7rsa.o panda/board/crypto/board/obj/panda_h7sha.o panda/board/board/obj/panda_h7bootstub.o
+arm-none-eabi-objcopy -O binary panda/board/obj/panda_h7/bootstub.elf panda/board/obj/bootstub.panda_h7.bin
+arm-none-eabi-gcc -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DPANDA_JUNGLE -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g -o panda/board/stm32h7/board/obj/panda_jungle_h7startup_stm32h7x5xx.o -c panda/board/stm32h7/startup_stm32h7x5xx.s
+arm-none-eabi-gcc -o panda/board/obj/panda_jungle_h7/bootstub.elf -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DPANDA_JUNGLE -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g -DBOOTSTUB panda/board/stm32h7/board/obj/panda_jungle_h7startup_stm32h7x5xx.o panda/board/crypto/board/obj/panda_jungle_h7rsa.o panda/board/crypto/board/obj/panda_jungle_h7sha.o panda/board/board/obj/panda_jungle_h7bootstub.o
+progress: 87.3
+arm-none-eabi-gcc -o panda/board/obj/body_h7/main.elf -Wl,--section-start,.isr_vector=0x8020000 -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DPANDA_BODY -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g panda/board/stm32h7/board/obj/body_h7startup_stm32h7x5xx.o panda/board/body/board/obj/body_h7main.o
+arm-none-eabi-objcopy -O binary panda/board/obj/panda_jungle_h7/bootstub.elf panda/board/obj/bootstub.panda_jungle_h7.bin
+progress: 87.5
+arm-none-eabi-gcc -o panda/board/obj/panda_h7/main.elf -Wl,--section-start,.isr_vector=0x8020000 -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g panda/board/stm32h7/board/obj/panda_h7startup_stm32h7x5xx.o panda/board/board/obj/panda_h7main.o
+arm-none-eabi-objcopy -O binary panda/board/obj/body_h7/main.elf panda/board/obj/body_h7/main.bin
+SETLEN=1 panda/board/crypto/sign.py panda/board/obj/body_h7/main.bin panda/board/obj/body_h7.bin.signed panda/board/certs/debug
+arm-none-eabi-objcopy -O binary panda/board/obj/panda_h7/main.elf panda/board/obj/panda_h7/main.bin
+progress: 87.6
+SETLEN=1 panda/board/crypto/sign.py panda/board/obj/panda_h7/main.bin panda/board/obj/panda_h7.bin.signed panda/board/certs/debug
+signing 82460 bytes
+hash: 136e06c86e4c95bdbc72e4a63db357dcbe31447a
+signing 81444 bytes
+hash: 0a98c97c266420eafa5055716775d758d35ae905
+progress: 87.8
+progress: 87.9
+progress: 88.1
+gcc -o panda/tests/libpanda/panda.os -c -nostdlib -fno-builtin -std=gnu11 -Wfatal-errors -Wno-pointer-to-int-cast -fPIC -Ipanda/tests/libpanda -Ipanda -Ipanda/board -Iopendbc_repo panda/tests/libpanda/panda.c
+  [CXX] rednose_repo/rednose/helpers/ekf_load.os
+gcc -o panda/tests/libpanda/libpanda.so -dynamiclib panda/tests/libpanda/panda.os
+progress: 88.2
+  [CXX] rednose_repo/rednose/helpers/ekf_sym.os
+progress: 88.4
+arm-none-eabi-gcc -o panda/board/obj/panda_jungle_h7/main.elf -Wl,--section-start,.isr_vector=0x8020000 -mcpu=cortex-m7 -mhard-float -DSTM32H7 -DSTM32H725xx -Iboard/stm32h7/inc -mfpu=fpv5-d16 -DPANDA_JUNGLE -DALLOW_DEBUG -DHEALTH_PACKET_VERSION=0x7EBDEB30U -DCAN_PACKET_VERSION_HASH=0x75ABF276U -DJUNGLE_HEALTH_PACKET_VERSION=0xA39967B7U -Wall -Wextra -Wstrict-prototypes -Werror -mlittle-endian -mthumb -nostdlib -fno-builtin -std=gnu11 -fmax-errors=1 -Tpanda/board/stm32h7/stm32h7x5_flash.ld -fsingle-precision-constant -Os -g panda/board/stm32h7/board/obj/panda_jungle_h7startup_stm32h7x5xx.o panda/board/jungle/board/obj/panda_jungle_h7main.o
+arm-none-eabi-objcopy -O binary panda/board/obj/panda_jungle_h7/main.elf panda/board/obj/panda_jungle_h7/main.bin
+SETLEN=1 panda/board/crypto/sign.py panda/board/obj/panda_jungle_h7/main.bin panda/board/obj/panda_jungle_h7.bin.signed panda/board/certs/debug
+signing 74880 bytes
+hash: 1fcec7b041dcd30f2abefe02a2308b35dcc0cb03
+progress: 88.5
+progress: 88.7
+cythonize rednose_repo/rednose/helpers/ekf_sym_pyx.pyx
+progress: 88.8
+progress: 89.0
+progress: 89.1
+progress: 89.3
+progress: 89.4
+progress: 89.6
+progress: 89.7
+progress: 89.9
+progress: 90.0
+progress: 90.2
+progress: 90.3
+progress: 90.5
+progress: 90.6
+progress: 90.7
+progress: 90.9
+progress: 91.0
+progress: 91.2
+progress: 91.3
+progress: 91.5
+progress: 91.6
+progress: 91.8
+progress: 91.9
+progress: 92.1
+progress: 92.2
+progress: 92.4
+progress: 92.5
+progress: 92.7
+progress: 92.8
+progress: 93.0
+progress: 93.1
+progress: 93.3
+progress: 93.4
+progress: 93.6
+progress: 93.7
+progress: 93.9
+progress: 94.0
+progress: 94.1
+progress: 94.3
+progress: 94.4
+progress: 94.6
+progress: 94.7
+progress: 94.9
+progress: 95.0
+progress: 95.2
+progress: 95.3
+progress: 95.5
+progress: 95.6
+progress: 95.8
+progress: 95.9
+progress: 96.1
+progress: 96.2
+progress: 96.4
+progress: 96.5
+progress: 96.7
+progress: 96.8
+progress: 97.0
+progress: 97.1
+progress: 97.3
+progress: 97.4
+progress: 97.5
+progress: 97.7
+progress: 97.8
+progress: 98.0
+progress: 98.1
+progress: 98.3
+progress: 98.4
+progress: 98.6
+progress: 98.7
+progress: 98.9
+progress: 99.0
+progress: 99.2
+progress: 99.3
+progress: 99.5
+progress: 99.6
+progress: 99.8
+progress: 99.9
+progress: 100.0
+  [LINK] openpilot/tools/jotpluggler/jotpluggler
+ld: warning: search path '/tmp/flashpilot-venv/lib/python3.12/site-packages/imgui/install/lib/mesa' not found
+Compiling /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/rednose_repo/rednose/helpers/ekf_sym_pyx.pyx because it changed.
+[1/1] Cythonizing /private/tmp/flashpilot-mads-finish-clean.9xEaIB/repo/rednose_repo/rednose/helpers/ekf_sym_pyx.pyx
+  [CXX] rednose_repo/rednose/helpers/ekf_sym_pyx.o
+  [AR] rednose_repo/rednose/helpers/libekf_sym.a
+  [RANLIB] rednose_repo/rednose/helpers/libekf_sym.a
+  [LINK] rednose_repo/rednose/helpers/ekf_sym_pyx.so
+ld: warning: ignoring duplicate libraries: '-lzmq'
+scons: done building targets.

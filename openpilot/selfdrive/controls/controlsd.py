@@ -21,6 +21,7 @@ from openpilot.selfdrive.controls.lib.latcontrol_torque import LatControlTorque
 from openpilot.selfdrive.controls.lib.longcontrol import LongControl
 from openpilot.selfdrive.modeld.modeld import LAT_SMOOTH_SECONDS
 from openpilot.selfdrive.locationd.helpers import PoseCalibrator, Pose
+from openpilot.selfdrive.controls.lib.flashpilot_mads import LightningMadsHost
 
 State = log.SelfdriveState.OpenpilotState
 LaneChangeState = log.LaneChangeState
@@ -40,7 +41,7 @@ class Controls:
 
     self.sm = messaging.SubMaster(['lateralDelay', 'vehicleParameters', 'lateralTorqueParameters', 'modelV2', 'selfdriveState',
                                    'extrinsicsCalibration', 'deviceMotion', 'longitudinalPlan', 'lateralManeuverPlan', 'carState', 'carOutput',
-                                   'driverMonitoringState', 'onroadEvents', 'driverAssistance'], poll='selfdriveState')
+                                   'driverMonitoringState', 'onroadEvents', 'driverAssistance', 'pandaStates', 'deviceState'], poll='selfdriveState')
     self.pm = messaging.PubMaster(['carControl', 'controlsState'])
 
     self.steer_limited_by_safety = False
@@ -51,6 +52,7 @@ class Controls:
     self.calibrated_pose: Pose | None = None
 
     self.LoC = LongControl(self.CP)
+    self.mads = LightningMadsHost(self.CP.carFingerprint == "FORD_F_150_LIGHTNING_MK1")
     self.VM = VehicleModel(self.CP)
     self.LaC: LatControl
     if self.CP.steerControlType == car.CarParams.SteerControlType.angle:
@@ -99,6 +101,25 @@ class Controls:
     standstill = abs(CS.vEgo) <= max(self.CP.minSteerSpeed, 0.3) or CS.standstill
     CC.latActive = self.sm['selfdriveState'].active and not CS.steerFaultTemporary and not CS.steerFaultPermanent and \
                    (not standstill or self.CP.steerAtStandstill)
+    # Startup-only FlashPilotMads selection still requires BOTH SunnyPilot host
+    # intent and fresh, separate panda authorization. Params never grant control.
+    pandas = self.sm['pandaStates']
+    sources = ['carState', 'pandaStates', 'deviceState', 'onroadEvents', 'driverMonitoringState', 'selfdriveState', 'modelV2']
+    fresh = self.sm.all_checks(sources)
+    valid_panda = (len(pandas) == 1 and str(pandas[0].safetyModel) == "ford" and len(self.CP.safetyConfigs) == 1
+                   and pandas[0].safetyParam == self.CP.safetyConfigs[0].safetyParam)
+    panda_enabled = valid_panda and pandas[0].madsSafetyEnabled
+    driver_ready = not self.sm['driverMonitoringState'].noResponseForceDecel
+    safety_ready = valid_panda and not pandas[0].safetyRxChecksInvalid and not pandas[0].faults and not pandas[0].heartbeatLost
+    mads = self.mads.update(onroad=self.sm['deviceState'].started, fresh=fresh,
+                            eligible=safety_ready and self.mads.vehicle_eligible(CS, self.sm['onroadEvents'], driver_ready,
+                                                                               panda_enabled=panda_enabled,
+                                                                               ordinary_enabled=CC.enabled),
+                            panda_enabled=panda_enabled,
+                            panda_authorized=valid_panda and pandas[0].controlsAllowedLateral,
+                            tja_pressed=CS.genericToggle, ordinary_enabled=CC.enabled)
+    if mads.session:
+      CC.latActive = mads.authorized and (not standstill or self.CP.steerAtStandstill)
     CC.longActive = CC.enabled and not any(e.overrideLongitudinal for e in self.sm['onroadEvents']) and self.CP.openpilotLongitudinalControl
 
     actuators = CC.actuators
@@ -191,6 +212,13 @@ class Controls:
     dat = messaging.new_message('controlsState')
     dat.valid = CS.canValid
     cs = dat.controlsState
+    cs.madsState.state = self.mads.result.state
+    cs.madsState.enabled = self.mads.result.requested
+    cs.madsState.active = self.mads.result.requested
+    cs.madsState.available = self.mads.result.session
+    cs.madsAuthorized = self.mads.result.authorized
+    cs.madsEligible = self.mads.result.eligible
+    cs.madsSoftDisableTimer = self.mads.selfdrive.state_machine.soft_disable_timer
 
     cs.curvature = self.curvature
     cs.longitudinalPlanMonoTime = self.sm.logMonoTime['longitudinalPlan']
