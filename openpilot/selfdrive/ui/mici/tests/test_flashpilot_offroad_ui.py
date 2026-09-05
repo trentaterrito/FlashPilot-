@@ -67,19 +67,19 @@ def test_enable_and_exit_requests_are_binary_and_idempotent(monkeypatch):
   assert params["writes"] == [("FlashPilotForceOffroad", "off")]
 
 
-def test_unavailable_dialog_does_not_misdiagnose_every_failure_as_park(monkeypatch):
+@pytest.mark.parametrize("current", [status(can_select=False), None, status(timestamp=90)])
+@pytest.mark.parametrize("enable", [True, False])
+def test_button_always_opens_swipe_without_request_or_warning(monkeypatch, current, enable):
   from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
-  current = status(can_select=False)
-  current["reason"] = "Standard comma behavior"
   params = install_params(monkeypatch, ui, current)
   shown = []
-  monkeypatch.setattr(ui, "BigDialog", lambda title, reason: (title, reason))
+  monkeypatch.setattr(ui, "FlashPilotOffroadConfirmation", lambda enabled, icon: (enabled, icon))
   monkeypatch.setattr(ui.gui_app, "push_widget", shown.append)
   button = object.__new__(ui.FlashPilotOffroadButton)
-  button._enable_offroad = True
+  button._enable_offroad = enable
+  button._slider_icon = "icon"
   button._show_confirmation()
-  assert shown[0][0] == "offroad transition unavailable"
-  assert "ignition off" in shown[0][1]
+  assert shown == [(enable, "icon")]
   assert "writes" not in params
 
 
@@ -100,36 +100,33 @@ def test_stale_status_keeps_fail_closed_exit_ui_when_lease_is_set(monkeypatch):
   assert not ui.can_request_transition(False)
 
 
-def test_leaving_safe_state_during_swipe_resets_and_disables_slider(monkeypatch):
+@pytest.mark.parametrize("current", [status(can_select=False), None, status(timestamp=90)])
+def test_unavailable_at_completed_swipe_shows_failure_without_request(monkeypatch, current):
   from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
-
-  class Slider:
-    confirmed = False
-    resets = 0
-    enabled = None
-
-    def set_enabled(self, enabled):
-      self.enabled = enabled
-
-    def reset(self):
-      self.resets += 1
-
+  params = install_params(monkeypatch, ui, current)
+  shown = []
+  monkeypatch.setattr(ui, "BigDialog", lambda title, reason: (title, reason))
+  monkeypatch.setattr(ui.gui_app, "push_widget", shown.append)
   dialog = object.__new__(ui.FlashPilotOffroadConfirmation)
   dialog._enable_offroad = True
-  dialog._slider = Slider()
-  dialog._enabled = True
-  dialog._dragging_down = False
-  dialog._playing_dismiss_animation = False
-  safe = {"value": False}
-  monkeypatch.setattr(ui, "can_request_transition", lambda _: safe["value"])
-  dialog._sync_safety()
-  assert dialog._slider.resets == 1
-  assert not dialog._slider.enabled()
+  dialog._submit_transition()
+  assert shown[0][0] == "offroad transition failed"
+  assert "writes" not in params
 
-  safe["value"] = True
-  dialog._sync_safety()
-  assert dialog._slider.resets == 1
-  assert dialog._slider.enabled()
+
+def test_confirmation_uses_normal_slider_and_checks_latest_state(monkeypatch):
+  from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
+  callbacks = []
+  monkeypatch.setattr(ui.BigConfirmationDialog, "__init__",
+                      lambda self, title, icon, confirm_callback, red: callbacks.append(confirm_callback))
+  params = install_params(monkeypatch, ui, status(can_select=False))
+  dialog = ui.FlashPilotOffroadConfirmation(True, None)
+  assert len(callbacks) == 1 and "writes" not in params
+  # Initial unavailability must not freeze the gesture; confirmation uses new evidence.
+  params["FlashPilotOffroadStatus"] = status()
+  callbacks[0]()
+  assert params["writes"] == [("FlashPilotForceOffroad", "offroad")]
+  assert "_update_state" not in type(dialog).__dict__  # normal SunnyPilot slider lifecycle
 
 
 def slider_harness(monkeypatch):

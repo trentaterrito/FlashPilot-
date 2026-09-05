@@ -47,21 +47,22 @@ def request_transition(enable: bool) -> bool:
 
 
 class FlashPilotOffroadConfirmation(BigConfirmationDialog):
-  """SunnyPilot slider that cancels if backend Park/safety evidence is lost."""
+  """Always offer the SunnyPilot swipe; validate when the user completes it."""
   def __init__(self, enable: bool, icon):
     self._enable_offroad = enable
     title = tr("slide to force offroad") if enable else tr("slide to exit forced offroad")
-    super().__init__(title, icon, confirm_callback=lambda: request_transition(enable), red=enable)
+    super().__init__(title, icon, confirm_callback=self._submit_transition, red=enable)
 
-  def _update_state(self):
-    super()._update_state()
-    self._sync_safety()
-
-  def _sync_safety(self):
-    safe = can_request_transition(self._enable_offroad)
-    self._slider.set_enabled(lambda: self.enabled and not self.is_dismissing and safe)
-    if not safe and not self._slider.confirmed:
-      self._slider.reset()
+  def _submit_transition(self):
+    # Opening/completing a gesture is not authorization. Keep the final fresh
+    # check and backend acknowledgment; never display a successful transition
+    # merely because the slider reached its end.
+    if request_transition(self._enable_offroad):
+      return
+    reason = offroad_status().get("reason", "")
+    if reason == "Standard comma behavior":
+      reason = tr("Requires Park, zero speed and inactive controls. With ignition off, normal offroad mode is already active.")
+    gui_app.push_widget(BigDialog(tr("offroad transition failed"), reason))
 
 
 class FlashPilotOffroadButton(BigCircleButton):
@@ -73,14 +74,6 @@ class FlashPilotOffroadButton(BigCircleButton):
     self.set_click_callback(self._show_confirmation)
 
   def _show_confirmation(self):
-    if not can_request_transition(self._enable_offroad):
-      status = offroad_status()
-      title = tr("offroad transition unavailable")
-      reason = status.get("reason", "")
-      if reason == "Standard comma behavior":
-        reason = tr("Requires Park, zero speed and inactive controls. With ignition off, normal offroad mode is already active.")
-      gui_app.push_widget(BigDialog(title, reason))
-      return
     gui_app.push_widget(FlashPilotOffroadConfirmation(self._enable_offroad, self._slider_icon))
 
   def _draw_content(self, btn_y: float):
