@@ -23,6 +23,7 @@ from openpilot.selfdrive.selfdrived.helpers import ExcessiveActuationCheck
 from openpilot.selfdrive.selfdrived.state import StateMachine
 from openpilot.selfdrive.selfdrived.alertmanager import AlertManager, set_offroad_alert
 from openpilot.selfdrive.selfdrived.experimental_button import DistanceButtonGesture, MAX_SAMPLE_AGE
+from openpilot.selfdrive.controls.lib.flashpilot_mads import LateralAuthorizationAlert
 from opendbc.car.ford.values import CAR as FORD_CAR
 
 from openpilot.common.version import get_build_metadata
@@ -115,6 +116,8 @@ class SelfdriveD:
     self.CS_prev = car.CarState.new_message()
     self.AM = AlertManager()
     self.events = Events()
+    self.lateral_authorization_alert = LateralAuthorizationAlert(
+      self.CP.carFingerprint == FORD_CAR.FORD_F_150_LIGHTNING_MK1)
 
     self.initialized = False
     self.enabled = False
@@ -160,6 +163,19 @@ class SelfdriveD:
     """Compute onroadEvents from carState"""
 
     self.events.clear()
+
+    controls_state_fresh = (self.initialized and self.sm.valid['controlsState'] and self.sm.alive['controlsState'] and
+                            self.sm.freq_ok['controlsState'])
+    controls_state = self.sm['controlsState']
+    if self.lateral_authorization_alert.update(
+      authorized=controls_state.madsAuthorized,
+      session=controls_state.madsState.available,
+      controls_state_fresh=controls_state_fresh,
+      onroad=self.sm['deviceState'].started,
+      drive=str(CS.gearShifter) == "drive",
+      cruise_available=CS.cruiseState.available,
+    ):
+      self.events.add(EventName.lateralControlUnavailable)
 
     if self.sm['controlsState'].lateralControlState.which() == 'debugState':
       self.events.add(EventName.joystickDebug)

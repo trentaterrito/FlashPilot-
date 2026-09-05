@@ -117,6 +117,8 @@ void fill_panda_state(cereal::PandaState::Builder &ps, cereal::PandaState::Panda
   ps.setControlsAllowed((health.flags_pkt & HEALTH_FLAG_CONTROLS_ALLOWED) != 0U);
   ps.setControlsAllowedLateral((health.flags_pkt & HEALTH_FLAG_CONTROLS_ALLOWED_LATERAL) != 0U);
   ps.setMadsSafetyEnabled((health.flags_pkt & HEALTH_FLAG_MADS_SAFETY_ENABLED) != 0U);
+  ps.setLateralRevocationReason(health.lateral_revocation_reason_pkt);
+  ps.setLateralAuthorizationGates(health.lateral_authorization_gates_pkt);
   ps.setTxBufferOverflow(health.tx_buffer_overflow_pkt);
   ps.setRxBufferOverflow(health.rx_buffer_overflow_pkt);
   ps.setPandaType(hw_type);

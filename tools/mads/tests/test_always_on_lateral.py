@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 
-from openpilot.selfdrive.controls.lib.flashpilot_mads import AlwaysOnLateralHost
+from openpilot.selfdrive.controls.lib.flashpilot_mads import AlwaysOnLateralHost, LateralAuthorizationAlert
 
 
 def update(host, *, onroad=True, fresh=True, eligible=True, panda=True, authorized=False):
@@ -49,3 +49,41 @@ def test_driver_override_is_not_a_vehicle_eligibility_veto():
     espDisabled=False, doorOpen=False, seatbeltUnlatched=False,
   )
   assert host.vehicle_eligible(cs, [], True, panda_enabled=True)
+
+
+def alert_update(alert, *, authorized, session=True, fresh=True, onroad=True, drive=True, cruise=True):
+  return alert.update(authorized=authorized, session=session, controls_state_fresh=fresh,
+                      onroad=onroad, drive=drive, cruise_available=cruise)
+
+
+def test_lateral_alert_fires_once_and_rearms_on_fresh_authorization():
+  alert = LateralAuthorizationAlert(True)
+  assert not alert_update(alert, authorized=False)  # initial handshake
+  assert not alert_update(alert, authorized=True)
+  assert alert_update(alert, authorized=False)
+  assert not alert_update(alert, authorized=False)
+  assert not alert_update(alert, authorized=True)
+  assert alert_update(alert, authorized=False)
+
+
+def test_lateral_alert_suppresses_expected_boundaries():
+  boundaries = ({"session": False}, {"fresh": False}, {"onroad": False}, {"drive": False}, {"cruise": False})
+  for boundary in boundaries:
+    alert = LateralAuthorizationAlert(True)
+    assert not alert_update(alert, authorized=True)
+    assert not alert_update(alert, authorized=False, **boundary)
+
+
+def test_lateral_alert_does_not_arm_inside_suppressed_boundary():
+  boundaries = ({"session": False}, {"fresh": False}, {"onroad": False}, {"drive": False}, {"cruise": False})
+  for boundary in boundaries:
+    alert = LateralAuthorizationAlert(True)
+    assert not alert_update(alert, authorized=True, **boundary)
+    assert not alert_update(alert, authorized=False)  # context restored, but no established authorization
+
+
+def test_lateral_alert_suppresses_stale_state_and_non_lightning():
+  for alert, kwargs in ((LateralAuthorizationAlert(True), {"fresh": False}),
+                        (LateralAuthorizationAlert(False), {})):
+    assert not alert_update(alert, authorized=True)
+    assert not alert_update(alert, authorized=False, **kwargs)

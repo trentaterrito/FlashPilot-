@@ -33,6 +33,19 @@ class AlwaysOnLateralResult:
   authorized: bool = False
 
 
+class LateralAuthorizationAlert:
+  """Detect one unexpected loss after an established AOL authorization."""
+  def __init__(self, lightning):
+    self.lightning = lightning
+    self.previous_authorized = False
+
+  def update(self, *, authorized, session, controls_state_fresh, onroad, drive, cruise_available):
+    expected_context = self.lightning and session and controls_state_fresh and onroad and drive and cruise_available
+    trigger = bool(self.previous_authorized and not authorized and expected_context)
+    self.previous_authorized = bool(authorized and expected_context)
+    return trigger
+
+
 class AlwaysOnLateralHost:
   """Fail-closed host side of the existing independent-lateral handshake."""
   def __init__(self, lightning):

@@ -235,6 +235,21 @@ class Car:
     co_send = messaging.new_message('carOutput')
     co_send.valid = self.sm.all_checks(['carControl'])
     co_send.carOutput.actuatorsOutput = self.last_actuators_output
+    ford_lat = getattr(self.CI.CC, 'ford_lateral_telemetry', None)
+    if ford_lat is not None:
+      telemetry = co_send.carOutput.fordLateralTelemetry
+      telemetry.active = True
+      telemetry.wireMode = ford_lat.mode
+      telemetry.requestedCurvature = ford_lat.requested_curvature
+      telemetry.deviationLimitedCurvature = ford_lat.deviation_limited_curvature
+      telemetry.calculatedPathAngle = ford_lat.calculated_path_angle
+      telemetry.finalPathAngle = ford_lat.path_angle
+      telemetry.shadowCurvature = ford_lat.shadow_curvature
+      telemetry.deviationLimited = ford_lat.deviation_limited
+      telemetry.pscmSaturationLimited = ford_lat.pscm_saturation_limited
+      telemetry.rangeLimited = ford_lat.range_limited
+      telemetry.rateLimited = ford_lat.rate_limited
+      telemetry.humanTurnActive = ford_lat.human_turn_active
     self.pm.send('carOutput', co_send)
 
     # kick off controlsd step while we actuate the latest carControl packet

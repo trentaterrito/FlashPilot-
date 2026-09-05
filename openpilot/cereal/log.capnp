@@ -117,6 +117,7 @@ struct OnroadEvent @0xc4fa6047f024e718 {
     selfdrivedLagging @81;
     resumeBlocked @82;
     carNotReady @103;
+    lateralControlUnavailable @104;
     steerTimeLimit @83;
     vehicleSensorsInvalid @84;
     locationdTemporaryError @85;
@@ -571,6 +572,8 @@ struct PandaState @0xa7649e2575e4591e {
   # reserved for forks building alternate experiences.
   controlsAllowedLateral @38 :Bool;
   madsSafetyEnabled @39 :Bool;
+  lateralRevocationReason @40 :UInt8;
+  lateralAuthorizationGates @41 :UInt16;
 
   enum FaultStatus {
     none @0;
