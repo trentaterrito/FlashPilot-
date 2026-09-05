@@ -1,287 +1,234 @@
-from dataclasses import replace
 from types import SimpleNamespace
 
 import pytest
 
-from openpilot.system.hardware.flashpilot_offroad import OffroadPolicy, ParkEvidence, ParkedCANObserver, OffroadSupervisor, ONROAD_PROCESSES, fresh
-from opendbc.can import CANPacker
-from opendbc.car import Bus
-from opendbc.car.ford.values import CAR, DBC
-
-PARK = ParkEvidence(ignition=True, panda_ok=True, parked=True, outputs_idle=True)
-STOPPED = replace(PARK, outputs_idle=False, shutdown_complete=True)
+from openpilot.system.hardware.flashpilot_offroad import OffroadPolicy, OffroadEvidence, OffroadSupervisor, ONROAD_PROCESSES, fresh
 
 
-def enter(policy):
-  policy.update(10, "off", PARK)
-  result = policy.update(11, "offroad", PARK)
-  assert result["inhibit"] and not result["active"] and result["phase"] == "stopping"
-  return result
+class FakeParams(dict):
+  def get_bool(self, key):
+    return bool(self.get(key, False))
+
+  def put_bool(self, key, value, **kwargs):
+    self[key] = value
+
+  def put(self, key, value, **kwargs):
+    self[key] = value
 
 
-def test_off_does_not_inhibit_normal_driving():
+class SM(dict):
+  def update(self, _):
+    pass
+
+
+@pytest.fixture
+def rig():
+  sm = SM(
+    carControl=SimpleNamespace(enabled=False, latActive=False, longActive=False),
+    selfdriveState=SimpleNamespace(enabled=False, active=False),
+    managerState=SimpleNamespace(processes=[SimpleNamespace(name=n, running=True, shouldBeRunning=True) for n in ONROAD_PROCESSES]),
+  )
+  sm.valid = dict.fromkeys(sm, True)
+  sm.logMonoTime = dict.fromkeys(sm, 0)
+  params = FakeParams()
+  messaging = SimpleNamespace(SubMaster=lambda services: sm)
+  supervisor = OffroadSupervisor(params, messaging)
+  panda = SimpleNamespace(
+    pandaType="tres", faults=[], ignitionLine=True, ignitionCan=True, controlsAllowed=False, controlsAllowedLateral=False, safetyModel="ford"
+  )
+  r = SimpleNamespace(s=supervisor, params=params, sm=sm, panda=panda, started=True)
+
+  def tick(t, stale=(), panda_valid=True, panda_age=0):
+    sm.logMonoTime = {n: int((t - (3 if n in stale else 0)) * 1e9) for n in sm}
+    return r.s.update(t, [panda], t - panda_age, r.started, panda_valid)
+
+  def shutdown():
+    r.started = False
+    panda.safetyModel = "noOutput"
+    for p in sm['managerState'].processes:
+      p.running = p.shouldBeRunning = False
+
+  r.tick, r.shutdown = tick, shutdown
+  return r
+
+
+def select(r, t=10, stale=()):
+  assert not r.tick(t, stale)
+  r.params['FlashPilotForceOffroad'] = 'offroad'
+  assert r.tick(t + 1.1, stale)
+
+
+def test_full_onroad_shutdown_hold_exit_and_normal_restart(rig):
+  r = rig
+  select(r)
+  assert r.params['FlashPilotOffroadStatus']['phase'] == 'stopping'
+  assert not r.params['FlashPilotOffroadStatus']['active']
+  r.started = False
+  assert r.tick(12)  # device offroad alone is not completion
+  assert not r.params['FlashPilotOffroadStatus']['active']
+  r.shutdown()
+  assert r.tick(13, stale=('carControl', 'selfdriveState'))
+  assert r.params['FlashPilotOffroadStatus']['active']
+  for t, ignition in ((14, False), (15, True), (16, False), (17, True)):
+    r.panda.ignitionLine = r.panda.ignitionCan = ignition
+    assert r.tick(t, stale=('carControl', 'selfdriveState'))
+    assert r.params['FlashPilotOffroadStatus']['active']
+  r.params['FlashPilotForceOffroad'] = 'off'
+  assert not r.tick(18, stale=('carControl', 'selfdriveState'))
+  assert not r.params.get_bool('FlashPilotOffroadLease')
+  assert not r.params['FlashPilotOffroadStatus']['active']
+  # Model normal manager restart of onroad processes after inhibit release.
+  r.started = True
+  r.panda.safetyModel = 'ford'
+  for p in r.sm['managerState'].processes:
+    p.running = p.shouldBeRunning = True
+  assert not r.tick(19)
+  assert not r.sm['carControl'].enabled
+  assert not r.panda.controlsAllowed and not r.panda.controlsAllowedLateral
+
+
+def test_select_while_already_offroad_without_fingerprint_or_control_publishers(rig):
+  r = rig
+  r.shutdown()
+  r.panda.ignitionLine = r.panda.ignitionCan = False
+  select(r, stale=('carControl', 'selfdriveState'))
+  assert r.params['FlashPilotOffroadStatus']['active']
+  r.panda.ignitionLine = True
+  assert r.tick(12, stale=('carControl', 'selfdriveState'))
+  assert r.params['FlashPilotOffroadStatus']['active']
+  r.params['FlashPilotForceOffroad'] = 'off'
+  assert not r.tick(13.2, stale=('carControl', 'selfdriveState'))
+
+
+@pytest.mark.parametrize('field', ['enabled', 'latActive', 'longActive'])
+def test_fresh_active_commands_veto_even_conflicting_stopped_manager(rig, field):
+  r = rig
+  r.shutdown()
+  setattr(r.sm['carControl'], field, True)
+  for t in (10, 12):
+    r.params['FlashPilotForceOffroad'] = 'offroad'
+    assert not r.tick(t)
+
+
+@pytest.mark.parametrize(
+  'failure',
+  ['long_permission', 'lat_permission', 'panda_fault', 'unknown_panda', 'stale_panda', 'invalid_panda', 'enabled', 'active', 'missing_cc', 'missing_sd'],
+)
+def test_entry_rejects_engaged_or_unconfirmed_state(rig, failure):
+  r = rig
+  stale = ()
+  if failure == 'long_permission':
+    r.panda.controlsAllowed = True
+  if failure == 'lat_permission':
+    r.panda.controlsAllowedLateral = True
+  if failure == 'panda_fault':
+    r.panda.faults = ['fault']
+  if failure == 'unknown_panda':
+    r.panda.pandaType = 'unknown'
+  if failure in ('enabled', 'active'):
+    setattr(r.sm['selfdriveState'], failure, True)
+  if failure == 'missing_cc':
+    stale = ('carControl',)
+  if failure == 'missing_sd':
+    stale = ('selfdriveState',)
+  for t in (10, 12):
+    r.params['FlashPilotForceOffroad'] = 'offroad'
+    assert not r.tick(t, stale, failure != 'invalid_panda', 1 if failure == 'stale_panda' else 0)
+
+
+@pytest.mark.parametrize('failure', [None, 'joystick_running', 'manager_stale', 'manager_invalid', 'process_missing'])
+def test_missing_commands_require_all_command_publishers_confirmed_dead(rig, failure):
+  r = rig
+  for p in r.sm['managerState'].processes:
+    if p.name in ('controlsd', 'joystickd'):
+      p.running = False
+  if failure == 'joystick_running':
+    next(p for p in r.sm['managerState'].processes if p.name == 'joystickd').running = True
+  if failure == 'process_missing':
+    r.sm['managerState'].processes = [p for p in r.sm['managerState'].processes if p.name != 'controlsd']
+  if failure == 'manager_invalid':
+    r.sm.valid['managerState'] = False
+  stale = ('carControl', 'managerState') if failure == 'manager_stale' else ('carControl',)
+  assert not r.tick(10, stale)
+  r.params['FlashPilotForceOffroad'] = 'offroad'
+  assert r.tick(11.1, stale) == (failure is None)
+
+
+@pytest.mark.parametrize('loss', ['manager_stale', 'running', 'expected', 'started', 'safety', 'long', 'lat', 'panda'])
+def test_ack_loss_clears_active_immediately_and_blocks_exit_but_keeps_inhibit(rig, loss):
+  r = rig
+  select(r)
+  r.shutdown()
+  assert r.tick(12) and r.tick(13.1)
+  assert r.params['FlashPilotOffroadStatus']['active']
+  if loss == 'running':
+    r.sm['managerState'].processes[0].running = True
+  if loss == 'expected':
+    r.sm['managerState'].processes[0].shouldBeRunning = True
+  if loss == 'started':
+    r.started = True
+  if loss == 'safety':
+    r.panda.safetyModel = 'ford'
+  if loss == 'long':
+    r.panda.controlsAllowed = True
+  if loss == 'lat':
+    r.panda.controlsAllowedLateral = True
+  r.params['FlashPilotForceOffroad'] = 'off'
+  assert r.tick(14, ('managerState',) if loss == 'manager_stale' else (), loss != 'panda')
+  assert not r.params['FlashPilotOffroadStatus']['active']
+  assert r.params.get_bool('FlashPilotOffroadLease')
+
+
+def test_timeout_and_supervisor_restart_never_release_inhibit(rig):
+  r = rig
+  select(r)
+  assert r.tick(22)
+  assert r.params['FlashPilotOffroadStatus']['phase'] == 'fault'
+  r.s = OffroadSupervisor(r.params, SimpleNamespace(SubMaster=lambda _: r.sm))
+  assert r.tick(23)
+  assert not r.params['FlashPilotOffroadStatus']['active']
+  r.shutdown()
+  assert r.tick(24)
+  assert r.params['FlashPilotOffroadStatus']['active']
+
+
+def test_invalid_requests_do_not_change_normal_startup():
   p = OffroadPolicy()
-  for e in (ParkEvidence(), PARK, replace(PARK, parked=False, outputs_idle=False)):
-    assert not p.update(10, "off", e)["inhibit"]
+  for t, request in enumerate(('off', 'bad', 'onroad'), 10):
+    assert not p.update(t, request, OffroadEvidence())['inhibit']
 
 
-@pytest.mark.parametrize("field", ["parked", "outputs_idle", "panda_ok", "ignition"])
-def test_entry_rejects_unsafe_or_missing_evidence(field):
-  p = OffroadPolicy()
-  e = replace(PARK, **{field: False})
-  p.update(10, "off", e)
-  assert not p.update(12, "offroad", e)["inhibit"]
-
-
-def test_confirmation_requires_parked_settle_time_and_completed_shutdown():
-  p = OffroadPolicy()
-  assert not p.update(10, "offroad", PARK)["inhibit"]
-  enter(p)
-  assert p.update(11.5, "offroad", STOPPED)["active"]
-  assert not p.update(11.8, "off", STOPPED)["can_select"]
-  assert p.inhibit
-  assert not p.update(12.5, "off", STOPPED)["inhibit"]
-
-
-def test_release_requires_fresh_park_and_shutdown():
-  p = OffroadPolicy()
-  enter(p)
-  e = replace(STOPPED, parked=False)
-  assert p.update(12, "off", e)["phase"] == "fault"
-  assert p.update(20, "off", e)["inhibit"]
-  p.update(21, "offroad", STOPPED)
-  r = p.update(22, "off", STOPPED)
-  assert not r["inhibit"] and r["selection"] == "off" and r["phase"] == "standard"
-
-
-def test_shutdown_timeout_never_claims_active():
-  p = OffroadPolicy()
-  enter(p)
-  r = p.update(22, "offroad", PARK)
-  assert r["inhibit"] and not r["active"] and r["phase"] == "fault"
-
-
-def test_hardwared_recovery_stays_inhibited_without_evidence():
-  p = OffroadPolicy(recovering=True)
-  assert p.update(10, "off", ParkEvidence())["inhibit"]
-  p.update(11, "offroad", STOPPED)
-  assert not p.update(12, "off", STOPPED)["inhibit"]
-
-
-def test_ignition_loss_clears_request_but_stale_panda_does_not():
-  p = OffroadPolicy()
-  enter(p)
-  assert p.update(12, "offroad", ParkEvidence())["inhibit"]
-  r = p.update(13, "offroad", ParkEvidence(panda_ok=True))
-  assert r["selection"] == "off" and not r["inhibit"]
-
-
-def test_reboot_policy_starts_standard_and_invalid_requests_do_nothing():
-  p = OffroadPolicy()
-  assert not p.update(10, "bogus", PARK)["inhibit"]
-  assert not p.update(12, "onroad", PARK)["inhibit"]
-  assert p.selection == "off"
-
-
-@pytest.mark.parametrize("stamp", [0, float('nan'), float('inf'), 11, 9.49])
-def test_fresh_rejects_missing_nonfinite_future_or_stale(stamp):
+@pytest.mark.parametrize('stamp', [0, float('nan'), float('inf'), 11, 9.49])
+def test_fresh_rejects_bad_timestamps(stamp):
   assert not fresh(10, stamp)
 
 
-def observer():
-  cp = SimpleNamespace(carFingerprint=CAR.FORD_F_150_LIGHTNING_MK1, transmissionType="automatic", safetyConfigs=[None])
-  return ParkedCANObserver(cp)
-
-
-def feed(o, start=10., gear=0, speed=0, engine_speed=0, cruise=3, standstill=1, omit=None, bus=0):
-  packer = CANPacker(DBC[CAR.FORD_F_150_LIGHTNING_MK1][Bus.pt])
-  for i in range(20):
-    values = {"BrakeSysFeatures": {"Veh_V_ActlBrk": speed},
-              "EngVehicleSpThrottle2": {"Veh_V_ActlEng": engine_speed},
-              "PowertrainData_10": {"TrnRng_D_Rq": gear},
-              "EngBrakeData": {"CcStat_D_Actl": cruise}, "DesiredTorqBrk": {"VehStop_D_Stat": standstill}}
-    o.update([(int((start + i * .05) * 1e9), [packer.make_can_msg(n, bus, v) for n, v in values.items() if n != omit])])
-  return start + .95
-
-
-def test_can_observer_accepts_fresh_park_and_rejects_stale():
-  o = observer()
-  t = feed(o)
-  assert o.parked(t)
-  assert not o.parked(t + .51)
-
-
-@pytest.mark.parametrize("kw", [{"gear": 3}, {"gear": 1}, {"gear": 14}, {"speed": 5}, {"engine_speed": 5},
-                                 {"cruise": 4}, {"cruise": 5}, {"standstill": 0}, {"omit": "PowertrainData_10"}, {"bus": 2}])
-def test_can_observer_rejects_unsafe_or_missing_signals(kw):
-  o = observer()
-  assert not o.parked(feed(o, **kw))
-
-
-def test_observer_survives_without_card_but_rejects_shift_out_of_park():
-  o = observer()
-  assert o.parked(feed(o))
-  assert not o.parked(feed(o, start=11, gear=3))
-
-
-def test_other_vehicle_rejected():
-  with pytest.raises(ValueError):
-    ParkedCANObserver(SimpleNamespace(carFingerprint=CAR.FORD_MUSTANG_MACH_E_MK1, transmissionType="automatic"))
-
-
-def supervisor_fixture():
-  class Params(dict):
-    def get_bool(self, k):
-      return bool(self.get(k, False))
-
-    def put_bool(self, k, v, **kwargs):
-      self[k] = v
-
-    def put(self, k, v, **kwargs):
-      self[k] = v
-
-  class SM(dict):
-    def update(self, _):
-      pass
-
-  s = OffroadSupervisor.__new__(OffroadSupervisor)
-  s.params = Params()
-  s.policy = OffroadPolicy()
-  s.observer = observer()
-  s.last_status = None
-  s.can_sock = None
-  s.messaging = SimpleNamespace(drain_sock=lambda _: [])
-  s.sm = SM(carState=SimpleNamespace(canValid=True, gearShifter="park", standstill=True, vEgo=0,
-                                    cruiseState=SimpleNamespace(enabled=False)),
-            carControl=SimpleNamespace(enabled=False, latActive=False, longActive=False),
-            selfdriveState=SimpleNamespace(enabled=False, active=False),
-            managerState=SimpleNamespace(processes=[SimpleNamespace(name=n, running=True, shouldBeRunning=True) for n in ONROAD_PROCESSES]))
-  s.sm.updated = {"carParams": False}
-  s.sm.valid = {n: True for n in s.sm}
-  panda = SimpleNamespace(pandaType="tres", faults=[], ignitionLine=True, ignitionCan=True,
-                          controlsAllowed=False, controlsAllowedLateral=False, safetyModel="ford")
-
-  def tick(t, started, stale=(), feed_can=True, panda_valid=True):
-    if feed_can and s.observer is not None:
-      feed(s.observer, start=t - .95)
-    s.sm.logMonoTime = {n: int(t * 1e9) for n in s.sm}
-    for n in stale:
-      s.sm.logMonoTime[n] = 0
-    return s.update(t, [panda], t, started, panda_valid)
-
-  return s, panda, tick
-
-
-def test_supervisor_requires_process_and_panda_ack_then_allows_clean_release():
-  s, panda, tick = supervisor_fixture()
-
-  assert not tick(10, True)
-  s.params["FlashPilotForceOffroad"] = "offroad"
-  assert tick(11.1, True)
-  assert s.params["FlashPilotOffroadLease"]
-  assert not s.params["FlashPilotOffroadStatus"]["active"]
-  assert tick(12, False)  # started=False alone cannot claim completion
-  for p in s.sm["managerState"].processes:
-    p.running = p.shouldBeRunning = False
-  assert tick(13, False)  # stopped processes alone cannot claim completion
-  assert not s.params["FlashPilotOffroadStatus"]["active"]
-  panda.safetyModel = "noOutput"
-  assert tick(14, False)
-  assert s.params["FlashPilotOffroadStatus"]["active"]
-  s.params["FlashPilotForceOffroad"] = "off"
-  assert not tick(15.1, False)
-  assert not s.params["FlashPilotOffroadLease"]
-  assert s.params["FlashPilotOffroadStatus"]["phase"] == "standard"
-
-
-def test_dead_controls_can_request_shutdown_but_not_claim_completion():
-  s, panda, tick = supervisor_fixture()
-  next(p for p in s.sm["managerState"].processes if p.name == "controlsd").running = False
-  # Even a last active command is not reused as current state. Live Panda
-  # authorization and independent parked evidence remain mandatory.
-  s.sm["carControl"].enabled = s.sm["carControl"].latActive = s.sm["carControl"].longActive = True
-  assert not tick(10, True, stale=("carControl",))
-  s.params["FlashPilotForceOffroad"] = "offroad"
-  assert tick(11.1, True, stale=("carControl",))
-  assert s.params["FlashPilotOffroadStatus"]["phase"] == "stopping"
-  assert not s.params["FlashPilotOffroadStatus"]["active"]
-  assert tick(22, True, stale=("carControl",))
-  assert s.params["FlashPilotOffroadStatus"]["phase"] == "fault"
-  for p in s.sm["managerState"].processes:
-    p.running = p.shouldBeRunning = False
-  panda.safetyModel = "noOutput"
-  assert tick(23, False, stale=("carControl",))
-  assert s.params["FlashPilotOffroadStatus"]["active"]
-  s.params["FlashPilotForceOffroad"] = "off"
-  assert not tick(24.1, False, stale=("carControl",))
-
-
-@pytest.mark.parametrize("failure", ["running", "missing_process", "stale_manager", "invalid_manager",
-                                     "stale_car", "stale_selfdrive", "invalid_car", "invalid_selfdrive",
-                                     "engaged", "cruise", "moving", "not_park", "unknown_car", "stale_can",
-                                     "long_permission", "lat_permission", "panda_fault", "invalid_panda", "fresh_active_command"])
-def test_dead_controls_recovery_rejects_missing_or_unsafe_evidence(failure):
-  s, panda, tick = supervisor_fixture()
-  processes = s.sm["managerState"].processes
-  next(p for p in processes if p.name == "controlsd").running = failure == "running"
-  stale = ["carControl"]
-  if failure == "fresh_active_command":
-    stale = []
-    s.sm["carControl"].latActive = True
-  if failure == "missing_process":
-    s.sm["managerState"].processes = [p for p in processes if p.name != "controlsd"]
-  if failure.startswith("stale_") and failure != "stale_can":
-    stale.append({"stale_manager": "managerState", "stale_car": "carState", "stale_selfdrive": "selfdriveState"}[failure])
-  if failure in ("invalid_manager", "invalid_car", "invalid_selfdrive"):
-    s.sm.valid[{"invalid_manager": "managerState", "invalid_car": "carState", "invalid_selfdrive": "selfdriveState"}[failure]] = False
-  if failure == "engaged":
-    s.sm["selfdriveState"].active = True
-  if failure == "cruise":
-    s.sm["carState"].cruiseState.enabled = True
-  if failure == "moving":
-    s.sm["carState"].vEgo = 1
-  if failure == "not_park":
-    s.sm["carState"].gearShifter = "drive"
-  if failure == "unknown_car":
-    s.observer = None
-  if failure == "long_permission":
-    panda.controlsAllowed = True
-  if failure == "lat_permission":
-    panda.controlsAllowedLateral = True
-  if failure == "panda_fault":
-    panda.faults = ["fault"]
-  for t in (10, 11.1, 15):
-    s.params["FlashPilotForceOffroad"] = "offroad"
-    assert not tick(t, True, stale=stale, feed_can=failure != "stale_can", panda_valid=failure != "invalid_panda")
-    assert not s.params["FlashPilotOffroadStatus"]["active"]
-
-
-def test_lateral_permission_blocks_healthy_entry_and_shutdown_ack():
-  s, panda, tick = supervisor_fixture()
-  panda.controlsAllowedLateral = True
-  for t in (10, 11.1):
-    s.params["FlashPilotForceOffroad"] = "offroad"
-    assert not tick(t, True)
-  panda.controlsAllowedLateral = False
-  assert not tick(12, True)
-  s.params["FlashPilotForceOffroad"] = "offroad"
-  assert tick(13.1, True)
-  for p in s.sm["managerState"].processes:
-    p.running = p.shouldBeRunning = False
-  panda.safetyModel = "noOutput"
-  panda.controlsAllowedLateral = True
-  assert tick(14, False)
-  assert not s.params["FlashPilotOffroadStatus"]["active"]
-
-
-def test_new_params_clear_on_manager_start_not_on_offroad_transition(tmp_path):
+def test_params_survive_ignition_and_route_edges_but_reset_on_manager_start(tmp_path):
   from openpilot.common.params import Params, ParamKeyFlag
+
   p = Params(str(tmp_path))
-  p.put("FlashPilotForceOffroad", "offroad", block=True)
-  p.put_bool("FlashPilotOffroadLease", True, block=True)
-  p.put("FlashPilotOffroadStatus", {"active": True}, block=True)
-  p.clear_all(ParamKeyFlag.CLEAR_ON_OFFROAD_TRANSITION)
-  assert p.get("FlashPilotForceOffroad") == "offroad" and p.get_bool("FlashPilotOffroadLease")
+  p.put('FlashPilotForceOffroad', 'offroad', block=True)
+  p.put_bool('FlashPilotOffroadLease', True, block=True)
+  for flag in (ParamKeyFlag.CLEAR_ON_OFFROAD_TRANSITION, ParamKeyFlag.CLEAR_ON_ONROAD_TRANSITION, ParamKeyFlag.CLEAR_ON_IGNITION_ON):
+    p.clear_all(flag)
+    assert p.get('FlashPilotForceOffroad') == 'offroad' and p.get_bool('FlashPilotOffroadLease')
   p.clear_all(ParamKeyFlag.CLEAR_ON_MANAGER_START)
-  assert p.get("FlashPilotForceOffroad") is None and not p.get_bool("FlashPilotOffroadLease")
-  assert p.get("FlashPilotOffroadStatus") is None
+  assert p.get('FlashPilotForceOffroad') is None and not p.get_bool('FlashPilotOffroadLease')
+
+
+def test_normal_manager_predicates_stop_required_processes_and_restart_gates_reset(tmp_path):
+  from opendbc.car.structs import car
+  from openpilot.common.params import Params, ParamKeyFlag
+  from openpilot.system.manager.process_config import managed_processes
+
+  params = Params(str(tmp_path))
+  cp = car.CarParams.new_message()
+  for name in ONROAD_PROCESSES:
+    assert not managed_processes[name].should_run(False, params, cp)
+  for name in ('card', 'controlsd', 'selfdrived'):
+    assert managed_processes[name].should_run(True, params, cp)
+  params.put_bool('ControlsReady', True, block=True)
+  params.put_bool('FirmwareQueryDone', True, block=True)
+  params.clear_all(ParamKeyFlag.CLEAR_ON_ONROAD_TRANSITION)
+  assert not params.get_bool('ControlsReady')
+  assert not params.get_bool('FirmwareQueryDone')

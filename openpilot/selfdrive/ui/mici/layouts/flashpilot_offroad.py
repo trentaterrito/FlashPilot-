@@ -10,6 +10,7 @@ from openpilot.system.ui.lib.multilang import tr
 
 
 STATUS_TIMEOUT_S = 2.0
+TRANSITION_TIMEOUT_S = 13.0
 STANDARD_MODE = "off"
 OFFROAD_MODE = "offroad"
 
@@ -23,7 +24,7 @@ def offroad_status():
     valid = False
   if not valid:
     return {"selection": STANDARD_MODE, "can_select": False, "phase": "unavailable",
-            "reason": "Status unavailable — do not assume parked mode is active", "inhibit": False, "active": False}
+            "reason": "Status unavailable — do not assume forced offroad is active", "inhibit": False, "active": False}
   return status
 
 
@@ -46,6 +47,39 @@ def request_transition(enable: bool) -> bool:
   return True
 
 
+def transition_result(status, enable, submitted_at, now, pending=None):
+  """None means pending; empty text means acknowledged; text explains failure."""
+  if status.get("timestamp", 0) > submitted_at and status.get("phase") != "unavailable":
+    target = transition_target(enable)
+    if status.get("selection") != target and pending != target:
+      return status.get("reason") or "Transition rejected"
+    if status.get("phase") == "fault":
+      return status.get("reason") or "Shutdown not confirmed"
+    if enable and status.get("active") and status.get("inhibit") and status.get("phase") == "offroad":
+      return ""
+    if not enable and not status.get("inhibit") and status.get("phase") == "standard":
+      return ""
+  if now - submitted_at >= TRANSITION_TIMEOUT_S:
+    return "Transition not confirmed. Check current offroad status; do not assume it completed."
+  return None
+
+
+class FlashPilotOffroadProgress(BigDialog):
+  def __init__(self, enable, submitted_at):
+    super().__init__(tr("switching offroad mode"), tr("Waiting for system confirmation"))
+    self._enable_offroad = enable
+    self._submitted_at = submitted_at
+
+  def _update_state(self):
+    super()._update_state()
+    if self.is_dismissing:
+      return
+    result = transition_result(offroad_status(), self._enable_offroad, self._submitted_at, time.monotonic(),
+                               ui_state.params.get("FlashPilotForceOffroad"))
+    if result is not None:
+      self.dismiss((lambda: gui_app.push_widget(BigDialog(tr("offroad transition failed"), tr(result)))) if result else None)
+
+
 class FlashPilotOffroadConfirmation(BigConfirmationDialog):
   """Always offer the SunnyPilot swipe; validate when the user completes it."""
   def __init__(self, enable: bool, icon):
@@ -57,11 +91,13 @@ class FlashPilotOffroadConfirmation(BigConfirmationDialog):
     # Opening/completing a gesture is not authorization. Keep the final fresh
     # check and backend acknowledgment; never display a successful transition
     # merely because the slider reached its end.
+    submitted_at = time.monotonic()
     if request_transition(self._enable_offroad):
+      gui_app.push_widget(FlashPilotOffroadProgress(self._enable_offroad, submitted_at))
       return
     reason = offroad_status().get("reason", "")
     if reason == "Standard comma behavior":
-      reason = tr("Requires Park, zero speed and inactive controls. With ignition off, normal offroad mode is already active.")
+      reason = tr("Disengage steering and cruise, then wait for current system status.")
     gui_app.push_widget(BigDialog(tr("offroad transition failed"), reason))
 
 

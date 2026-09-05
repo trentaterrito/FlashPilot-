@@ -117,6 +117,9 @@ def test_unavailable_at_completed_swipe_shows_failure_without_request(monkeypatc
 def test_confirmation_uses_normal_slider_and_checks_latest_state(monkeypatch):
   from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
   callbacks = []
+  progress = []
+  monkeypatch.setattr(ui, "FlashPilotOffroadProgress", lambda enable, submitted: (enable, submitted))
+  monkeypatch.setattr(ui.gui_app, "push_widget", progress.append)
   monkeypatch.setattr(ui.BigConfirmationDialog, "__init__",
                       lambda self, title, icon, confirm_callback, red: callbacks.append(confirm_callback))
   params = install_params(monkeypatch, ui, status(can_select=False))
@@ -126,7 +129,62 @@ def test_confirmation_uses_normal_slider_and_checks_latest_state(monkeypatch):
   params["FlashPilotOffroadStatus"] = status()
   callbacks[0]()
   assert params["writes"] == [("FlashPilotForceOffroad", "offroad")]
+  assert progress == [(True, 100.0)]
   assert "_update_state" not in type(dialog).__dict__  # normal SunnyPilot slider lifecycle
+
+
+def test_request_write_is_not_shutdown_acknowledgment():
+  from openpilot.selfdrive.ui.mici.layouts.flashpilot_offroad import transition_result
+  before_request = status(timestamp=99)
+  stopping = status('offroad', phase='stopping', inhibit=True, timestamp=101)
+  assert transition_result(before_request, True, 100, 101) is None
+  assert transition_result(stopping, True, 100, 101) is None
+  complete = status('offroad', phase='offroad', inhibit=True, timestamp=102)
+  assert transition_result(complete, True, 100, 102) == ''
+  assert transition_result(status(timestamp=103), False, 102, 103) == ''
+
+
+def test_asynchronous_rejection_fault_and_timeout_explain_failure():
+  from openpilot.selfdrive.ui.mici.layouts.flashpilot_offroad import transition_result
+  rejected = status(timestamp=101)
+  rejected['reason'] = 'Disengage first'
+  assert transition_result(rejected, True, 100, 101) == 'Disengage first'
+  fault = status('offroad', phase='fault', inhibit=True, timestamp=102)
+  fault['reason'] = 'Shutdown not confirmed'
+  assert transition_result(fault, True, 100, 102) == 'Shutdown not confirmed'
+  assert 'not confirmed' in transition_result({'phase': 'unavailable'}, True, 100, 113)
+
+
+def test_status_published_before_backend_consumes_request_is_not_rejection():
+  from openpilot.selfdrive.ui.mici.layouts.flashpilot_offroad import transition_result
+  old_selection = status(timestamp=101)
+  assert transition_result(old_selection, True, 100, 101, pending='offroad') is None
+  old_selection['reason'] = 'Disengage first'
+  assert transition_result(old_selection, True, 100, 102, pending='off') == 'Disengage first'
+
+
+@pytest.mark.parametrize('result', ['', 'Shutdown not confirmed'])
+def test_progress_dismisses_before_showing_final_result(monkeypatch, result):
+  from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
+  monkeypatch.setattr(ui.BigDialog, '_update_state', lambda _: None)
+  monkeypatch.setattr(ui, 'transition_result', lambda *args: result)
+  monkeypatch.setattr(ui, 'BigDialog', lambda title, reason: (title, reason))
+  shown = []
+  monkeypatch.setattr(ui.gui_app, 'push_widget', shown.append)
+  dialog = object.__new__(ui.FlashPilotOffroadProgress)
+  dialog._enable_offroad = True
+  dialog._submitted_at = 100
+  dialog._dragging_down = False
+  dialog._playing_dismiss_animation = False
+  callbacks = []
+  monkeypatch.setattr(dialog, 'dismiss', lambda callback: callbacks.append(callback))
+  dialog._update_state()
+  assert len(callbacks) == 1 and not shown
+  if result:
+    callbacks[0]()
+    assert shown == [('offroad transition failed', result)]
+  else:
+    assert callbacks == [None]
 
 
 def slider_harness(monkeypatch):
