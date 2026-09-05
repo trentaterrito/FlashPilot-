@@ -144,6 +144,22 @@ def test_request_write_is_not_shutdown_acknowledgment():
   assert transition_result(status(timestamp=103), False, 102, 103) == ''
 
 
+def test_forced_offroad_label_distinguishes_acknowledged_pending_and_fault():
+  from openpilot.selfdrive.ui.mici.layouts.flashpilot_offroad import forced_offroad_label
+  assert forced_offroad_label(status()) is None
+  assert 'active' in forced_offroad_label(status('offroad', phase='offroad', inhibit=True))
+  assert 'waiting' in forced_offroad_label(status('offroad', phase='stopping', inhibit=True))
+  assert 'not confirmed' in forced_offroad_label(status('offroad', phase='fault', inhibit=True))
+  assert 'not confirmed' in forced_offroad_label({'phase': 'unavailable'}, lease=True)
+  assert 'not confirmed' in forced_offroad_label(status('offroad', phase='offroad', inhibit=True), panda_known=False)
+
+
+def test_stale_acknowledgment_cannot_display_active(monkeypatch):
+  from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
+  install_params(monkeypatch, ui, status('offroad', phase='offroad', inhibit=True, timestamp=90))
+  assert 'not confirmed' in ui.forced_offroad_label(ui.offroad_status(), lease=True)
+
+
 def test_asynchronous_rejection_fault_and_timeout_explain_failure():
   from openpilot.selfdrive.ui.mici.layouts.flashpilot_offroad import transition_result
   rejected = status(timestamp=101)

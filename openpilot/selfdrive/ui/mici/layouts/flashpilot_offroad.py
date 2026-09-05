@@ -32,6 +32,18 @@ def transition_target(enable: bool) -> str:
   return OFFROAD_MODE if enable else STANDARD_MODE
 
 
+def forced_offroad_label(status, lease=False, panda_known=True):
+  """Only acknowledged shutdown may be presented as active, never a request."""
+  selected = lease or status.get("inhibit") or status.get("selection") == OFFROAD_MODE
+  if not selected:
+    return None
+  if (panda_known and status.get("phase") == "offroad" and status.get("active") and status.get("inhibit")):
+    return "forced offroad active\nexit in Settings to start"
+  if panda_known and status.get("phase") == "stopping":
+    return "switching to offroad\nwaiting for shutdown"
+  return "forced offroad selected\nshutdown not confirmed"
+
+
 def can_request_transition(enable: bool) -> bool:
   status = offroad_status()
   target = transition_target(enable)

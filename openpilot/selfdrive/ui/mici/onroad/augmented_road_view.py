@@ -6,6 +6,7 @@ from openpilot.cereal import log
 from opendbc.car.structs import car
 from openpilot.cereal.visionipc import VisionStreamType
 from openpilot.selfdrive.ui.ui_state import ui_state, UIStatus
+from openpilot.selfdrive.ui.mici.layouts.flashpilot_offroad import offroad_status, forced_offroad_label
 from openpilot.selfdrive.ui.mici.onroad import SIDE_PANEL_WIDTH
 from openpilot.selfdrive.ui.mici.onroad.alert_renderer import AlertRenderer
 from openpilot.selfdrive.ui.mici.onroad.driver_state import DriverStateRenderer
@@ -175,7 +176,11 @@ class AugmentedRoadView(CameraView):
     super()._update_state()
 
     # update offroad label
-    if ui_state.panda_type == log.PandaState.PandaType.unknown:
+    forced_label = forced_offroad_label(offroad_status(), ui_state.params.get_bool("FlashPilotOffroadLease"),
+                                       ui_state.panda_type != log.PandaState.PandaType.unknown)
+    if not ui_state.started and forced_label:
+      self._offroad_label.set_text(forced_label)
+    elif ui_state.panda_type == log.PandaState.PandaType.unknown:
       self._offroad_label.set_text("system booting")
     elif ui_state.ignition and not ui_state.started:
       self._offroad_label.set_text("openpilot can't start\ncheck alerts")
