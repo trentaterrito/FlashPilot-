@@ -75,8 +75,11 @@ class FlashPilotOffroadButton(BigCircleButton):
   def _show_confirmation(self):
     if not can_request_transition(self._enable_offroad):
       status = offroad_status()
-      title = tr("park to enable forced offroad") if self._enable_offroad else tr("park to exit forced offroad")
-      gui_app.push_widget(BigDialog(title, status.get("reason", "")))
+      title = tr("offroad transition unavailable")
+      reason = status.get("reason", "")
+      if reason == "Standard comma behavior":
+        reason = tr("Requires Park, zero speed and inactive controls. With ignition off, normal offroad mode is already active.")
+      gui_app.push_widget(BigDialog(title, reason))
       return
     gui_app.push_widget(FlashPilotOffroadConfirmation(self._enable_offroad, self._slider_icon))
 

@@ -67,6 +67,22 @@ def test_enable_and_exit_requests_are_binary_and_idempotent(monkeypatch):
   assert params["writes"] == [("FlashPilotForceOffroad", "off")]
 
 
+def test_unavailable_dialog_does_not_misdiagnose_every_failure_as_park(monkeypatch):
+  from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
+  current = status(can_select=False)
+  current["reason"] = "Standard comma behavior"
+  params = install_params(monkeypatch, ui, current)
+  shown = []
+  monkeypatch.setattr(ui, "BigDialog", lambda title, reason: (title, reason))
+  monkeypatch.setattr(ui.gui_app, "push_widget", shown.append)
+  button = object.__new__(ui.FlashPilotOffroadButton)
+  button._enable_offroad = True
+  button._show_confirmation()
+  assert shown[0][0] == "offroad transition unavailable"
+  assert "ignition off" in shown[0][1]
+  assert "writes" not in params
+
+
 @pytest.mark.parametrize("unsafe", [status(can_select=False), status(timestamp=90.0),
                                      status("offroad", can_select=False, inhibit=True)])
 def test_unsafe_or_unacknowledged_state_cannot_request(monkeypatch, unsafe):
