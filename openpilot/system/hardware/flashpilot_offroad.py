@@ -143,15 +143,24 @@ class OffroadSupervisor:
       return sm.valid[name] and fresh(now, sm.logMonoTime[name] * 1e-9, timeout)
 
     cs, cc, sd = sm["carState"], sm["carControl"], sm["selfdriveState"]
-    idle = (all(service_fresh(n) for n in ("carState", "carControl", "selfdriveState"))
+    processes = {p.name: p for p in sm["managerState"].processes}
+    # Missing commands alone are never proof of inactivity. A positively
+    # observed dead publisher may request parked shutdown, but cannot grant
+    # offroad completion, restart permission, or vehicle control authorization.
+    controls_stopped = (service_fresh("managerState") and "controlsd" in processes
+                        and not processes["controlsd"].running)
+    commands_idle = (service_fresh("carControl") and not cc.enabled and not cc.latActive and not cc.longActive)
+    missing_commands_from_stopped_controls = not service_fresh("carControl") and controls_stopped
+    permissions_off = (panda_ok and not panda_states[0].controlsAllowed
+                       and not panda_states[0].controlsAllowedLateral)
+    idle = (all(service_fresh(n) for n in ("carState", "selfdriveState"))
             and cs.canValid and str(cs.gearShifter) == "park" and cs.standstill
             and math.isfinite(cs.vEgo) and abs(cs.vEgo) <= 0.05
-            and not cs.cruiseState.enabled and not cc.enabled and not cc.latActive and not cc.longActive
-            and not sd.enabled and not sd.active and panda_ok and not panda_states[0].controlsAllowed)
-    processes = {p.name: p for p in sm["managerState"].processes}
+            and not cs.cruiseState.enabled and (commands_idle or missing_commands_from_stopped_controls)
+            and not sd.enabled and not sd.active and permissions_off)
     stopped = (service_fresh("managerState", 2.0) and not started
                and all(n in processes and not processes[n].running and not processes[n].shouldBeRunning for n in ONROAD_PROCESSES))
-    no_output = panda_ok and all(str(p.safetyModel) == "noOutput" and not p.controlsAllowed for p in panda_states)
+    no_output = permissions_off and all(str(p.safetyModel) == "noOutput" for p in panda_states)
     evidence = ParkEvidence(ignition, panda_ok, self.observer is not None and self.observer.parked(now), idle, stopped and no_output)
     requested = self.params.get("FlashPilotForceOffroad") or "off"
     status = self.policy.update(now, requested, evidence)
