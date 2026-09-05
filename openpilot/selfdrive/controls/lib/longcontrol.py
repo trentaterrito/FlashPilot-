@@ -19,6 +19,12 @@ LongCtrlState = car.CarControl.Actuators.LongControlState
 # vRel ticked past 0.2 for a single frame.
 STATIONARY_LEAD_RELEASE_VREL = 0.3
 STATIONARY_LEAD_RELEASE_TICKS = 3
+LIGHTNING_LEAD_RELEASE_TICKS = 30
+LIGHTNING_LEAD_RELEASE_GAP = 0.5
+LIGHTNING_DEPART_MAX_SPEED = 2.5
+LIGHTNING_DEPART_ACCEL_START = 0.8
+LIGHTNING_DEPART_ACCEL_END = 1.2
+LIGHTNING_DEPART_ACCEL_RISE = 1.5
 
 
 def long_control_state_trans(active, long_control_state, should_stop, brake_pressed, cruise_standstill,
@@ -50,6 +56,10 @@ class LongControl:
     self.long_control_state = LongCtrlState.off
     self.stationary_lead_latched = False
     self.motion_confirm_count = 0
+    self.stationary_lead_anchor = None
+    self.stationary_lead_track_id = None
+    self.lightning_lead_depart_active = False
+    self.is_lightning = str(getattr(CP, 'carFingerprint', '')) == 'FORD_F_150_LIGHTNING_MK1'
     self.pid = PIDController(0.0, (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
                              rate=1 / DT_CTRL)
     self.last_output_accel = 0.0
@@ -58,14 +68,19 @@ class LongControl:
     self.pid.reset()
     self.stationary_lead_latched = False
     self.motion_confirm_count = 0
+    self.stationary_lead_anchor = None
+    self.stationary_lead_track_id = None
+    self.lightning_lead_depart_active = False
 
   def _radar_lead_one(self, long_plan, radar_state):
-    if long_plan is None or not getattr(long_plan, 'hasLead', False):
+    if long_plan is None or (not self.is_lightning and not getattr(long_plan, 'hasLead', False)):
       return None
     if radar_state is None:
       return None
     lead_one = getattr(radar_state, 'leadOne', None)
     if lead_one is None or not getattr(lead_one, 'radar', False):
+      return None
+    if hasattr(lead_one, 'present') and not lead_one.present:
       return None
     return lead_one
 
@@ -87,24 +102,43 @@ class LongControl:
     # Real-motion latch: once we settle behind a stationary radar lead while stopping+standstill,
     # hold the latch through any shouldStop flicker and only release once vRel has been above
     # STATIONARY_LEAD_RELEASE_VREL for STATIONARY_LEAD_RELEASE_TICKS consecutive real ticks. The
-    # latch (and its confirm counter) is force-cleared whenever we leave the structural context
-    # that justified it in the first place -- not stopping+standstill, or the radar lead is gone --
-    # so it can never go stale across disengagement, a controller reset, lead loss, or leaving
-    # standstill.
-    if self.long_control_state != LongCtrlState.stopping or not CS.standstill or not has_radar_lead:
+    # The latch is force-cleared when leaving stopping+standstill. Lightning preserves an
+    # existing latch through brief lead publication loss; without fresh radar motion that is
+    # the fail-closed choice. Reset/disengagement and leaving standstill still clear it.
+    if self.long_control_state != LongCtrlState.stopping or not CS.standstill:
       self.stationary_lead_latched = False
       self.motion_confirm_count = 0
+      self.stationary_lead_anchor = None
+      self.stationary_lead_track_id = None
+    elif not has_radar_lead:
+      # A settled Lightning must not release just because planner/lead publication
+      # flickered. Preserve an existing latch until real radar motion is confirmed.
+      if not self.is_lightning:
+        self.stationary_lead_latched = False
+        self.motion_confirm_count = 0
     elif not self.stationary_lead_latched:
       if has_stationary_lead:
         self.stationary_lead_latched = True
         self.motion_confirm_count = 0
+        self.stationary_lead_anchor = float(getattr(lead_one, 'dRel', 0.0) or 0.0)
+        self.stationary_lead_track_id = int(getattr(lead_one, 'radarTrackId', -1))
     else:
       vrel = float(getattr(lead_one, 'vRel', 0.0) or 0.0)
-      if vrel > STATIONARY_LEAD_RELEASE_VREL:
+      drel = float(getattr(lead_one, 'dRel', 0.0) or 0.0)
+      track_id = int(getattr(lead_one, 'radarTrackId', -1))
+      if self.is_lightning and track_id != self.stationary_lead_track_id:
+        self.stationary_lead_anchor = drel
+        self.stationary_lead_track_id = track_id
+        self.motion_confirm_count = 0
+      gap_confirmed = (not self.is_lightning or
+                       (self.stationary_lead_anchor is not None and
+                        drel - self.stationary_lead_anchor >= LIGHTNING_LEAD_RELEASE_GAP))
+      if vrel > STATIONARY_LEAD_RELEASE_VREL and gap_confirmed:
         self.motion_confirm_count += 1
       else:
         self.motion_confirm_count = 0
-      if self.motion_confirm_count >= STATIONARY_LEAD_RELEASE_TICKS:
+      release_ticks = LIGHTNING_LEAD_RELEASE_TICKS if self.is_lightning else STATIONARY_LEAD_RELEASE_TICKS
+      if self.motion_confirm_count >= release_ticks:
         self.stationary_lead_latched = False
         self.motion_confirm_count = 0
 
@@ -114,14 +148,18 @@ class LongControl:
       not self.stationary_lead_latched
     )
 
+    previous_state = self.long_control_state
     self.long_control_state = long_control_state_trans(active, self.long_control_state, should_stop,
                                                        CS.brakePressed, CS.cruiseState.standstill,
                                                        allow_stopping_to_pid=allow_stopping_to_pid)
+    if self.is_lightning and previous_state == LongCtrlState.stopping and self.long_control_state == LongCtrlState.pid:
+      self.lightning_lead_depart_active = True
     if self.long_control_state == LongCtrlState.off:
       self.reset()
       output_accel = 0.
 
     elif self.long_control_state == LongCtrlState.stopping:
+      self.lightning_lead_depart_active = False
       output_accel = self.last_output_accel
       if output_accel > self.CP.stopAccel:
         output_accel = min(output_accel, 0.0)
@@ -133,6 +171,14 @@ class LongControl:
       error = a_target - CS.aEgo
       output_accel = self.pid.update(error, speed=CS.vEgo,
                                      feedforward=a_target)
+      if self.lightning_lead_depart_active:
+        if CS.vEgo >= LIGHTNING_DEPART_MAX_SPEED:
+          self.lightning_lead_depart_active = False
+        else:
+          depart_cap = np.interp(CS.vEgo, [0.0, LIGHTNING_DEPART_MAX_SPEED],
+                                 [LIGHTNING_DEPART_ACCEL_START, LIGHTNING_DEPART_ACCEL_END])
+          output_accel = min(output_accel, depart_cap)
+          output_accel = min(output_accel, max(0.0, self.last_output_accel) + LIGHTNING_DEPART_ACCEL_RISE * DT_CTRL)
 
     self.last_output_accel = np.clip(output_accel, accel_limits[0], accel_limits[1])
     return self.last_output_accel

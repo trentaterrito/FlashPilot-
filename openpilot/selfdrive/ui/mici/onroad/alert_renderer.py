@@ -37,6 +37,10 @@ TURN_SIGNAL_BLINK_PERIOD = 1 / (80 / 60)  # Mazda heartbeat turn signal BPM
 DEBUG = False
 
 
+def new_onroad_session(previous_started_frame: int, started_frame: int) -> bool:
+  return previous_started_frame != started_frame
+
+
 class IconSide(StrEnum):
   left = 'left'
   right = 'right'
@@ -97,6 +101,7 @@ class AlertRenderer(Widget):
                                            letter_spacing=0.025)
 
     self._prev_alert: Alert | None = None
+    self._started_frame = -1
     self._text_gen_time = 0
     self._alert_text2_gen = ''
 
@@ -119,6 +124,12 @@ class AlertRenderer(Widget):
 
   def get_alert(self, sm: messaging.SubMaster) -> Alert | None:
     """Generate the current alert based on selfdrive state."""
+    # Never carry a fading alert from the previous onroad session into a newly
+    # fingerprinted drive. Genuine Dashcam Mode remains visible when the new
+    # selfdriveState publishes it; this only removes stale renderer state.
+    if new_onroad_session(self._started_frame, ui_state.started_frame):
+      self._started_frame = ui_state.started_frame
+      self._prev_alert = None
     ss = sm['selfdriveState']
 
     # Check if selfdriveState messages have stopped arriving

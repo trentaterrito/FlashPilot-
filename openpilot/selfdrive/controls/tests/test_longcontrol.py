@@ -1,10 +1,17 @@
+import inspect
 from types import SimpleNamespace
 
 from openpilot.common.test import OpenpilotTestCase
 from openpilot.selfdrive.controls.lib.longcontrol import LongControl, LongCtrlState, long_control_state_trans
+from openpilot.selfdrive.controls.controlsd import Controls
 
 
 class TestLongControlStateTransition(OpenpilotTestCase):
+
+  def test_controlsd_wires_lead_context_to_longcontrol(self):
+    source = inspect.getsource(Controls.state_control)
+    call = "pid_accel_limits, long_plan, self.sm['radarState']"
+    assert call in source
 
   def test_stay_stopped(self):
     active = True
@@ -97,3 +104,51 @@ class TestLongControlStateTransition(OpenpilotTestCase):
 
     control.update(True, cs, 0.0, False, (-3.5, 2.0), long_plan, radar_state)
     assert control.long_control_state == LongCtrlState.pid
+
+  def test_lightning_rejects_lead_twitch_and_plan_flicker(self):
+    cp = SimpleNamespace(carFingerprint='FORD_F_150_LIGHTNING_MK1', stopAccel=-2.0,
+                         longitudinalTuning=SimpleNamespace(kiBP=[0.0], kiV=[0.0]))
+    control = LongControl(cp)
+    control.long_control_state = LongCtrlState.stopping
+    cs = SimpleNamespace(vEgo=0.0, aEgo=0.0, standstill=True, brakePressed=False,
+                         cruiseState=SimpleNamespace(standstill=False))
+    lead = SimpleNamespace(present=True, radar=True, radarTrackId=9, dRel=7.3, vRel=0.0)
+    plan = SimpleNamespace(hasLead=True)
+    radar = SimpleNamespace(leadOne=lead)
+
+    control.update(True, cs, 0.0, False, (-3.5, 2.0), plan, radar)
+    for _ in range(100):
+      lead.vRel = 0.1
+      plan.hasLead = not plan.hasLead
+      control.update(True, cs, 0.1, False, (-3.5, 2.0), plan, radar)
+      assert control.long_control_state == LongCtrlState.stopping
+
+  def test_lightning_requires_sustained_motion_and_gap_growth(self):
+    cp = SimpleNamespace(carFingerprint='FORD_F_150_LIGHTNING_MK1', stopAccel=-2.0,
+                         longitudinalTuning=SimpleNamespace(kiBP=[0.0], kiV=[0.0]))
+    control = LongControl(cp)
+    control.long_control_state = LongCtrlState.stopping
+    cs = SimpleNamespace(vEgo=0.0, aEgo=0.0, standstill=True, brakePressed=False,
+                         cruiseState=SimpleNamespace(standstill=False))
+    lead = SimpleNamespace(present=True, radar=True, radarTrackId=7, dRel=5.8, vRel=0.0)
+    plan = SimpleNamespace(hasLead=True)
+    radar = SimpleNamespace(leadOne=lead)
+    control.update(True, cs, 0.0, False, (-3.5, 2.0), plan, radar)
+
+    lead.vRel = 1.0
+    for _ in range(60):
+      control.update(True, cs, 1.5, False, (-3.5, 2.0), plan, radar)
+      assert control.long_control_state == LongCtrlState.stopping
+
+    lead.dRel = 6.4
+    for _ in range(29):
+      control.update(True, cs, 1.5, False, (-3.5, 2.0), plan, radar)
+      assert control.long_control_state == LongCtrlState.stopping
+    output = control.update(True, cs, 1.5, False, (-3.5, 2.0), plan, radar)
+    assert control.long_control_state == LongCtrlState.pid
+    assert 0.0 <= output <= 0.02
+
+    outputs = []
+    for _ in range(50):
+      outputs.append(control.update(True, cs, 1.5, False, (-3.5, 2.0), plan, radar))
+    assert max(outputs) <= 0.9
