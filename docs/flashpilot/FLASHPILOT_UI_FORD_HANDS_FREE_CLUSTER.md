@@ -1,5 +1,16 @@
 # Ford Hands-Free Cluster Toggle
 
+## Clear Horizon — reference-backed BlueCruise mapping
+
+Current candidate uses `ACCDATA_3.Tja_D_Stat=7`, matching StarPilot f55ad916
+and published BluePilot bp-dev 501a7c0e, for Lightning CAN-FD only when the
+existing preference AND latActive AND longActive are true, with no steering
+alert. Lane-departure status3/4 retains priority. This supersedes the temporary
+"no presentation" status below, not the warning-field correction. IPMA remains
+normal0 / genuine alert1. All other ACC UI payload bits remain unchanged.
+Physical cluster rendering remains unverified; this is not OEM BlueCruise
+activation and does not change driver monitoring, safety or control authority.
+
 ## September 4 correction — prior display interpretation withdrawn
 
 The implementation history below is superseded wherever it describes Level2
