@@ -21,7 +21,7 @@ from opendbc.car.interfaces import CarInterfaceBase, RadarInterfaceBase
 from openpilot.selfdrive.pandad import can_capnp_to_list, can_list_to_can_capnp
 from openpilot.selfdrive.car.cruise import VCruiseHelper
 from openpilot.selfdrive.car.flashpilot_mads import configure_always_on_lateral
-from openpilot.selfdrive.flashpilot_features import log_feature_snapshot
+from openpilot.selfdrive.flashpilot_features import angle_path_enabled, log_feature_snapshot
 
 REPLAY = "REPLAY" in os.environ
 
@@ -188,7 +188,8 @@ class Car:
     # One read-only configuration record per onroad card lifecycle. This does
     # not write Params or participate in any control decision.
     try:
-      log_feature_snapshot(cloudlog, self.params, self.CP)
+      log_feature_snapshot(cloudlog, self.params, self.CP,
+                           ford_angle_path_enabled=angle_path_enabled(os.environ.get("FLASHPILOT_ANGLE_ENABLED")))
     except Exception:
       cloudlog.exception("flashpilot feature snapshot failed")
 

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
+import json
 from typing import Any
 
 
@@ -93,12 +95,21 @@ def _cp_value(CP, key: str, default: Any = None) -> Any:
     return default
 
 
-def build_feature_snapshot(params, CP) -> dict[str, Any]:
+def angle_path_enabled(env_value: str | None) -> bool:
+  return env_value == "1"
+
+
+def _configuration_fingerprint(snapshot: dict[str, Any]) -> str:
+  canonical = json.dumps(snapshot, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+  return hashlib.sha256(canonical.encode()).hexdigest()
+
+
+def build_feature_snapshot(params, CP, *, ford_angle_path_enabled: bool = False) -> dict[str, Any]:
   fingerprint = str(_cp_value(CP, "carFingerprint", "unknown"))
   statuses = feature_statuses(params, fingerprint)
   angle_factors = {key: _safe_get(params, key) for key in ANGLE_PARAMS}
 
-  return {
+  snapshot = {
     "schema_version": SNAPSHOT_SCHEMA_VERSION,
     "source": {
       "version": _safe_get(params, "Version", "unknown"),
@@ -112,6 +123,7 @@ def build_feature_snapshot(params, CP) -> dict[str, Any]:
       "pcm_cruise": bool(_cp_value(CP, "pcmCruise", False)),
       "dashcam_only": bool(_cp_value(CP, "dashcamOnly", False)),
       "passive": bool(_cp_value(CP, "passive", False)),
+      "ford_angle_path_enabled": bool(ford_angle_path_enabled),
     },
     "driving_model": {
       "name": DEFAULT_DRIVING_MODEL,
@@ -121,9 +133,11 @@ def build_feature_snapshot(params, CP) -> dict[str, Any]:
     "features": {status.key: {"promotion": status.promotion, "runtime": status.runtime} for status in statuses},
     "ford_angle_factors": angle_factors,
   }
+  snapshot["configuration_fingerprint"] = _configuration_fingerprint(snapshot)
+  return snapshot
 
 
-def log_feature_snapshot(logger, params, CP) -> dict[str, Any]:
-  snapshot = build_feature_snapshot(params, CP)
+def log_feature_snapshot(logger, params, CP, *, ford_angle_path_enabled: bool = False) -> dict[str, Any]:
+  snapshot = build_feature_snapshot(params, CP, ford_angle_path_enabled=ford_angle_path_enabled)
   logger.event("flashpilot_feature_snapshot", snapshot=snapshot)
   return snapshot

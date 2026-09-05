@@ -2,7 +2,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from openpilot.selfdrive.flashpilot_features import (
-  FORD_LIGHTNING, SNAPSHOT_SCHEMA_VERSION, build_feature_snapshot,
+  FORD_LIGHTNING, SNAPSHOT_SCHEMA_VERSION, angle_path_enabled, build_feature_snapshot,
   feature_statuses, log_feature_snapshot,
 )
 
@@ -76,6 +76,7 @@ def test_snapshot_is_non_sensitive_and_deterministic():
   second = build_feature_snapshot(params, car_params())
 
   assert first == second
+  assert len(first["configuration_fingerprint"]) == 64
   assert first["schema_version"] == SNAPSHOT_SCHEMA_VERSION
   assert first["vehicle"]["fingerprint"] == FORD_LIGHTNING
   assert first["driving_model"] == {
@@ -93,6 +94,26 @@ def test_snapshot_is_non_sensitive_and_deterministic():
   assert params.writes == []
 
 
+def test_angle_path_and_configuration_change_fingerprint():
+  params = ParamsStub()
+  disabled = build_feature_snapshot(params, car_params(), ford_angle_path_enabled=False)
+  enabled = build_feature_snapshot(params, car_params(), ford_angle_path_enabled=True)
+
+  assert angle_path_enabled(None) is False
+  assert angle_path_enabled("0") is False
+  assert angle_path_enabled("true") is False
+  assert angle_path_enabled("1") is True
+  assert disabled["vehicle"]["ford_angle_path_enabled"] is False
+  assert enabled["vehicle"]["ford_angle_path_enabled"] is True
+  assert disabled["configuration_fingerprint"] != enabled["configuration_fingerprint"]
+
+
+def test_feature_setting_changes_fingerprint():
+  disabled = build_feature_snapshot(ParamsStub({"AlphaLongitudinalEnabled": False}), car_params())
+  enabled = build_feature_snapshot(ParamsStub({"AlphaLongitudinalEnabled": True}), car_params())
+  assert disabled["configuration_fingerprint"] != enabled["configuration_fingerprint"]
+
+
 def test_logger_emits_one_structured_event_per_call():
   logger = LoggerStub()
   params = ParamsStub()
@@ -102,5 +123,6 @@ def test_logger_emits_one_structured_event_per_call():
 
 def test_card_logs_exactly_once_per_lifecycle():
   card_source = Path(__file__).parents[1] / "car" / "card.py"
-  assert card_source.read_text().count("log_feature_snapshot(cloudlog, self.params, self.CP)") == 1
+  assert card_source.read_text().count("log_feature_snapshot(cloudlog, self.params, self.CP,") == 1
+  assert 'angle_path_enabled(os.environ.get("FLASHPILOT_ANGLE_ENABLED"))' in card_source.read_text()
   assert 'cloudlog.exception("flashpilot feature snapshot failed")' in card_source.read_text()
