@@ -1,5 +1,28 @@
 # Ford Hands-Free Cluster Toggle
 
+## September 4 correction — prior display interpretation withdrawn
+
+The implementation history below is superseded wherever it describes Level2
+as hands-free/BlueCruise presentation. `LaHandsOff_D_Dsply=2` requests a
+Level2 take-the-wheel warning with chime. Route 145 segment 1 confirmed that
+request at +65.456833 s with both axes active and no Comma steering alert,
+returning to 0 at +77.607871 s when longitudinal disengaged.
+
+The corrected CAN builder sends 1 for the existing genuine steering alert,
+otherwise 0, regardless of the cluster preference. No unverified replacement
+BlueCruise signal is sent. `FlashPilotFordHandsFreeCluster`, CP.flags, the
+Lightning guard and latActive/longActive gate are retained for a future
+validated implementation, but enabling the preference currently has no
+hands-free presentation effect. The current UI lives under Ford Settings.
+
+Focused tests now require warning-free output with either/both axes active,
+including startup flag application and longitudinal transitions; genuine
+alerts still produce 1. Toggle-on/off IPMA payloads and all other CAN payloads
+must be identical for identical inputs. Safety and vehicle-control logic are
+unchanged. A true BlueCruise display requires separate signal validation.
+
+## Historical implementation (not current behavior or validation)
+
 Branch: `claude/flashpilot-ux-package`. Implements the toggle previously
 audited (and deliberately left unimplemented, pending this round) on the
 frozen `claude/flashpilot-ui-polish` branch. This doc supersedes that one's
