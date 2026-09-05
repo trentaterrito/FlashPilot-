@@ -116,15 +116,50 @@ def test_normal_driver_nudge_and_opposite_torque_behavior_unchanged():
   assert helper.lane_change_state == LaneChangeState.laneChangeStarting
 
 
-def test_lane_change_abort_behavior_unchanged():
+@pytest.mark.parametrize("direction", ["left", "right"])
+def test_lane_change_completion_consumes_blinker_activation(direction):
   helper = DesireHelper(nudgeless_enabled=True)
-  state = car_state(left=True)
+  state = car_state(left=direction == "left", right=direction == "right")
   enter_pre_lane_change(helper, state)
   for _ in range(round(NUDGELESS_CONFIRMATION_TIME / DT_MDL)):
     helper.update(state, True, 1.0, left_blindspot_valid=True, right_blindspot_valid=True)
   assert helper.lane_change_state == LaneChangeState.laneChangeStarting
   for _ in range(round(0.6 / DT_MDL)):
     helper.update(state, True, 0.0, left_blindspot_valid=True, right_blindspot_valid=True)
+  assert helper.lane_change_state == LaneChangeState.off
+  assert helper.lane_change_direction == log.LaneChangeDirection.none
+
+  # A held signal cannot start another lane change, even beyond the confirmation time.
+  for _ in range(round(2 * NUDGELESS_CONFIRMATION_TIME / DT_MDL)):
+    helper.update(state, True, 1.0, left_blindspot_valid=True, right_blindspot_valid=True)
+  assert helper.lane_change_state == LaneChangeState.off
+
+  # A physical OFF -> ON transition makes exactly one new lane change eligible.
+  state.leftBlinker = state.rightBlinker = False
+  helper.update(state, True, 1.0, left_blindspot_valid=True, right_blindspot_valid=True)
+  state.leftBlinker = direction == "left"
+  state.rightBlinker = direction == "right"
+  helper.update(state, True, 1.0, left_blindspot_valid=True, right_blindspot_valid=True)
+  assert helper.lane_change_state == LaneChangeState.preLaneChange
+
+
+@pytest.mark.parametrize("direction", ["left", "right"])
+def test_lateral_dropout_does_not_create_blinker_edge(direction):
+  helper = DesireHelper(nudgeless_enabled=True)
+  state = car_state(left=direction == "left", right=direction == "right")
+  enter_pre_lane_change(helper, state)
+
+  helper.update(state, False, 1.0, left_blindspot_valid=True, right_blindspot_valid=True)
+  assert helper.lane_change_state == LaneChangeState.off
+  for _ in range(round(2 * NUDGELESS_CONFIRMATION_TIME / DT_MDL)):
+    helper.update(state, True, 1.0, left_blindspot_valid=True, right_blindspot_valid=True)
+  assert helper.lane_change_state == LaneChangeState.off
+
+  state.leftBlinker = state.rightBlinker = False
+  helper.update(state, True, 1.0, left_blindspot_valid=True, right_blindspot_valid=True)
+  state.leftBlinker = direction == "left"
+  state.rightBlinker = direction == "right"
+  helper.update(state, True, 1.0, left_blindspot_valid=True, right_blindspot_valid=True)
   assert helper.lane_change_state == LaneChangeState.preLaneChange
 
 

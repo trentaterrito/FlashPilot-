@@ -101,15 +101,11 @@ class DesireHelper:
 
         if lane_change_prob < 0.02 and self.lane_change_timer >= LANE_CHANGE_START_TIME:
           self.lane_change_timer = 0.0
-          if one_blinker:
-            self.lane_change_state = LaneChangeState.preLaneChange
-            self.lane_change_direction = self.get_lane_change_direction(carstate)
-          else:
-            self.lane_change_state = LaneChangeState.off
-            self.lane_change_direction = LaneChangeDirection.none
+          self.lane_change_state = LaneChangeState.off
+          self.lane_change_direction = LaneChangeDirection.none
           self.nudgeless_clear_timer = 0.0
 
-    self.prev_one_blinker = one_blinker and lateral_active
+    self.prev_one_blinker = one_blinker
 
     self.desire = log.Desire.none
     if self.lane_change_state == LaneChangeState.laneChangeStarting:
