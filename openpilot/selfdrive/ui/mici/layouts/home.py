@@ -30,6 +30,22 @@ NETWORK_TYPES = {
 }
 
 
+def alpha_long_badge_visible(alpha_long_available: bool, has_longitudinal_control: bool) -> bool:
+  return alpha_long_available and has_longitudinal_control
+
+
+class AlphaLongBadge(Widget):
+  def __init__(self):
+    super().__init__()
+    self.set_rect(rl.Rectangle(0, 0, 82, 44))
+
+  def _render(self, rect):
+    rl.draw_rectangle_rounded(rect, 0.22, 8, rl.Color(15, 117, 78, 235))
+    rl.draw_rectangle_rounded_lines_ex(rect, 0.22, 8, 2, rl.Color(108, 255, 191, 255))
+    gui_label(rect, "AL-ON", font_size=24, font_weight=FontWeight.BOLD,
+              alignment=TextAlignment.CENTER, alignment_vertical=TextAlignmentVertical.MIDDLE)
+
+
 class AlertsPill(Widget):
   ICON_OFFSET = 12
   COUNT_OFFSET = 40
@@ -140,6 +156,7 @@ class MiciHomeLayout(Widget):
     self._version_text = self._get_version_text()
 
     self._experimental_icon = IconWidget("icons_mici/experimental_mode.png", (48, 48))
+    self._alpha_long_badge = AlphaLongBadge()
     self._usb_icon = IconWidget("icons_mici/usb.png", (62, 40))
     self._chestnut_icon = IconWidget("icons_mici/chestnut_green.png", (68, 40))
     self._chestnut_loading_icon = IconWidget("icons_mici/chestnut.png", (68, 40))
@@ -153,6 +170,7 @@ class MiciHomeLayout(Widget):
       IconWidget("icons_mici/settings.png", (48, 48), opacity=0.9),
       NetworkIcon(),
       self._experimental_icon,
+      self._alpha_long_badge,
       self._usb_icon,
       self._chestnut_icon,
       self._chestnut_loading_icon,
@@ -261,6 +279,8 @@ class MiciHomeLayout(Widget):
     usb_unknown = ui_state.usb_unknown
     chestnut_state = ui_state.chestnut_state
     self._experimental_icon.set_visible(ui_state.experimental_mode)
+    alpha_long_available = ui_state.CP is not None and ui_state.CP.alphaLongitudinalAvailable
+    self._alpha_long_badge.set_visible(alpha_long_badge_visible(alpha_long_available, ui_state.has_longitudinal_control))
     self._usb_icon.set_visible(usb_connected and usb_unknown)
     self._chestnut_icon.set_visible(not usb_unknown and chestnut_state not in
                                     (ChestnutState.LOADING, ChestnutState.UNCOMPILED, ChestnutState.FAILED) and
