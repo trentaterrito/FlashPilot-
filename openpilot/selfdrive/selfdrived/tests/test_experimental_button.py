@@ -5,13 +5,13 @@ import pytest
 from openpilot.selfdrive.selfdrived.experimental_button import DistanceButtonGesture
 
 
-def held(g, start=1.0, duration=3.0, repeated=False):
+def held(g, start=1.0, duration=1.5, repeated=False):
   results = [g.update(start, [True])]
   results += [g.update(start + i / 100, [True] if repeated else []) for i in range(1, round(duration * 100) + 1)]
   return [r for r in results if r is not None]
 
 
-@pytest.mark.parametrize('duration', [0.05, 0.5, 2.99])
+@pytest.mark.parametrize('duration', [0.05, 0.5, 1.49])
 def test_short_press(duration):
   g = DistanceButtonGesture()
   assert held(g, duration=duration) == []
@@ -19,7 +19,7 @@ def test_short_press(duration):
 
 
 @pytest.mark.parametrize('repeated', [False, True])
-def test_hold_fires_once_at_three_seconds_and_consumes_release(repeated):
+def test_hold_fires_once_at_one_and_a_half_seconds_and_consumes_release(repeated):
   g = DistanceButtonGesture()
   assert held(g, duration=9.0, repeated=repeated) == ['hold']
   assert g.update(10.01, [False]) is None
@@ -28,14 +28,14 @@ def test_hold_fires_once_at_three_seconds_and_consumes_release(repeated):
 
 def test_threshold_reached_on_release():
   g = DistanceButtonGesture()
-  assert held(g, duration=2.99) == []
-  assert g.update(4.0, [False]) == 'hold'
+  assert held(g, duration=1.49) == []
+  assert g.update(2.5, [False]) == 'hold'
 
 
 @pytest.mark.parametrize('reason', ['invalid', 'gap', 'backward', 'nan'])
 def test_interrupted_hold_needs_release_and_new_press(reason):
   g = DistanceButtonGesture()
-  held(g, duration=2.5)
+  held(g, duration=1.0)
   now = {'invalid': 3.51, 'gap': 4.0, 'backward': 3.0, 'nan': float('nan')}[reason]
   assert g.update(now, [], valid=reason != 'invalid') is None
   assert held(g, start=4.01, duration=4) == []
@@ -101,9 +101,9 @@ def integration(monkeypatch):
 
   def hold(start=1.0):
     tick(start, [True])
-    for i in range(1, 301):
+    for i in range(1, 151):
       tick(start + i / 100)
-    tick(start + 3.01, [False])
+    tick(start + 1.51, [False])
 
   return d, tick, hold, module
 
@@ -113,11 +113,11 @@ def test_actual_wiring_hold_on_off_preserves_personality(integration):
   hold()
   assert d.params.writes == [('ExperimentalMode', True)]
   assert d.personality == 1
-  hold(4.02)
+  hold(2.52)
   assert d.params.writes[-1] == ('ExperimentalMode', False)
   assert d.personality == 1
-  tick(7.04, [True])
-  tick(7.1, [False])
+  tick(4.04, [True])
+  tick(4.1, [False])
   assert d.params.writes[-1] == ('LongitudinalPersonality', 0)
 
 
@@ -146,25 +146,25 @@ def test_disable_still_allowed_if_consent_missing(integration):
 def test_actual_wiring_invalid_data_cancels_hold(integration, failure):
   d, tick, _, _ = integration
   tick(1, [True])
-  for i in range(1, 301):
+  for i in range(1, 151):
     tick(1 + i / 100, can_valid=failure != 'can', sample_age=0.3 if failure == 'stale' else 0)
-  tick(4.01, [False])
+  tick(2.51, [False])
   assert d.params.writes == []
 
 
 def test_reused_sample_does_not_replay_edges(integration):
   d, tick, _, _ = integration
   tick(1, [True], updated=False)
-  for i in range(1, 301): tick(1 + i / 100)
-  tick(4.01, [False])
+  for i in range(1, 151): tick(1 + i / 100)
+  tick(2.51, [False])
   assert d.params.writes == []
 
 
 def test_other_button_cannot_trigger_shortcut(integration):
   d, tick, _, module = integration
   tick(1, [True], event_type=module.ButtonType.cancel)
-  for i in range(1, 301): tick(1 + i / 100)
-  tick(4.01, [False], event_type=module.ButtonType.cancel)
+  for i in range(1, 151): tick(1 + i / 100)
+  tick(2.51, [False], event_type=module.ButtonType.cancel)
   assert d.params.writes == []
 
 
@@ -174,8 +174,8 @@ def test_disabled_shortcut_blocks_hold_but_preserves_short_press(integration):
   hold()
   assert not any(key == 'ExperimentalMode' for key, _ in d.params.writes)
   assert d.personality == 1
-  tick(4.02, [True])
-  tick(4.10, [False])
+  tick(2.52, [True])
+  tick(2.60, [False])
   assert d.params.writes[-1] == ('LongitudinalPersonality', 0)
 
 

@@ -1,7 +1,7 @@
 """Distance-button gesture only; no control/engagement or safety permissions."""
 import math
 
-HOLD_SECONDS = 3.0
+HOLD_SECONDS = 1.5
 MAX_SAMPLE_AGE = 0.25
 
 
