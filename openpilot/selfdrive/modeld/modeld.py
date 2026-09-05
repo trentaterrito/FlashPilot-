@@ -323,7 +323,10 @@ def main(demo=False):
   # messaging
   pub_socks = ["modelV2", "drivingModelData", "cameraOdometry"] + (["chestnutState"] if CHESTNUT else [])
   pm = PubMaster(pub_socks)
-  sm = SubMaster(["deviceState", "carState", "narrowRoadCameraState", "extrinsicsCalibration", "driverMonitoringState", "carControl", "lateralDelay"])
+  # Camera-paced subscriber: 100 Hz carState is sampled at the 20 Hz model cadence.
+  # Declare that cadence so frequency health does not reject healthy BSM inputs.
+  sm = SubMaster(["deviceState", "carState", "narrowRoadCameraState", "extrinsicsCalibration", "driverMonitoringState", "carControl", "lateralDelay"],
+                 frequency=1 / DT_MDL)
 
   publish_state = PublishState()
   params = Params()
