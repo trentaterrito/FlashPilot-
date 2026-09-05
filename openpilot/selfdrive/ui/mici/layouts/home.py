@@ -12,6 +12,7 @@ from openpilot.system.ui.widgets.label import UnifiedLabel, gui_label
 from openpilot.system.ui.lib.application import gui_app, FontWeight, MousePos, TextAlignment, TextAlignmentVertical
 from openpilot.selfdrive.ui.ui_state import ui_state, ChestnutState
 from openpilot.common.version import RELEASE_BRANCHES
+from openpilot.selfdrive.ui.release_name import get_release_name
 
 HEAD_BUTTON_FONT_SIZE = 40
 HOME_PADDING = 8
@@ -238,7 +239,7 @@ class MiciHomeLayout(Widget):
     except (ValueError, IndexError, TypeError, AttributeError):
       date_str = ""
 
-    return version, branch, commit[:7], date_str
+    return version, branch, get_release_name(commit), date_str
 
   def _render(self, _):
     # TODO: why is there extra space here to get it to be flush?
@@ -264,7 +265,8 @@ class MiciHomeLayout(Widget):
       self._date_label.render()
 
       self._branch_label.set_max_width(gui_app.width - self._version_label.text_width - self._date_label.text_width - 32)
-      self._branch_label.set_text(" " + ("release" if release_branch else self._version_text[1]))
+      branch_text = "release" if release_branch else self._version_text[1]
+      self._branch_label.set_text("" if branch_text == "HEAD" else " " + branch_text)
       self._branch_label.set_position(version_pos.x + self._version_label.text_width + self._date_label.text_width + 20, version_pos.y)
       self._branch_label.render()
 
