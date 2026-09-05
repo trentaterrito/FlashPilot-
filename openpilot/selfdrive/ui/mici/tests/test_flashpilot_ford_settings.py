@@ -5,7 +5,7 @@ from openpilot.selfdrive.ui.mici.layouts.settings import ford
 
 from openpilot.selfdrive.ui.mici.layouts.settings.ford import (
   ANGLE_SETTINGS, AUTO_LANE_CHANGE_OPTIONS, bounded_angle_value, restore_angle_defaults,
-  step_angle_value, toggle_bool_param, write_angle_value,
+  FeatureStatusPage, step_angle_value, toggle_bool_param, write_angle_value,
 )
 
 
@@ -77,6 +77,14 @@ def test_state_param_button_reuses_existing_param():
 
 def test_readonly_always_on_row_removed():
   assert 'always_on_lateral' not in inspect.getsource(ford.FordSettingsLayout)
+
+
+def test_feature_status_page_is_read_only_and_wired():
+  source = inspect.getsource(FeatureStatusPage)
+  assert "feature_statuses" in source
+  assert ".put(" not in source
+  assert ".put_bool(" not in source
+  assert 'feature status' in inspect.getsource(ford.FordSettingsLayout)
 
 
 @pytest.mark.parametrize('increase,count', [(False, 1), (True, 2)])

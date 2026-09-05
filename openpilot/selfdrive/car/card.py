@@ -21,6 +21,7 @@ from opendbc.car.interfaces import CarInterfaceBase, RadarInterfaceBase
 from openpilot.selfdrive.pandad import can_capnp_to_list, can_list_to_can_capnp
 from openpilot.selfdrive.car.cruise import VCruiseHelper
 from openpilot.selfdrive.car.flashpilot_mads import configure_always_on_lateral
+from openpilot.selfdrive.flashpilot_features import log_feature_snapshot
 
 REPLAY = "REPLAY" in os.environ
 
@@ -183,6 +184,13 @@ class Car:
 
     self.is_metric = self.params.get_bool("IsMetric")
     self.experimental_mode = self.params.get_bool("ExperimentalMode")
+
+    # One read-only configuration record per onroad card lifecycle. This does
+    # not write Params or participate in any control decision.
+    try:
+      log_feature_snapshot(cloudlog, self.params, self.CP)
+    except Exception:
+      cloudlog.exception("flashpilot feature snapshot failed")
 
     # card is driven by can recv, expected at 100Hz
     self.rk = Ratekeeper(100, print_delay_threshold=None)

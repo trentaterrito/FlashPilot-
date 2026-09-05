@@ -10,6 +10,7 @@ from openpilot.selfdrive.ui.layouts.settings.common import restart_needed_callba
 from openpilot.selfdrive.ui.mici.widgets.button import BigButton, BigMultiParamToggle, GreyBigButton
 from openpilot.selfdrive.ui.ui_state import ui_state
 from openpilot.system.ui.lib.application import gui_app
+from openpilot.selfdrive.flashpilot_features import feature_statuses
 
 
 AUTO_LANE_CHANGE_OPTIONS = ["require nudge", "0.5 sec", "1.0 sec"]
@@ -167,6 +168,31 @@ class AngleControlPage(NavScroller):
     self.refresh()
 
 
+class FeatureStatusPage(NavScroller):
+  """Read-only status for shipped and planned FlashPilot features."""
+  def __init__(self):
+    super().__init__()
+    self._params = Params()
+    self._buttons = []
+    for status in feature_statuses(self._params):
+      button = GreyBigButton(status.title, "")
+      button.set_enabled(False)
+      self._buttons.append((status.key, button))
+    self._scroller.add_widgets([button for _, button in self._buttons])
+    self.refresh()
+
+  def refresh(self):
+    fingerprint = ui_state.CP.carFingerprint if ui_state.CP is not None else None
+    status_by_key = {status.key: status for status in feature_statuses(self._params, fingerprint)}
+    for key, button in self._buttons:
+      status = status_by_key[key]
+      button.set_value(f"{status.promotion} · {status.runtime}")
+
+  def show_event(self):
+    super().show_event()
+    self.refresh()
+
+
 class FordSettingsLayout(NavScroller):
   def __init__(self):
     super().__init__()
@@ -181,12 +207,15 @@ class FordSettingsLayout(NavScroller):
       "bluecruise view", "FlashPilotFordHandsFreeCluster", toggle_callback=restart_needed_callback)
     self._experimental_shortcut = StateParamButton(
       "experimental mode shortcut", "FlashPilotFordExperimentalModeShortcut")
+    feature_status = BigButton("feature status", ">")
+    feature_status.set_click_callback(lambda: gui_app.push_widget(FeatureStatusPage()))
 
     self._scroller.add_widgets([
       self._auto_lane_change,
       angle_control,
       self._bluecruise,
       self._experimental_shortcut,
+      feature_status,
     ])
 
   def show_event(self):
