@@ -3,7 +3,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock  # noqa: TID251
 
-import aiohttp
+import requests
 import pytest
 
 from openpilot.cereal import custom
@@ -37,7 +37,7 @@ class TestPortContracts(ManagerDownloadTestBase):
       params, store = self._make_params_with_store()
       store['ModelManager_ActiveBundle'] = {'ref': 'previous'}
       self.manager.params = params
-      with pytest.raises(aiohttp.ClientResponseError):
+      with pytest.raises(requests.HTTPError):
         asyncio.run(self.manager._download_bundle(self._bundle, self.dest, 'qcom'))
       assert DownloadHandler.request_paths.count(failing) == 1
       assert store['ModelManager_ActiveBundle'] == {'ref': 'previous'}

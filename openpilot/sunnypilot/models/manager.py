@@ -9,7 +9,7 @@ import asyncio
 import os
 import time
 
-import aiohttp
+import requests
 from openpilot.common.params import Params
 from openpilot.common.realtime import Ratekeeper
 from openpilot.common.swaglog import cloudlog
@@ -83,14 +83,16 @@ class ModelManagerSP:
     """Downloads a file with progress tracking"""
     self._download_start_times[model.fileName] = time.monotonic()
 
-    async with aiohttp.ClientSession() as session:
-      async with session.get(url) as response:
+    def download() -> None:
+      with requests.get(url, stream=True, timeout=30) as response:
         response.raise_for_status()
         total_size = int(response.headers.get("content-length", 0))
         bytes_downloaded = 0
 
         with open(path, 'wb') as f:
-          async for chunk in response.content.iter_chunked(self._chunk_size):  # type: bytes
+          for chunk in response.iter_content(chunk_size=self._chunk_size):
+            if not chunk:
+              continue
             f.write(chunk)
             bytes_downloaded += len(chunk)
 
@@ -105,12 +107,14 @@ class ModelManagerSP:
               self._sync_artifact_progress(model)
               self._report_status()
 
-        # Clean up start time after download completes
-        del self._download_start_times[model.fileName]
+      # Clean up start time after download completes
+      del self._download_start_times[model.fileName]
+
+    await asyncio.to_thread(download)
 
 
   async def _download_chunked(self, base_url: str, base_path: str, artifact) -> None:
-    # BluePilot: selector v19 declares chunks in the catalog; keep the existing aiohttp transport.
+    # BluePilot: selector v19 declares chunks in the catalog; use FlashPilot's existing HTTP transport.
     from openpilot.common.file_chunker import get_chunk_name
     num_chunks = len(artifact.chunks)
     if num_chunks == 0:
@@ -123,12 +127,15 @@ class ModelManagerSP:
       chunk_url = get_chunk_name(base_url, i, num_chunks)
       chunk_path = get_chunk_name(base_path, i, num_chunks)
       chunk_downloaded = 0
-      async with aiohttp.ClientSession() as session:
-        async with session.get(chunk_url) as response:
+      def download_chunk() -> None:
+        nonlocal chunk_downloaded
+        with requests.get(chunk_url, stream=True, timeout=30) as response:
           response.raise_for_status()
           chunk_size = int(response.headers.get("content-length", 0))
           with open(chunk_path, 'wb') as f:
-            async for data in response.content.iter_chunked(self._chunk_size):
+            for data in response.iter_content(chunk_size=self._chunk_size):
+              if not data:
+                continue
               f.write(data)
               chunk_downloaded += len(data)
               if self._download_interrupted():
@@ -140,6 +147,8 @@ class ModelManagerSP:
               artifact.downloadProgress.eta = self._calculate_eta(artifact.fileName, progress)
               self._sync_artifact_progress(artifact)
               self._report_status()
+
+      await asyncio.to_thread(download_chunk)
 
     del self._download_start_times[artifact.fileName]
 

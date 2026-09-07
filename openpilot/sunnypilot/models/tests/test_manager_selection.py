@@ -19,7 +19,7 @@ from unittest import mock  # noqa: TID251
 import pytest
 
 import requests
-import aiohttp
+import requests
 
 from openpilot.cereal import custom
 from openpilot.common.file_chunker import get_chunk_name, get_manifest_path
@@ -217,7 +217,7 @@ class TestManagerDownload(ManagerDownloadTestBase):
       failing = '/' + os.path.basename(get_chunk_name(artifact.downloadUri.uri, 1, len(CHUNK_BODIES)))
       DownloadHandler.fail_paths = {failing: 404}
 
-      with pytest.raises(aiohttp.ClientResponseError):
+      with pytest.raises(requests.HTTPError):
         asyncio.run(self.manager._download_chunked(artifact.downloadUri.uri, base_path, artifact))
 
       # chunk 1 failed, so its file and the manifest must not exist
@@ -380,7 +380,7 @@ class TestManagerDownload(ManagerDownloadTestBase):
 
 
 class TestManagerImports:
-  """Check the adapted manager imports; this target declares aiohttp in pyproject.toml."""
+  """Check the adapted manager imports with FlashPilot's supported HTTP transport."""
 
   def test_manager_imports(self):
     assert manager_module.ModelManagerSP is not None
