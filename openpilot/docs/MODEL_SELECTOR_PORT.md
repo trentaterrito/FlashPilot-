@@ -18,3 +18,5 @@ Comma 4 Settings includes a top-level **models** page. Model selection and downl
 ## Compatibility
 
 The selector consumes SunnyPilot's `driving_models_v22.json` schema at selector version 19. `tinygrad_repo` must remain pinned to the `tinygrad_ref` published by that manifest.
+
+FlashPilot also adds one immutable local catalog overlay: **RDF V4 (StarPilot)**. It references StarPilot commit `f55ad9162d77993a7e558ad6c2507a94b55132a9`, downloads three QCOM chunks, and verifies their published hashes before activation. It is never downloaded or selected automatically and does not replace the stock default.

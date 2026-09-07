@@ -14,7 +14,7 @@ import requests
 from openpilot.cereal import custom
 from openpilot.common.file_chunker import get_chunk_name, get_manifest_path
 from openpilot.sunnypilot.models import helpers
-from openpilot.sunnypilot.models.fetcher import ModelFetcher, ModelParser
+from openpilot.sunnypilot.models.fetcher import ModelFetcher, ModelParser, STARPILOT_RDF_V4_BUNDLE, parse_source_models
 from openpilot.sunnypilot.models.helpers import _bundle_artifacts, is_bundle_version_compatible
 
 CHUNKED_BUNDLE = {
@@ -98,6 +98,36 @@ class TestChunkedManifestParse:
     restored = helpers._parse_active_bundle(bundle.to_dict())
     assert restored is not None
     assert [c.sha256 for c in restored.models[0].artifact.chunks] == ["aa", "bb"]
+
+
+class TestStarPilotRdfV4Overlay:
+  def test_qcom_source_includes_pinned_rdf_v4(self):
+    bundles = parse_source_models(ModelParser, {"bundles": [CHUNKED_BUNDLE]}, "qcom")
+    rdf = next(bundle for bundle in bundles if bundle.ref == STARPILOT_RDF_V4_BUNDLE["ref"])
+    assert rdf.displayName == "RDF V4 (StarPilot)"
+    assert rdf.runner == custom.ModelManagerSP.Runner.tinygrad
+    assert rdf.is20hz
+    assert rdf.generation == 12
+    assert {override.key: override.value for override in rdf.overrides} == {
+      "folder": "Release Models", "lat": ".1", "long": ".3",
+    }
+
+    artifact = rdf.models[0].artifact
+    assert artifact.fileName == "driving_starpilot_rdf_v4_tinygrad.pkl"
+    assert artifact.downloadUri.sha256 == "27969d9da00f74ba0c1f56de575665121a967528753500cd2f809b61664e0e3f"
+    assert [chunk.sha256 for chunk in artifact.chunks] == [
+      "1f562cd72273e1c670e9fc79eb3dc5dc78abd0842a918c222991e0eb62429ed5",
+      "97ee0e75752193102192d7513486aa964838f14f41673db7c4b45c9e6617720f",
+      "76e8660b09c859e39682738f82e100ea271a7339d212fabba9534442aa94a976",
+    ]
+
+  def test_chestnut_source_does_not_include_rdf_v4(self):
+    bundles = parse_source_models(ModelParser, {"bundles": [CHUNKED_BUNDLE]}, "chestnut")
+    assert all(bundle.ref != STARPILOT_RDF_V4_BUNDLE["ref"] for bundle in bundles)
+
+  def test_overlay_is_not_duplicated(self):
+    bundles = parse_source_models(ModelParser, {"bundles": [STARPILOT_RDF_V4_BUNDLE]}, "qcom")
+    assert sum(bundle.ref == STARPILOT_RDF_V4_BUNDLE["ref"] for bundle in bundles) == 1
 
   def test_hardware_selects_manifest(self):
     assert ModelFetcher.MODEL_SOURCES["qcom"][0].endswith("driving_models_v22.json")
