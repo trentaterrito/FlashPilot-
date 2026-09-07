@@ -231,7 +231,7 @@ else:
 np_version = SCons.Script.Value(np.__version__)
 Export('envCython', 'np_version')
 
-Export('env', 'arch', 'acados', 'ffmpeg_libs')
+Export('env', 'arch', 'acados', 'ffmpeg_libs', 'release')
 
 # Setup cache dir
 cache_dir = '/data/scons_cache' if arch == "comma_arm64" else '/tmp/scons_cache'
@@ -252,6 +252,7 @@ def prune_cache_dir(target=None, source=None, env=None):
 
 # Build common module
 SConscript(['openpilot/common/SConscript'])
+SConscript(['openpilot/sunnypilot/SConscript'])
 Import('_common')
 common = [_common, 'json11', 'zmq']
 Export('common')

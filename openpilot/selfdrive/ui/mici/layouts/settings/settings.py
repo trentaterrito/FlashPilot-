@@ -8,6 +8,7 @@ from openpilot.selfdrive.ui.mici.layouts.settings.developer import DeveloperLayo
 from openpilot.selfdrive.ui.mici.layouts.settings.software import SoftwareLayoutMici
 from openpilot.selfdrive.ui.mici.layouts.settings.firehose import FirehoseLayout
 from openpilot.selfdrive.ui.mici.layouts.settings.ford import FordSettingsLayout, ford_lightning_connected
+from openpilot.selfdrive.ui.mici.layouts.settings.models import ModelsLayoutMici
 from openpilot.selfdrive.ui.mici.layouts.flashpilot_offroad import FlashPilotOffroadButton, forced_offroad_requested
 from openpilot.selfdrive.ui.ui_state import ui_state
 from openpilot.system.ui.lib.application import gui_app, FontWeight
@@ -44,6 +45,10 @@ class SettingsLayout(NavScroller):
     software_btn = SettingsBigButton("software", "", gui_app.texture("icons_mici/settings/software.png", 64, 75))
     software_btn.set_click_callback(lambda: gui_app.push_widget(software_panel))
 
+    models_panel = ModelsLayoutMici()
+    models_btn = SettingsBigButton("models", "", gui_app.texture("icons_mici/chestnut.png", 72, 72))
+    models_btn.set_click_callback(lambda: gui_app.push_widget(models_panel))
+
     developer_panel = DeveloperLayoutMici()
     developer_btn = SettingsBigButton("developer", "", gui_app.texture("icons_mici/settings/developer_icon.png", 64, 60))
     developer_btn.set_click_callback(lambda: gui_app.push_widget(developer_panel))
@@ -74,6 +79,7 @@ class SettingsLayout(NavScroller):
       network_btn,
       device_btn,
       software_btn,
+      models_btn,
       PairBigButton(),
       firehose_btn,
       developer_btn,

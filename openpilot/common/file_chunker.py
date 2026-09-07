@@ -47,6 +47,12 @@ class ChunkStream(io.RawIOBase):
   def readable(self):
     return True
 
+  def close(self):
+    if self._f is not None:
+      self._f.close()
+      self._f = None
+    super().close()
+
   def readinto(self, b):
     n = 0
     view = memoryview(b)
