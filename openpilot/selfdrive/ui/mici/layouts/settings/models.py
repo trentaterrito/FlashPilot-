@@ -8,7 +8,7 @@ from collections.abc import Callable
 import os
 import pyray as rl
 
-from cereal import custom
+from openpilot.cereal import custom
 from openpilot.sunnypilot.models.default_model import DEFAULT_MODEL
 from openpilot.sunnypilot.models.helpers import ACTIVE_BUNDLE_KEYS, get_active_source
 from openpilot.selfdrive.ui.mici.widgets.button import BigButton
