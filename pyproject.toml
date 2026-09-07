@@ -18,6 +18,7 @@ dependencies = [
   # multiple users
   "sounddevice",  # micd + soundd
   "requests",     # many one-off uses
+  "aiohttp",      # downloadable model manager
   "tqdm",         # cars (fw_versions.py) on start + many one-off uses
 
   # core
