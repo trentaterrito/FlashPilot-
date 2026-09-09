@@ -108,8 +108,8 @@ class SelfdriveD:
     car_recognized = self.CP.brand != 'mock'
 
     # cleanup old params
-    if not self.CP.alphaLongitudinalAvailable:
-      self.params.remove("AlphaLongitudinalEnabled")
+    # Alpha is a saved preference; transient unavailable/MOCK CP must not erase it.
+    # Vehicle capability and release-channel restrictions remain separate gates.
     if not self.CP.openpilotLongitudinalControl:
       self.params.remove("ExperimentalMode")
 
