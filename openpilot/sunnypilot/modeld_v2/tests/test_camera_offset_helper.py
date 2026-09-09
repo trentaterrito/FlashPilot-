@@ -30,8 +30,8 @@ class TestCameraOffset:
 
     sm = MockStruct(
       deviceState=MockStruct(deviceType='mici'),
-      roadCameraState=MockStruct(sensor='os04c10'),
-      liveCalibration=MockStruct(rpyCalib=[0.0, 0.0, 0.0], height=[1.22])
+      narrowRoadCameraState=MockStruct(sensor='os04c10'),
+      extrinsicsCalibration=MockStruct(rpyCalib=[0.0, 0.0, 0.0], height=[1.22])
     )
 
     intrinsics_main = self.dc.narrow_road.intrinsics
@@ -62,8 +62,8 @@ class TestCameraOffset:
   def test_update(self):
     sm = MockStruct(
       deviceState=MockStruct(deviceType='mici'),
-      roadCameraState=MockStruct(sensor='os04c10'),
-      liveCalibration=MockStruct(rpyCalib=[0.0, 0.0, 0.0], height=[1.22])
+      narrowRoadCameraState=MockStruct(sensor='os04c10'),
+      extrinsicsCalibration=MockStruct(rpyCalib=[0.0, 0.0, 0.0], height=[1.22])
     )
     intrinsics_main = self.dc.narrow_road.intrinsics
     intrinsics_extra = self.dc.wide_road.intrinsics
