@@ -43,6 +43,28 @@ ACTIVE_BUNDLE_KEYS = {
 _LAST_VALIDATED_RAW: dict[str, dict | None] = {}
 
 
+def is_retired_bundle(bundle: dict | None) -> bool:
+  """Keep withdrawn RDF V4 out of old catalogs and persisted selections."""
+  if not isinstance(bundle, dict):
+    return False
+  if bundle.get("ref") == "starpilot-rdf-v4-27969d9d":
+    return True
+  models = bundle.get("models", [])
+  if not isinstance(models, list):
+    return False
+  for model in models:
+    if not isinstance(model, dict):
+      continue
+    artifact = model.get("artifact", {})
+    if not isinstance(artifact, dict):
+      continue
+    if (artifact.get("fileName") == "driving_starpilot_rdf_v4_tinygrad.pkl" or
+        isinstance(artifact.get("downloadUri"), dict) and
+        str(artifact["downloadUri"].get("sha256", "")).lower() == "27969d9da00f74ba0c1f56de575665121a967528753500cd2f809b61664e0e3f"):
+      return True
+  return False
+
+
 def _compute_hash(file_path: str) -> str | None:
   from openpilot.common.file_chunker import open_file_chunked
   try:
@@ -141,7 +163,7 @@ def _bundle_needs_reset(active_bundle: custom.ModelManagerSP.ModelBundle, availa
 
 def _parse_active_bundle(raw_bundle) -> "custom.ModelManagerSP.ModelBundle | None":
   try:
-    if isinstance(raw_bundle, dict) and raw_bundle and is_bundle_version_compatible(raw_bundle):
+    if isinstance(raw_bundle, dict) and raw_bundle and is_bundle_version_compatible(raw_bundle) and not is_retired_bundle(raw_bundle):
       return custom.ModelManagerSP.ModelBundle(**raw_bundle)
   except Exception:
     pass
@@ -208,7 +230,8 @@ def validate_active_bundles(params: Params, source_bundles: dict[str, list[custo
 def get_active_model_runner(params: Params | None = None, force_check: bool = False) -> int:
   params = params or Params()
   cached_runner_type = params.get("ModelRunnerTypeCache")
-  if cached_runner_type is not None and not force_check:
+  retired_selection = is_retired_bundle(params.get(ACTIVE_BUNDLE_KEYS[get_active_source()]))
+  if cached_runner_type is not None and not force_check and not retired_selection:
     return cached_runner_type
   runner_type = custom.ModelManagerSP.Runner.stock
   if active_bundle := get_active_bundle(params):

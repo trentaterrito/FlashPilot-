@@ -10,51 +10,8 @@ import requests
 from requests.exceptions import (SSLError, RequestException, HTTPError)
 from openpilot.common.params import Params
 from openpilot.common.swaglog import cloudlog
-from openpilot.sunnypilot.models.helpers import is_bundle_version_compatible
+from openpilot.sunnypilot.models.helpers import is_bundle_version_compatible, is_retired_bundle
 from openpilot.cereal import custom
-
-
-STARPILOT_RDF_V4_BUNDLE = {
-  "short_name": "RDFV4SP",
-  "display_name": "RDF V4 (StarPilot)",
-  "is_20hz": True,
-  "is_big": False,
-  "ref": "starpilot-rdf-v4-27969d9d",
-  "environment": "release",
-  "runner": "tinygrad",
-  "index": 10000,
-  "minimum_selector_version": "19",
-  "generation": "12",
-  "overrides": {"folder": "Release Models", "lat": ".1", "long": ".3"},
-  "models": [{
-    "type": "chunked",
-    "artifact": {
-      "file_name": "driving_starpilot_rdf_v4_tinygrad.pkl",
-      "download_uri": {
-        "url": ("https://raw.githubusercontent.com/firestar5683/StarPilot/"
-                "f55ad9162d77993a7e558ad6c2507a94b55132a9/"
-                "selfdrive/modeld/models/driving_tinygrad.pkl"),
-        "sha256": "27969d9da00f74ba0c1f56de575665121a967528753500cd2f809b61664e0e3f",
-      },
-      "chunks": [
-        {"file_name": "driving_tinygrad.pkl.chunk01of03", "sha256": "1f562cd72273e1c670e9fc79eb3dc5dc78abd0842a918c222991e0eb62429ed5"},
-        {"file_name": "driving_tinygrad.pkl.chunk02of03", "sha256": "97ee0e75752193102192d7513486aa964838f14f41673db7c4b45c9e6617720f"},
-        {"file_name": "driving_tinygrad.pkl.chunk03of03", "sha256": "76e8660b09c859e39682738f82e100ea271a7339d212fabba9534442aa94a976"},
-      ],
-    },
-  }],
-}
-
-
-def add_pinned_bundles(parser, bundles: list[custom.ModelManagerSP.ModelBundle], source: str) -> list[custom.ModelManagerSP.ModelBundle]:
-  bundles = list(bundles)
-  if source == "qcom" and not any(bundle.ref == STARPILOT_RDF_V4_BUNDLE["ref"] for bundle in bundles):
-    bundles.extend(parser.parse_models({"bundles": [STARPILOT_RDF_V4_BUNDLE]}))
-  return bundles
-
-
-def parse_source_models(parser, json_data: dict, source: str) -> list[custom.ModelManagerSP.ModelBundle]:
-  return add_pinned_bundles(parser, parser.parse_models(json_data), source)
 
 
 class ModelParser:
@@ -124,7 +81,8 @@ class ModelParser:
   @staticmethod
   def parse_models(json_data: dict) -> list[custom.ModelManagerSP.ModelBundle]:
     found_bundles = [ModelParser._parse_bundle(bundle) for bundle in json_data.get("bundles", [])]
-    return [bundle for bundle in found_bundles if is_bundle_version_compatible(bundle.to_dict())]
+    return [bundle for bundle in found_bundles
+            if is_bundle_version_compatible(bundle.to_dict()) and not is_retired_bundle(bundle.to_dict())]
 
 
 class ModelCache:
@@ -212,7 +170,7 @@ class ModelFetcher:
       if parsed:
         self.model_caches[source].set(json_data)
         cloudlog.debug(f"Successfully updated models cache for {source}")
-      return add_pinned_bundles(self.model_parser, parsed, source)
+      return parsed
 
     except ConnectionError as e:
       cloudlog.warning(f"DNS/connection error while fetching models: {e}")
@@ -250,7 +208,7 @@ class ModelFetcher:
         else:
           if parsed:
             cloudlog.debug(f"Using valid cached models data for source {source}")
-            return add_pinned_bundles(self.model_parser, parsed, source)
+            return parsed
           # a source-matching cache that yields no valid bundles is stale (e.g. an old
           # manifest version) - do not trust it, refetch so the source is repopulated
           cloudlog.warning(f"Cached models for {source} have no valid bundles; refetching")
@@ -267,7 +225,7 @@ class ModelFetcher:
 
     cloudlog.warning("Failed to fetch fresh data. Using expired cache as fallback")
     try:
-      return parse_source_models(self.model_parser, cached_data, source)
+      return self.model_parser.parse_models(cached_data)
     except Exception:
       return []
 
@@ -282,7 +240,7 @@ def get_cached_bundles(params: Params, source: str) -> list[custom.ModelManagerS
   if not cached_data:
     return []
   try:
-    return parse_source_models(ModelParser, cached_data, source)
+    return ModelParser.parse_models(cached_data)
   except Exception as e:
     cloudlog.warning(f"Failed to parse cached models for source {source}: {e}")
     return []

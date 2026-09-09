@@ -466,7 +466,7 @@ class TestModelFetcherSources:
     params = self._make_params({"bundles": [manifest_bundle("small", "aaa")]},
                                {"bundles": [manifest_bundle("big", "bbb", is_big=True)]})
     fetcher = ModelFetcher(params)
-    assert [bundle.ref for bundle in fetcher.get_bundles_for_source("qcom")] == ["aaa", "starpilot-rdf-v4-27969d9d"]
+    assert [bundle.ref for bundle in fetcher.get_bundles_for_source("qcom")] == ["aaa"]
     assert [bundle.ref for bundle in fetcher.get_bundles_for_source("chestnut")] == ["bbb"]
 
   def test_get_bundles_for_source_unknown(self):
@@ -477,7 +477,7 @@ class TestModelFetcherSources:
                                {"bundles": [manifest_bundle("big", "bbb", is_big=True)]})
     qcom_bundles = get_cached_bundles(params, "qcom")
     chestnut_bundles = get_cached_bundles(params, "chestnut")
-    assert [b.ref for b in qcom_bundles] == ["aaa", "starpilot-rdf-v4-27969d9d"]
+    assert [b.ref for b in qcom_bundles] == ["aaa"]
     assert [b.ref for b in chestnut_bundles] == ["bbb"]
     assert qcom_bundles[0].displayName == "SMALL"
 
@@ -552,7 +552,7 @@ class TestSourceCacheIntegrity:
                                {"bundles": [manifest_bundle("big", "bbb", is_big=True)]})
     fetcher = ModelFetcher(params)
     with mock.patch.object(fetcher, "_fetch_and_cache_models", side_effect=AssertionError("cache should be used")):
-      assert [bundle.ref for bundle in fetcher.get_bundles_for_source("qcom")] == ["aaa", "starpilot-rdf-v4-27969d9d"]
+      assert [bundle.ref for bundle in fetcher.get_bundles_for_source("qcom")] == ["aaa"]
       assert [bundle.ref for bundle in fetcher.get_bundles_for_source("chestnut")] == ["bbb"]
 
   def test_stale_version_cache_is_refetched(self):
@@ -582,7 +582,7 @@ class TestSourceCacheIntegrity:
       second = fetcher.get_bundles_for_source("qcom")
     fetch.assert_called_once_with("qcom")
     assert [bundle.ref for bundle in first] == ["bbb"]
-    assert [bundle.ref for bundle in second] == ["bbb", "starpilot-rdf-v4-27969d9d"]
+    assert [bundle.ref for bundle in second] == ["bbb"]
 
   def test_corrupt_cache_is_refetched(self):
     """A cache that fails to parse (e.g. truncated/foreign JSON) must trigger a
