@@ -11,12 +11,13 @@ from openpilot.system.ui.widgets.icon_widget import IconWidget
 from openpilot.system.ui.widgets.label import UnifiedLabel, gui_label
 from openpilot.system.ui.lib.application import gui_app, FontWeight, MousePos, TextAlignment, TextAlignmentVertical
 from openpilot.selfdrive.ui.ui_state import ui_state, ChestnutState
-from openpilot.common.version import RELEASE_BRANCHES
 from openpilot.selfdrive.ui.release_name import get_release_name
 
 HEAD_BUTTON_FONT_SIZE = 40
 HOME_PADDING = 8
 ALERTS_ZONE_WIDTH = 180
+# Public home-screen identity; GitBranch remains available in diagnostics.
+HOME_CHANNEL = "flashpilot-dev"
 
 NetworkType = log.DeviceState.NetworkType
 
@@ -184,8 +185,8 @@ class MiciHomeLayout(Widget):
     self._version_label = UnifiedLabel("", font_size=36, font_weight=FontWeight.ROMAN, max_width=480, wrap_text=False)
     self._large_version_label = UnifiedLabel("", font_size=64, text_color=rl.GRAY, font_weight=FontWeight.ROMAN, max_width=480, wrap_text=False)
     self._date_label = UnifiedLabel("", font_size=36, text_color=rl.GRAY, font_weight=FontWeight.ROMAN, max_width=480, wrap_text=False)
-    self._branch_label = UnifiedLabel("", font_size=36, text_color=rl.GRAY, font_weight=FontWeight.ROMAN, scroll=True)
-    self._version_commit_label = UnifiedLabel("", font_size=36, text_color=rl.GRAY, font_weight=FontWeight.ROMAN, max_width=480, wrap_text=False)
+    self._channel_label = UnifiedLabel("", font_size=36, text_color=rl.GRAY, font_weight=FontWeight.ROMAN, wrap_text=False)
+    self._release_label = UnifiedLabel("", font_size=36, text_color=rl.GRAY, font_weight=FontWeight.ROMAN, wrap_text=False)
 
   def _update_state(self):
     if self.is_pressed and not self._is_pressed_prev:
@@ -225,10 +226,9 @@ class MiciHomeLayout(Widget):
 
   def _get_version_text(self) -> tuple[str, str, str, str] | None:
     version = ui_state.params.get("Version")
-    branch = ui_state.params.get("GitBranch")
     commit = ui_state.params.get("GitCommit")
 
-    if not all((version, branch, commit)):
+    if not version:
       return None
 
     commit_date_raw = ui_state.params.get("GitCommitDate")
@@ -239,7 +239,7 @@ class MiciHomeLayout(Widget):
     except (ValueError, IndexError, TypeError, AttributeError):
       date_str = ""
 
-    return version, branch, get_release_name(commit), date_str
+    return version, HOME_CHANNEL, get_release_name(commit), date_str
 
   def _render(self, _):
     # TODO: why is there extra space here to get it to be flush?
@@ -253,8 +253,6 @@ class MiciHomeLayout(Widget):
     self._openpilot_label.render()
 
     if self._version_text is not None:
-      # release branch
-      release_branch = self._version_text[1] in RELEASE_BRANCHES
       version_pos = rl.Rectangle(text_pos.x, text_pos.y + 112, 100, 44)
       self._version_label.set_text(self._version_text[0])
       self._version_label.set_position(version_pos.x, version_pos.y)
@@ -264,17 +262,18 @@ class MiciHomeLayout(Widget):
       self._date_label.set_position(version_pos.x + self._version_label.text_width + 10, version_pos.y)
       self._date_label.render()
 
-      self._branch_label.set_max_width(gui_app.width - self._version_label.text_width - self._date_label.text_width - 32)
-      branch_text = "release" if release_branch else self._version_text[1]
-      self._branch_label.set_text("" if branch_text == "HEAD" else " " + branch_text)
-      self._branch_label.set_position(version_pos.x + self._version_label.text_width + self._date_label.text_width + 20, version_pos.y)
-      self._branch_label.render()
+      channel_x = version_pos.x + self._version_label.text_width + self._date_label.text_width + 20
+      content_right = self.rect.x + self.rect.width - HOME_PADDING
+      self._channel_label.set_max_width(max(1, content_right - channel_x))
+      self._channel_label.set_text(" " + self._version_text[1])
+      self._channel_label.set_position(channel_x, version_pos.y)
+      self._channel_label.render()
 
-      if not release_branch:
-        # 2nd line
-        self._version_commit_label.set_text(self._version_text[2])
-        self._version_commit_label.set_position(version_pos.x, version_pos.y + self._date_label.font_size + 7)
-        self._version_commit_label.render()
+      # Weather identity directly below the metadata, using the full available width.
+      self._release_label.set_max_width(max(1, content_right - version_pos.x))
+      self._release_label.set_text(self._version_text[2])
+      self._release_label.set_position(version_pos.x, version_pos.y + self._date_label.font_size + 7)
+      self._release_label.render()
 
     # ***** Center-aligned bottom section icons *****
     usb_connected = ui_state.usb_connected

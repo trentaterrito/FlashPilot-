@@ -6,11 +6,11 @@ import subprocess
 
 
 @lru_cache(maxsize=8)
-def get_release_name(commit: str) -> str:
+def get_release_name(commit: str | None) -> str:
   # Resolve the exact running revision, including detached checkouts, not a
   # branch tip that might have advanced since startup.
-  if not re.fullmatch(r"[0-9a-fA-F]{40}", commit):
-    return "Name unavailable"
+  if not commit or not re.fullmatch(r"[0-9a-fA-F]{40}", commit):
+    return "Development Build"
   try:
     subject = subprocess.check_output(
       ["git", "show", "--no-patch", "--format=%s", commit],
@@ -18,6 +18,11 @@ def get_release_name(commit: str) -> str:
       stderr=subprocess.DEVNULL, timeout=1,
     ).strip()
   except (OSError, subprocess.SubprocessError):
-    return "Name unavailable"
-  # Weather commits use 'Rainshadow: description'. Keep the home label short.
-  return subject.split(":", 1)[0].strip() or "Name unavailable"
+    return "Development Build"
+  # Existing weather commits use 'Rainshadow: description'. Require the named
+  # prefix convention; an ordinary commit subject is never a release name.
+  name, separator, description = subject.partition(":")
+  name = name.strip()
+  if separator and description.strip() and re.fullmatch(r"[A-Z][a-z]+(?: (?:[A-Z][a-z]+|of|the|and))*", name):
+    return name
+  return "Development Build"
