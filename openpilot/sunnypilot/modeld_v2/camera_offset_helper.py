@@ -28,8 +28,8 @@ class CameraOffsetHelper:
 
   def update(self, model_transform_main, model_transform_extra, sm, main_wide_camera):
     self.actual_camera_offset = (0.9 * self.actual_camera_offset) + (0.1 * self.camera_offset)
-    dc = DEVICE_CAMERAS[(str(sm['deviceState'].deviceType), str(sm['roadCameraState'].sensor))]
-    height = sm["liveCalibration"].height[0] if sm['liveCalibration'].height else 1.22
+    dc = DEVICE_CAMERAS[(str(sm['deviceState'].deviceType), str(sm['narrowRoadCameraState'].sensor))]
+    height = sm["extrinsicsCalibration"].height[0] if sm['extrinsicsCalibration'].height else 1.22
 
     intrinsics_main = dc.wide_road.intrinsics if main_wide_camera else dc.narrow_road.intrinsics
     model_transform_main = self.apply_camera_offset(model_transform_main, intrinsics_main, height, self.actual_camera_offset)
