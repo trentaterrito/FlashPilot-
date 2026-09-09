@@ -21,6 +21,7 @@ STATIONARY_LEAD_RELEASE_VREL = 0.3
 STATIONARY_LEAD_RELEASE_TICKS = 3
 LIGHTNING_LEAD_RELEASE_TICKS = 30
 LIGHTNING_LEAD_RELEASE_GAP = 0.5
+LIGHTNING_LEAD_RELEASE_ACCEL = 0.15
 LIGHTNING_DEPART_MAX_SPEED = 2.5
 LIGHTNING_DEPART_ACCEL_START = 0.8
 LIGHTNING_DEPART_ACCEL_END = 1.2
@@ -142,10 +143,14 @@ class LongControl:
         self.stationary_lead_latched = False
         self.motion_confirm_count = 0
 
+    # The anchor survives motion confirmation until the stopped-lead hold exits.
+    # Require more demand to release that hold than the unchanged re-stop boundary.
     allow_stopping_to_pid = bool(
       self.long_control_state == LongCtrlState.stopping and
       CS.standstill and
-      not self.stationary_lead_latched
+      not self.stationary_lead_latched and
+      (not self.is_lightning or self.stationary_lead_anchor is None or
+       a_target >= LIGHTNING_LEAD_RELEASE_ACCEL)
     )
 
     previous_state = self.long_control_state
