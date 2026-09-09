@@ -6,6 +6,8 @@ See the LICENSE.md file in the root directory for more details.
 """
 
 import pickle
+import hashlib
+from pathlib import Path
 import pytest
 
 import openpilot.sunnypilot.models.helpers as helpers
@@ -23,6 +25,24 @@ class DummyOverride:
 class DummyArtifact:
   def __init__(self, file_name):
     self.fileName = file_name
+    self.identity = None
+
+  def to_dict(self):
+    return self.identity or {'fileName': self.fileName}
+
+
+def fixture_artifact(path):
+  """Identity for locally authored synthetic fixtures, never for downloaded model bytes."""
+  from openpilot.common.file_chunker import open_file_chunked, get_chunk_name, get_manifest_path
+  path = Path(path)
+  with open_file_chunked(str(path)) as stream:
+    digest = hashlib.file_digest(stream, 'sha256').hexdigest()
+  artifact = {'fileName': path.name, 'downloadUri': {'sha256': digest}}
+  if (manifest := Path(get_manifest_path(str(path)))).exists():
+    count = int(manifest.read_text())
+    artifact['chunks'] = [{'fileName': Path(chunk).name, 'sha256': hashlib.sha256(Path(chunk).read_bytes()).hexdigest()}
+                          for chunk in (get_chunk_name(str(path), i, count) for i in range(count))]
+  return artifact
 
 
 class DummyModelType:
@@ -191,7 +211,7 @@ def make_bundle(archetype):
 def patch_modeld(monkeypatch):
   def _patch(bundle):
     monkeypatch.setattr(helpers, 'get_active_bundle', lambda params=None, *, chestnut=None: bundle)
-    monkeypatch.setattr(modeld_module, 'get_active_bundle', lambda params=None, *, chestnut=None: bundle)
+    monkeypatch.setattr(modeld_module, 'get_verified_active_bundle', lambda params=None, *, chestnut=None: bundle)
 
   return _patch
 
@@ -203,6 +223,8 @@ def model_state_factory(tmp_path, monkeypatch, patch_modeld):
   def _create(archetype, oob=True):
     write_pkl(tmp_path, archetype, oob=oob)
     bundle = make_bundle(archetype)
+    for model in bundle.models:
+      model.artifact.identity = fixture_artifact(tmp_path / model.artifact.fileName)
     patch_modeld(bundle)
     monkeypatch.setattr(hw.Paths, 'model_root', staticmethod(lambda: str(tmp_path)))
     return modeld_module.ModelState(cam_w=CAM_W, cam_h=CAM_H)

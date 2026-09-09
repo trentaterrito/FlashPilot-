@@ -40,7 +40,8 @@ from openpilot.sunnypilot.modeld_v2.camera_offset_helper import CameraOffsetHelp
 from openpilot.sunnypilot.livedelay.helpers import get_lat_delay
 from openpilot.sunnypilot.modeld_v2.modeld_base import ModelStateBase
 from openpilot.sunnypilot.modeld_v2.compile_modeld import WARP_INPUTS, POLICY_INPUTS
-from openpilot.sunnypilot.models.helpers import get_active_bundle, chestnut_present
+from openpilot.sunnypilot.models.helpers import get_verified_active_bundle, chestnut_present
+from openpilot.sunnypilot.models.artifact import ArtifactIdentityError, verified_artifact
 
 PROCESS_NAME = "selfdrive.modeld.modeld_tinygrad"
 BIG_MODEL_TIMEOUT = 60
@@ -58,22 +59,22 @@ def _pkl_exists(path):
   return os.path.exists(path) or os.path.exists(get_manifest_path(path))
 
 
-def _load_jits(pkl_path):
-  from openpilot.common.file_chunker import open_file_chunked
+def _load_jits(pkl_path, artifact):
   from openpilot.selfdrive.modeld.helpers import load_oob
 
-  with open_file_chunked(pkl_path) as f:
+  with verified_artifact(pkl_path, artifact) as f:
     # manifest v22+ artifacts are dump_oob streams: an 8-byte opcode length followed by the pickle (PROTO at byte 8).
     # A plain pickle (older local compile_modeld.py output) has its FRAME length there instead, never PROTO.
-    head = f.peek(16)
+    head = f.read(16)
+    f.seek(0)
     if len(head) < 9:
       raise EOFError(f"truncated model pkl {pkl_path}: only {len(head)} bytes")
     return load_oob(f) if head[8:9] == pickle.PROTO else pickle.load(f)
 
 
 def _find_driving_pkl(bundle):
-  if (override := os.environ.get('COMBINED_MODEL_PKL')) and _pkl_exists(override):
-    return override
+  if os.environ.get('COMBINED_MODEL_PKL'):
+    raise ArtifactIdentityError('COMBINED_MODEL_PKL is not bound to a selected catalog artifact')
   if bundle is None or not bundle.models:
     return None
   from openpilot.common.hardware.hw import Paths
@@ -102,11 +103,7 @@ class ModelState(ModelStateBase):
   def __init__(self, cam_w: int, cam_h: int, chestnut: bool = False):
     ModelStateBase.__init__(self)
 
-    env_pkl = os.environ.get('COMBINED_MODEL_PKL')
-    if env_pkl and os.path.exists(env_pkl):
-      model_bundle = None
-    else:
-      model_bundle = get_active_bundle(chestnut=chestnut)
+    model_bundle = get_verified_active_bundle(chestnut=chestnut)
     self.generation = model_bundle.generation if model_bundle is not None else None
     overrides = {override.key: override.value for override in model_bundle.overrides} if model_bundle else {}
 
@@ -126,7 +123,7 @@ class ModelState(ModelStateBase):
     from openpilot.sunnypilot.modeld_v2.compile_modeld import derive_frame_skip, make_split_input_queues, make_supercombo_input_queues
 
     cloudlog.warning(f"loading combined pkl: {pkl_path}")
-    jits = _load_jits(pkl_path)
+    jits = _load_jits(pkl_path, bundle.models[0].artifact)
 
     metadata = jits['metadata']
     # the catalog pkl is compiled for a fixed device; the runtime must put its inputs on the same one

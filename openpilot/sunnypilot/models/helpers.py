@@ -16,6 +16,7 @@ from openpilot.common.params import Params
 from openpilot.common.swaglog import cloudlog
 from openpilot.sunnypilot.models.constants import Meta, MetaSimPose, MetaTombRaider
 from openpilot.common.hardware.hw import Paths
+from openpilot.sunnypilot.models.artifact import ArtifactIdentityError, artifact_identity, artifact_fingerprint, verify_artifact
 # BluePilot: this base predates the Chestnut rename; the USB GPU probe is the same hardware check.
 # Catalog selection (fetcher/manager/UI) and the modeld_v2 device choice all go through this one
 # gate. Big (AMD) model runtime has not been validated on BluePilot hardware, so the gate stays off
@@ -41,6 +42,7 @@ ACTIVE_BUNDLE_KEYS = {
   "chestnut": "ModelManager_ActiveBundleChestnut",
 }
 _LAST_VALIDATED_RAW: dict[str, dict | None] = {}
+_VERIFIED_ARTIFACTS: dict[tuple, tuple] = {}
 
 
 def is_retired_bundle(bundle: dict | None) -> bool:
@@ -128,9 +130,22 @@ def _bundle_manifests_valid(bundle: custom.ModelManagerSP.ModelBundle) -> bool:
 
 
 def _bundle_is_valid_locally(bundle: custom.ModelManagerSP.ModelBundle) -> bool:
-  artifacts = _bundle_artifacts(bundle)
-  return bool(artifacts) and _bundle_manifests_valid(bundle) and all(
-    _verify_file(os.path.join(Paths.model_root(), file_name), expected_hash) for file_name, expected_hash in artifacts)
+  if not bundle.models:
+    return False
+  try:
+    for model in bundle.models:
+      artifact = model.artifact
+      root = Paths.model_root()
+      key = (root, artifact_identity(artifact))
+      before = artifact_fingerprint(root, artifact)
+      if _VERIFIED_ARTIFACTS.get(key) != before:
+        verify_artifact(root, artifact)
+        if artifact_fingerprint(root, artifact) != before:
+          return False
+        _VERIFIED_ARTIFACTS[key] = before
+    return True
+  except (ArtifactIdentityError, OSError, ValueError):
+    return False
 # End BluePilot
 
 
@@ -155,7 +170,11 @@ def _bundle_needs_reset(active_bundle: custom.ModelManagerSP.ModelBundle, availa
       return True
     if active_bundle.runner != matching_bundle.runner:
       return True
-    if set(_bundle_artifacts(active_bundle)) != set(_bundle_artifacts(matching_bundle)):
+    try:
+      if ([artifact_identity(m.artifact) for m in active_bundle.models] !=
+          [artifact_identity(m.artifact) for m in matching_bundle.models]):
+        return True
+    except ArtifactIdentityError:
       return True
 
   return not _bundle_is_valid_locally(active_bundle)
@@ -191,6 +210,26 @@ def get_active_bundle(params: Params | None = None, *, chestnut: bool | None = N
   return get_selected_bundle(params, get_active_source(chestnut=chestnut))
 
 
+def _current_catalog_bundles(params: Params, source: str) -> list:
+  from openpilot.sunnypilot.models.fetcher import ModelParser
+  key = 'ModelManager_ModelsCache' + ('_Chestnut' if source == 'chestnut' else '')
+  try:
+    cache = params.get(key)
+    return ModelParser.parse_models(cache) if isinstance(cache, dict) else []
+  except Exception:
+    return []
+
+
+def get_verified_active_bundle(params: Params | None = None, *, chestnut: bool | None = None):
+  """Bind direct runner startup to the current cached catalog, not a saved old identity."""
+  params = params or Params()
+  source = get_active_source(chestnut=chestnut)
+  bundle = get_selected_bundle(params, source)
+  if bundle is not None and _bundle_needs_reset(bundle, _current_catalog_bundles(params, source)):
+    raise ArtifactIdentityError('Selected artifact does not match current catalog and verified local bytes')
+  return bundle
+
+
 def resolve_bundle_by_ref(
   ref: str, source_bundles: dict[str, list[custom.ModelManagerSP.ModelBundle]],
 ) -> "tuple[custom.ModelManagerSP.ModelBundle, str] | None":
@@ -210,8 +249,8 @@ def _validate_active_bundle(params: Params, source: str, available_bundles: list
     return
 
   active_bundle = _parse_active_bundle(raw_bundle)
-  if _LAST_VALIDATED_RAW.get(key) == raw_bundle and active_bundle is not None and _bundle_manifests_valid(active_bundle):
-    return
+  # Recheck file identity and current catalog even when the saved selection is unchanged.
+  # Per-file stat caching avoids hashing large artifacts on every manager tick.
   if active_bundle is None or _bundle_needs_reset(active_bundle, available_bundles):
     cloudlog.warning(f"Active model bundle invalid for {source}; resetting to default")
     params.remove(key)
@@ -230,12 +269,17 @@ def validate_active_bundles(params: Params, source_bundles: dict[str, list[custo
 def get_active_model_runner(params: Params | None = None, force_check: bool = False) -> int:
   params = params or Params()
   cached_runner_type = params.get("ModelRunnerTypeCache")
-  retired_selection = is_retired_bundle(params.get(ACTIVE_BUNDLE_KEYS[get_active_source()]))
-  if cached_runner_type is not None and not force_check and not retired_selection:
-    return cached_runner_type
+  # This is the manager's pre-launch decision. Runner-type cache alone cannot
+  # attest that the selected file still has the catalog's bytes.
+  source = get_active_source()
+  _validate_active_bundle(params, source, _current_catalog_bundles(params, source))
   runner_type = custom.ModelManagerSP.Runner.stock
   if active_bundle := get_active_bundle(params):
-    runner_type = active_bundle.runner.raw
+    if os.environ.get('COMBINED_MODEL_PKL'):
+      cloudlog.warning('Unbound model path override rejected; resetting selection to native default')
+      params.remove(ACTIVE_BUNDLE_KEYS[source])
+    else:
+      runner_type = active_bundle.runner.raw
 
   if cached_runner_type != runner_type:
     params.put("ModelRunnerTypeCache", int(runner_type), block=True)

@@ -191,6 +191,9 @@ class ModelManagerSP:
           raise ValueError(f"Hash validation failed for {filename}")
 
       # Publish a manifest only after every declared chunk is verified. Parsing a catalog is read-only.
+      # Chunk hashes alone do not attest the logical compiled artifact.
+      from openpilot.sunnypilot.models.artifact import verify_artifact
+      await asyncio.to_thread(verify_artifact, destination_path, artifact, require_manifest=False)
       if chunked:
         with open(get_manifest_path(full_path), 'w') as manifest:
           manifest.write(str(len(artifact.chunks)))

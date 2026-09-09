@@ -17,7 +17,7 @@ from openpilot.selfdrive.modeld.helpers import dump_oob, load_oob
 from openpilot.sunnypilot.modeld_v2.compile_modeld import POLICY_INPUTS, WARP_INPUTS
 from openpilot.sunnypilot.modeld_v2.modeld import _find_driving_pkl, _load_jits, select_devices
 from openpilot.sunnypilot.modeld_v2.tests.conftest import DummyModel, DummyBundle, ARCHETYPES, CAM_W, CAM_H, \
-  SPLIT_VISION_INPUT_SHAPES, make_pkl_data, write_pkl
+  SPLIT_VISION_INPUT_SHAPES, make_pkl_data, write_pkl, fixture_artifact
 
 ModelState = modeld_module.ModelState
 ARCHETYPE_NAMES = list(ARCHETYPES.keys())
@@ -55,7 +55,7 @@ class TestLoadJits:
   def test_loads_both_formats(self, tmp_path, oob):
     archetype = ARCHETYPES['vision_policy_split']
     pkl_path = write_pkl(tmp_path, archetype, oob=oob)
-    jits = _load_jits(str(pkl_path))
+    jits = _load_jits(str(pkl_path), fixture_artifact(pkl_path))
     assert jits['metadata'] == make_pkl_data(archetype)['metadata']
     assert (CAM_W, CAM_H) in jits and 'run_policy' in jits
 
@@ -65,7 +65,7 @@ class TestLoadJits:
     pkl_path = write_pkl(tmp_path, archetype, oob=True)
     chunk_file(str(pkl_path), get_chunk_targets(str(pkl_path), 1 + 2 * 45 * 1024 * 1024))  # force 3 chunk files
     assert not pkl_path.exists()
-    assert _load_jits(str(pkl_path))['metadata'] == make_pkl_data(archetype)['metadata']
+    assert _load_jits(str(pkl_path), fixture_artifact(pkl_path))['metadata'] == make_pkl_data(archetype)['metadata']
 
   @pytest.mark.parametrize("cut", [4, 8, 20, -1])
   def test_truncated_oob_fails_loudly(self, tmp_path, cut):
@@ -75,7 +75,7 @@ class TestLoadJits:
     data = pkl_path.read_bytes()
     pkl_path.write_bytes(data[:cut] if cut > 0 else data[:-1])
     with pytest.raises((EOFError, ValueError, struct.error)):
-      _load_jits(str(pkl_path))
+      _load_jits(str(pkl_path), fixture_artifact(pkl_path))
 
   def test_truncated_buffer_payload_fails_loudly(self):
     """The out-of-band buffers hold the weights: a truncated one must raise rather than come back zeroed."""
@@ -97,7 +97,7 @@ class TestLoadJits:
     with open(first, 'r+b') as f:
       f.truncate(os.path.getsize(first) - 5)
     with pytest.raises((EOFError, ValueError, struct.error)):
-      _load_jits(str(pkl_path))
+      _load_jits(str(pkl_path), fixture_artifact(pkl_path))
 
 
 # Device selection: the same USB GPU gate that picks the catalog picks the model device
@@ -130,7 +130,7 @@ class TestModelStateCombinedInit:
   def test_asserts_when_no_pkl(self, monkeypatch):
     bundle = DummyBundle(models=[], is_20hz=True)
     monkeypatch.setattr(helpers, 'get_active_bundle', lambda params=None, *, chestnut=None: bundle)
-    monkeypatch.setattr(modeld_module, 'get_active_bundle', lambda params=None, *, chestnut=None: bundle)
+    monkeypatch.setattr(modeld_module, 'get_verified_active_bundle', lambda params=None, *, chestnut=None: bundle)
     with pytest.raises(AssertionError, match="No driving pkl found"):
       ModelState(cam_w=CAM_W, cam_h=CAM_H)
 

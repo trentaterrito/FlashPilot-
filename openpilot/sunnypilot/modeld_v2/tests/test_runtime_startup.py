@@ -6,6 +6,7 @@ model directory. Native Params, enums, service registry, schema, action extracti
 helpers and serializers remain real. This does not validate catalog model weights.
 """
 from types import SimpleNamespace
+import hashlib
 import numpy as np
 import pytest
 from openpilot.cereal import custom, log
@@ -58,10 +59,11 @@ def test_current_runtime_startup_through_publication(monkeypatch,tmp_path,wide_o
   bundle=custom.ModelManagerSP.ModelBundle(
     minimumSelectorVersion=19,runner='tinygrad',is20hz=is_20hz,generation=12,
     overrides=[{'key':'lat','value':'.1'},{'key':'long','value':'.3'}],
-    models=[{'type':'chunked','artifact':{'fileName':model_path.name}}])
+    models=[{'type':'chunked','artifact':{'fileName':model_path.name,
+             'downloadUri':{'sha256':hashlib.sha256(model_path.read_bytes()).hexdigest()}}}])
   monkeypatch.delenv('COMBINED_MODEL_PKL',raising=False)
   monkeypatch.setattr(Paths,'model_root',staticmethod(lambda:str(tmp_path)))
-  monkeypatch.setattr(runner,'get_active_bundle',lambda **kwargs:bundle)
+  monkeypatch.setattr(runner,'get_verified_active_bundle',lambda **kwargs:bundle)
   monkeypatch.setattr(meta_helper,'get_active_bundle',lambda:bundle)
   monkeypatch.setattr(modeld_base,'Params',lambda:params)
   streams=runner.VisionStreamType
@@ -83,7 +85,7 @@ def test_current_runtime_startup_through_publication(monkeypatch,tmp_path,wide_o
     get_action_from_model=runner.ModelState.get_action_from_model
     def _init_combined(self,path,cam_w,cam_h,bundle):
       # Stop at the hardware boundary: this is a synthetic artifact, not weights.
-      assert runner._load_jits(path)=={'fixture_marker':'selected'}
+      assert runner._load_jits(path,bundle.models[0].artifact)=={'fixture_marker':'selected'}
       self.loaded_path=path
       models.append(self)
     def run(self,bufs,transforms,inputs,prepare_only):
@@ -145,7 +147,7 @@ def test_missing_selected_artifact_does_not_load_another_model(monkeypatch,tmp_p
   monkeypatch.delenv('COMBINED_MODEL_PKL',raising=False)
   bundle=custom.ModelManagerSP.ModelBundle(
     models=[{'type':'chunked','artifact':{'fileName':filename}}])
-  monkeypatch.setattr(runner,'get_active_bundle',lambda **kwargs:bundle)
+  monkeypatch.setattr(runner,'get_verified_active_bundle',lambda **kwargs:bundle)
   (tmp_path/'driving_supercombo_tinygrad.pkl').write_bytes(b'decoy')
   with pytest.raises(AssertionError,match='No driving pkl found'):
     runner.ModelState(cam_w=1928,cam_h=1208)
