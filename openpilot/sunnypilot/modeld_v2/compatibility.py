@@ -52,11 +52,31 @@ class ModelProfile:
     return float(curvature), float(action[0, 1])
 
 
+# Exact distributed package bindings, never model-name/generation inference.
+# Source/ONNX/catalog proof and the original-vs-distribution smoothing distinction
+# are recorded in tools/model_compatibility/PROFILE_BINDINGS.md.
+ARTIFACT_PROFILES = {
+  '92e736e4f52ef0b25c4ae62e651261c3dde98a5050122699004236845256b6b9': (
+    'on_policy', '1e72cf5a-785f-45ea-888f-28cdb14785de/100', 'action_speed_squared', .1, .3),
+  '52fcf48bfb991f327a8982037eb0855d9a63437d78e9f4828d2be54df0f32567': (
+    'model', '1acf0a93-3b20-4808-beb4-739aca6bb852/100/42a55a96-99c7-4973-9f1c-d11f33a4802e/400',
+    'action_speed_squared', .1, .3),
+}
+
 def resolve_profile(metadata, overrides, artifact_sha256, lateral_smoothing, longitudinal_smoothing):
   components = [value for value in metadata.values() if isinstance(value, dict) and 'input_shapes' in value]
   has_input = any('action_t' in value['input_shapes'] for value in components)
   has_head = any('action' in value.get('output_slices', {}) for value in components)
   packaging = 'tensor_or_singleton' if 'model' in metadata else 'component_tuple'
+  if artifact_sha256 in ARTIFACT_PROFILES:
+    component, checkpoint, profile_name, lat, long = ARTIFACT_PROFILES[artifact_sha256]
+    if metadata.get(component, {}).get('model_checkpoint') != checkpoint:
+      raise ModelCompatibilityError('artifact profile checkpoint mismatch')
+    if (lateral_smoothing, longitudinal_smoothing) != (lat, long):
+      raise ModelCompatibilityError('artifact profile smoothing differs from its verified distribution contract')
+    if overrides.get('compat_profile', profile_name) != profile_name or overrides.get('compat_sha256', artifact_sha256) != artifact_sha256:
+      raise ModelCompatibilityError('explicit profile conflicts with the exact artifact binding')
+    overrides = {**overrides, 'compat_profile': profile_name, 'compat_sha256': artifact_sha256}
   name = overrides.get('compat_profile', 'plan')
   if not all(math.isfinite(v) and v >= 0 for v in (lateral_smoothing, longitudinal_smoothing)):
     raise ModelCompatibilityError('model smoothing must be finite and nonnegative')

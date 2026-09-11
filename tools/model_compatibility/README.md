@@ -56,18 +56,17 @@ order. Lists, nesting, wrong arity, non-Tensor members and unknown packaging fai
 - Historical retired RDF V4 supplies the proven singleton tuple packaging case;
   its artifact/catalog entry is not restored.
 
-**No real action-model profile assignment is made.** The authoritative reuse
-report leaves exact artifact-to-action-units binding unresolved for RDF V2 and
-OP16. Shape checks cannot decide between the supported scaling profiles. These
-models consequently still stop at the explicit profile check; the commit is
-not a claim that they now run or that only hardware work remains.
+The exact OP16 Deep and RDF V2 hashes above now have proven
+`action_speed_squared` bindings; see [PROFILE_BINDINGS.md](PROFILE_BINDINGS.md).
+The assignment follows each model's own original ONNX/source and its exact
+SunnyPilot catalog entry, not RDF V4 or a display-name/generation assumption.
+Unknown action artifacts remain blocked. Bound profiles reject mismatched
+checkpoints, changed smoothing and conflicting explicit overrides.
 
-Remaining offline dependency: establish the exact artifact's scaling, smoothing
-and delay semantics, then bind the reviewed profile through catalog overrides.
-Do not infer this from generation/name or transfer original RDF V4 semantics to
-RDF V2. No catalog modification or retired artifact restoration is included.
+OP16's full compiled package still must be obtained and hash-verified before its
+hardware test; saved first-chunk metadata is not a complete inference artifact.
 
-After that binding, QCOM-only checks are exact artifact selection/load, real
+Remaining QCOM-only checks are exact artifact selection/load, real
 camera inference, finite modelV2/drivingModelData/cameraOdometry, sustained20Hz,
 no restart loop, and guarded restoration of native CD210. No hardware gate,
 deployment or road test is performed by this change.
