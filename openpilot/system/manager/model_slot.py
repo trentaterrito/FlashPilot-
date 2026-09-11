@@ -176,6 +176,6 @@ def baseline_eligible(sm, params):
   # Reuse the existing parked guardian. This import is validation-only.
   from tools.model_validation.guardian_support import read_state, safe_state
   return (safe_state(read_state(sm, params), 'parked') and
-          sm.valid['carParams'] and sm['carParams'].carName not in ('mock', '') and
+          sm.valid['carParams'] and sm['carParams'].brand not in ('mock', '') and
           not params.get('ModelManager_ActiveBundle') and
           not params.get('ModelManager_ActiveBundleChestnut'))
