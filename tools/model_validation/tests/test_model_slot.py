@@ -141,15 +141,11 @@ class ClientBoundary(unittest.TestCase):
   def setUp(self):
     spec = importlib.util.spec_from_file_location('client', ROOT / 'tools/model_validation/model_slot_client.py')
     self.client = importlib.util.module_from_spec(spec); spec.loader.exec_module(self.client)
-  def test_membership_write_precedes_exec(self):
-    events = []
-    with patch.object(Path, 'resolve', lambda p, **kw: p), patch.object(Path, 'write_text', lambda p, v: events.append('join')), patch.object(self.client.os, 'execvp', lambda *a: events.append('exec')):
-      self.client.enter('/sys/fs/cgroup/test/lease', ['harmless'])
-    self.assertEqual(events, ['join', 'exec'])
-  def test_membership_failure_never_executes_worker(self):
-    with patch.object(Path, 'resolve', lambda p, **kw: p), patch.object(Path, 'write_text', side_effect=FileNotFoundError), patch.object(self.client.os, 'execvp') as execute:
-      with self.assertRaises(FileNotFoundError): self.client.enter('/sys/fs/cgroup/test/expired', ['harmless'])
-      execute.assert_not_called()
+  def test_client_uses_privileged_self_entry_helper(self):
+    with patch.object(self.client, 'launch_command', return_value=['sudo','helper']) as launch, patch.object(self.client.os, 'execvp') as execute:
+      self.client.enter('/domain', ['harmless'])
+      launch.assert_called_once_with('/domain', ['harmless'])
+      execute.assert_called_once_with('sudo', ['sudo','helper'])
   def test_session_eof_closes_lease_without_launch(self):
     import os
     read, write = os.pipe(); os.close(write)
@@ -169,6 +165,14 @@ class FailureIsolation(unittest.TestCase):
     self.r._accept = lambda: (_ for _ in ()).throw(OSError('descriptor failure'))
     self.assertEqual(self.r.exclusions(self.processes, True), [])
     self.assertEqual(self.r.exclusions(self.processes, True), [])
+  def test_partial_creation_failure_keeps_cleanup_exclusion(self):
+    group = Group(None); group.empty = False
+    self.r.group_factory = lambda _: (_ for _ in ()).throw(slot.CleanupPending(group, 'start failed'))
+    self.assertEqual(self.tick(), list(slot.MODEL_SLOTS))
+    self.assertEqual(self.r.phase, 'cleanup')
+    group.empty = True
+    self.assertEqual(self.tick(), [])
+
   def test_new_startup_cleans_orphans_before_eligibility(self):
     orphan = Group(None); orphan.empty = False
     self.r.orphans = [orphan]

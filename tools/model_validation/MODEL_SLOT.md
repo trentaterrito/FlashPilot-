@@ -18,21 +18,32 @@ at an ordinary manager startup. It is a new private 0700 temporary directory and
 Unix socket each time. Linux peer credentials require the same UID as manager.
 No persistent Params, model-selection changes, UI, or live injection is used.
 
-A dedicated delegated cgroup-v2 root at
-`/sys/fs/cgroup/silver-lining-validation` is a future activation prerequisite.
-Manager must be able to create/remove children and write their `cgroup.kill`.
-The manager/service itself must NOT be moved into that root's worker children.
-No cgroup or service configuration has been created on the device by this work.
-Absence of these permissions refuses a lease before suppressing native modeld.
-Older kernels without `cgroup.kill` are not qualified; no weaker process-group
-fallback is provided.
+The cleanup backend uses systemd transient services under the dedicated
+`/sys/fs/cgroup/silverliningvalidation.slice`. Each service has a unique UUID,
+User=comma, Delegate=yes, KillMode=control-group, TimeoutStopSec=2,
+SendSIGKILL=yes, Restart=no and RuntimeMaxSec=185. The device's systemd255/kernel
+4.9.103 combination supports this; cgroup.kill and freezer controls are not used.
 
-Each lease creates a unique child cgroup. The client enters it **before** executing
-the checker; all descendants inherit membership, including new sessions. Neither
-checker nor model runner may migrate outside it. Cleanup kills the entire group,
-removes nested empty groups, and removes the lease group before releasing the
-slot. A late join after removal fails before exec. If cleanup cannot be proven,
-the model slots stay suppressed and manager reports the concrete failure.
+The validation-only commands require existing noninteractive sudo authority for
+systemd-run/systemctl and the self-entry helper. No persistent service, permission
+rule, cgroup delegation setup or production launcher change is installed here.
+Only the startup opt-in is still needed after separately authorized deployment.
+
+A small privileged helper validates the service and originating sudo identity,
+moves **only itself** into the domain, drops to the original non-root account,
+then executes the worker. This is required because the kernel denies migration
+across cgroups to a normal user even when the destination is delegated. It never
+moves an externally supplied PID or runs the model as root. Descendants inherit
+the domain, including children that start new process sessions.
+
+Cleanup validates the exact unit name, InvocationID, dedicated cgroup path,
+owner and cleanup properties before requesting systemd stop. It never signals
+PID snapshots or matches production process names. Completion requires both a
+terminal/absent service and a disappeared cgroup. A partially created service
+remains tracked for cleanup even if startup inspection fails. Unknown identity
+or incomplete cleanup holds the model slot closed. Names are fresh UUIDs and
+are never intentionally reused; this is not a boundary against a privileged
+administrator deliberately replacing an identically named validation service.
 
 EOF, explicit release/abort, malformed protocol, process death, four seconds
 without heartbeat, loss of fresh parked eligibility, or the 180-second absolute
@@ -42,7 +53,7 @@ most about one additional second; this is not a real-time guarantee).
 A subsequent manager startup scans the fixed validation root even if opt-in was
 removed. It kills/removes orphaned validation groups before model eligibility.
 A scan/cleanup failure suppresses models, not manager or the vehicle interface.
-No previous lease is resumed. A reboot removes the kernel cgroups; stale socket
+No previous lease is resumed. A reboot removes transient units/kernel cgroups; stale socket
 paths cannot grant ownership. Socket errors disable new reservations and allow
 cleanup/normal model management after workers are gone.
 
@@ -67,7 +78,7 @@ The prepared native health verifier must still confirm CD210 identity, finite
 modelV2/drivingModelData/cameraOdometry, stable 19–21 Hz, and unchanged Lightning
 recognition before another reservation. A failed native check stops the gate.
 
-Future order: authorized deployment/opt-in with delegated cgroup preparation;
+Future order: authorized deployment/opt-in;
 next ordinary startup (no forced restart); verify normal Lightning/calibration/
 READY/Park/parking brake/CD210 baseline; exercise harmless reservation/release,
 crash, timeout, abort and session loss; verify native recovery each time. Only
@@ -80,10 +91,24 @@ processes, worker membership-before-exec, session EOF, orphan cleanup and toolin
 failure handling. Model sources, compatibility profiles, selector, controls,
 safety and submodule pointers are unchanged.
 
-Mac tests cannot prove Linux SO_PEERCRED, cgroup-v2 delegation/kill, real manager
+Mac tests cannot prove Linux SO_PEERCRED, real manager
 scheduling, QCOM publications, or Lightning recognition preservation. Those are
 explicit on-device reservation/release gates, not claims of this offline commit.
 No RDF/OP16 inference or broad vehicle suites were run.
 
-Result: 21 focused tests PASS; independent review VALIDATED OFFLINE after
-startup-orphan and persistent-listener-error corrections. Compile/diff checks PASS.
+Cleanup replacement results: 34 focused tests PASS; independent review PASS.
+On actual Comma: release, timeout-triggered cleanup and parent-crash each removed
+five harmless parent/child/grandchild processes, including TERM-ignoring children
+in new sessions. Cleanup took2.30–2.38s; an unrelated process survived and repeated
+cleanup passed. These were backend-domain tests, not live model-slot tests.
+SSH/session EOF and lease timeout routing passed offline; no physical SSH outage
+or full180-second lease expiration was imposed on the device.
+
+The old cgroup.kill hook never activated and created no legacy worker domains,
+as established at the deployment checkpoint. This change therefore does not
+claim migration cleanup of hypothetical legacy domains.
+
+The live manager still ran dfd4b419 without the reservation hook at handoff.
+Full live reservation/release plus native CD210 publication/vehicle recognition
+verification remains blocked until a later authorized ordinary startup. No
+manager restart, downloaded-model test or production-source deployment occurred.

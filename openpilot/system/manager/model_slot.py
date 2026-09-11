@@ -10,58 +10,12 @@ import socket
 import struct
 import tempfile
 import time
-import uuid
 
-CGROUP_ROOT = Path('/sys/fs/cgroup/silver-lining-validation')
+from openpilot.system.manager.model_slot_cleanup import CGROUP_ROOT, UNIT_PATTERN, WorkerGroup, CleanupPending
+
 MODEL_SLOTS = ('modeld', 'modeld_tinygrad')
 HEARTBEAT_TIMEOUT = 4.0
 MAX_SECONDS = 180.0
-
-
-class WorkerGroup:
-  def __init__(self, root):
-    root = Path(root)
-    resolved = root.resolve(strict=True)
-    if root != resolved or not str(resolved).startswith('/sys/fs/cgroup/'):
-      raise ValueError('validation requires a dedicated delegated cgroup-v2 directory')
-    if not (root / 'cgroup.controllers').is_file():
-      raise ValueError('cgroup v2 required')
-    self.path = root / ('silver-lining-' + uuid.uuid4().hex)
-    self.path.mkdir(mode=0o700)
-    try:
-      if not os.access(self.path / 'cgroup.kill', os.W_OK):
-        raise PermissionError('delegated cgroup.kill required')
-    except BaseException:
-      self.path.rmdir()
-      raise
-
-  @classmethod
-  def existing(cls, path):
-    obj = object.__new__(cls)
-    obj.path = path
-    return obj
-
-  def remove(self):
-    """Kill descendants, then seal the slot by removing the empty group.
-
-    A racing late worker cannot enter an already removed group. If it entered
-    first, rmdir fails and manager continues suppression until the next tick.
-    """
-    try:
-      # Never kill the manager if a misconfigured delegation placed it here.
-      memberships = Path('/proc/self/cgroup').read_text().splitlines()
-      relative = '/' + str(self.path.relative_to('/sys/fs/cgroup'))
-      if any(line.split(':', 2)[-1] == relative or line.split(':', 2)[-1].startswith(relative + '/') for line in memberships):
-        return False
-      (self.path / 'cgroup.kill').write_text('1')
-      for child in sorted((p for p in self.path.rglob('*') if p.is_dir()), key=lambda p: len(p.parts), reverse=True):
-        child.rmdir()
-      self.path.rmdir()
-      return True
-    except FileNotFoundError:
-      return not self.path.exists()
-    except OSError:
-      return False
 
 
 class Reservation:
@@ -97,7 +51,7 @@ class Reservation:
       if root.resolve() != root:
         raise ValueError('validation cgroup root must not be a symlink')
       self.orphans = [WorkerGroup.existing(p) for p in root.iterdir()
-                      if re.fullmatch(r'silver-lining-[0-9a-f]{32}', p.name) and p.is_dir() and not p.is_symlink()]
+                      if re.fullmatch(UNIT_PATTERN, p.name) and p.is_dir() and not p.is_symlink()]
     self.scan_pending = False
 
   def _send(self, text):
@@ -168,6 +122,8 @@ class Reservation:
                 self.last = now
               except Exception as exc:
                 self.error = str(exc)
+                if isinstance(exc, CleanupPending):
+                  self.group = exc.group
                 self._revoke()
             elif line == b'beat' and self.phase in ('stopping', 'active'):
               self.last = now
