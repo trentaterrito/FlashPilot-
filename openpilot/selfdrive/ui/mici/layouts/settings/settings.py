@@ -9,8 +9,7 @@ from openpilot.selfdrive.ui.mici.layouts.settings.software import SoftwareLayout
 from openpilot.selfdrive.ui.mici.layouts.settings.firehose import FirehoseLayout
 from openpilot.selfdrive.ui.mici.layouts.settings.ford import FordSettingsLayout, ford_lightning_connected
 from openpilot.selfdrive.ui.mici.layouts.settings.models import ModelsLayoutMici
-from openpilot.selfdrive.ui.mici.layouts.flashpilot_offroad import FlashPilotOffroadButton, forced_offroad_requested
-from openpilot.selfdrive.ui.ui_state import ui_state
+from openpilot.selfdrive.ui.mici.layouts.flashpilot_offroad import FlashPilotOffroadButton, forced_offroad_requested, keep_offroad_controls_last
 from openpilot.system.ui.lib.application import gui_app, FontWeight
 
 
@@ -57,23 +56,13 @@ class SettingsLayout(NavScroller):
     firehose_btn = SettingsBigButton("firehose", "", gui_app.texture("icons_mici/settings/firehose.png", 52, 62))
     firehose_btn.set_click_callback(lambda: gui_app.push_widget(firehose_panel))
 
-    offroad_icon = gui_app.texture("icons_mici/settings/device/power.png", 110, 110)
     offroad_slider_icon = gui_app.texture("icons_mici/settings/device/lkas.png", 110, 110)
-
-    # Match SunnyPilot's Comma 4 placement: the onroad enable and active exit
-    # buttons occupy the first slot; normal-offroad enable sits after Developer.
-    enable_offroad_onroad = FlashPilotOffroadButton(True, offroad_icon, offroad_slider_icon)
-    enable_offroad_onroad.set_visible(lambda: ui_state.started and not forced_offroad_requested())
-
-    disable_forced_offroad = FlashPilotOffroadButton(False, offroad_icon, offroad_slider_icon)
+    enable_offroad = FlashPilotOffroadButton(True, offroad_slider_icon)
+    enable_offroad.set_visible(lambda: not forced_offroad_requested())
+    disable_forced_offroad = FlashPilotOffroadButton(False, offroad_slider_icon)
     disable_forced_offroad.set_visible(forced_offroad_requested)
 
-    enable_offroad_offroad = FlashPilotOffroadButton(True, offroad_icon, offroad_slider_icon)
-    enable_offroad_offroad.set_visible(lambda: not ui_state.started and not forced_offroad_requested())
-
     self._scroller.add_widgets([
-      disable_forced_offroad,
-      enable_offroad_onroad,
       toggles_btn,
       ford_btn,
       network_btn,
@@ -83,7 +72,13 @@ class SettingsLayout(NavScroller):
       PairBigButton(),
       firehose_btn,
       developer_btn,
-      enable_offroad_offroad,
+      enable_offroad,
+      disable_forced_offroad,
     ])
 
     self._font_medium = gui_app.font(FontWeight.MEDIUM)
+
+  def _update_state(self):
+    super()._update_state()
+    # This is a lifecycle action, so future ordinary additions still precede it.
+    keep_offroad_controls_last(self._scroller.items)

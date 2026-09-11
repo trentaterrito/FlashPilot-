@@ -1,8 +1,8 @@
-"""SunnyPilot-style Comma 4 offroad controls backed by FlashPilot safety checks."""
+"""FlashPilot Comma 4 offroad controls backed by existing safety checks."""
 import time
 import pyray as rl
 
-from openpilot.selfdrive.ui.mici.widgets.button import BigCircleButton
+from openpilot.selfdrive.ui.mici.widgets.button import BigButton
 from openpilot.selfdrive.ui.mici.widgets.dialog import BigConfirmationDialog, BigDialog
 from openpilot.selfdrive.ui.ui_state import ui_state
 from openpilot.system.ui.lib.application import gui_app
@@ -13,6 +13,7 @@ STATUS_TIMEOUT_S = 2.0
 TRANSITION_TIMEOUT_S = 13.0
 STANDARD_MODE = "off"
 OFFROAD_MODE = "offroad"
+ENABLE_ACTION_RED = rl.Color(255, 38, 55, 255)
 
 
 def offroad_status():
@@ -113,52 +114,46 @@ class FlashPilotOffroadConfirmation(BigConfirmationDialog):
     gui_app.push_widget(BigDialog(tr("offroad transition failed"), reason))
 
 
-class FlashPilotOffroadButton(BigCircleButton):
-  """Circular Comma 4 entry/exit button matching SunnyPilot placement and color."""
-  def __init__(self, enable: bool, icon, slider_icon):
-    super().__init__(icon, red=enable)
+class FlashPilotOffroadButton(BigButton):
+  """Text action only; the existing confirmation owns transition submission."""
+  def __init__(self, enable: bool, slider_icon):
+    super().__init__("ENABLE ALWAYS OFFROAD" if enable else "DISABLE ALWAYS OFFROAD")
     self._enable_offroad = enable
     self._slider_icon = slider_icon
     self.set_click_callback(self._show_confirmation)
+
+  def _get_label_font_size(self):
+    return 36
 
   def _show_confirmation(self):
     gui_app.push_widget(FlashPilotOffroadConfirmation(self._enable_offroad, self._slider_icon))
 
   def _draw_content(self, btn_y: float):
     if not self._enable_offroad:
-      super()._draw_content(btn_y)
-      return
+      return super()._draw_content(btn_y)
+    self._label.set_color(rl.color_alpha(ENABLE_ACTION_RED, 1.0 if self.enabled else 0.35))
+    self._label.render(rl.Rectangle(
+      self._rect.x + self.LABEL_HORIZONTAL_PADDING, btn_y + self.LABEL_VERTICAL_PADDING,
+      self._title_width_hint(), self._rect.height - self.LABEL_VERTICAL_PADDING * 2,
+    ))
 
-    # Lightning-front-with-X entry glyph. Drawn natively to avoid adding a fork-specific
-    # bitmap to openpilot's shared upstream Git LFS asset store.
-    color = rl.Color(255, 255, 255, int(255 * (0.9 if self.enabled else 0.35)))
-    x, y = self._rect.x + 22, btn_y + 27
+  def _render(self, rect):
+    super()._render(rect)
+    if self._enable_offroad:
+      scale = self._scale_filter.x
+      border_rect = rl.Rectangle(
+        self._rect.x + self._rect.width * (1 - scale) / 2 + 1,
+        self._rect.y + self._rect.height * (1 - scale) / 2 + 1,
+        self._rect.width * scale - 2, self._rect.height * scale - 2,
+      )
+      rl.draw_rectangle_rounded_lines_ex(border_rect, 0.4, 12, 2,
+                                         rl.color_alpha(ENABLE_ACTION_RED, 1.0 if self.enabled else 0.35))
 
-    def line(x1, y1, x2, y2, width=7):
-      rl.draw_line_ex(rl.Vector2(x + x1, y + y1), rl.Vector2(x + x2, y + y2), width, color)
 
-    # Upright cab, squared nose, mirrors and Lightning-style light bar/C lamps.
-    line(24, 52, 29, 24, 5)
-    line(29, 24, 91, 24, 5)
-    line(91, 24, 98, 52, 5)
-    line(13, 44, 23, 44, 6)
-    line(100, 44, 110, 44, 6)
-    line(13, 57, 13, 98, 5)
-    line(13, 98, 111, 98, 5)
-    line(111, 98, 111, 57, 5)
-    line(24, 99, 24, 108, 9)
-    line(100, 99, 100, 108, 9)
-    line(23, 57, 101, 57, 6)
-    line(23, 57, 23, 79, 6)
-    line(23, 79, 34, 79, 6)
-    line(101, 57, 101, 79, 6)
-    line(101, 79, 90, 79, 6)
-    line(43, 76, 81, 76, 3)
-    line(38, 88, 86, 88, 3)
-
-    # X overlays the upper-right of the vehicle.
-    line(81, 5, 121, 45, 9)
-    line(121, 5, 81, 45, 9)
+def keep_offroad_controls_last(items):
+  """Reserve the terminal group even when callers append new settings later."""
+  items[:] = ([item for item in items if not isinstance(item, FlashPilotOffroadButton)] +
+              [item for item in items if isinstance(item, FlashPilotOffroadButton)])
 
 
 def forced_offroad_requested() -> bool:

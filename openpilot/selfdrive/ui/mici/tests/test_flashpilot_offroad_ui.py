@@ -267,15 +267,53 @@ def test_sunnypilot_full_left_swipe_confirms_exactly_once(monkeypatch):
   assert calls == ["confirm"]
 
 
-def test_settings_uses_sunnypilot_button_placement_and_removes_vehicle_state_tile():
+def test_settings_terminal_controls_and_no_action_icon():
   source = Path(__file__).parents[1] / "layouts/settings/settings.py"
   tree = ast.parse(source.read_text())
   menu = next(node for node in ast.walk(tree) if isinstance(node, ast.Call) and
               isinstance(node.func, ast.Attribute) and node.func.attr == "add_widgets")
-  assert [ast.unparse(item) for item in menu.args[0].elts] == [
-    "disable_forced_offroad", "enable_offroad_onroad", "toggles_btn", "ford_btn", "network_btn", "device_btn",
-    "software_btn", "PairBigButton()", "firehose_btn", "developer_btn", "enable_offroad_offroad",
-  ]
+  assert [ast.unparse(item) for item in menu.args[0].elts][-2:] == ["enable_offroad", "disable_forced_offroad"]
   assert "FlashPilotOffroadToggle" not in source.read_text()
-  offroad_source = Path(__file__).parents[1] / "layouts/flashpilot_offroad.py"
-  assert "Lightning-front-with-X entry glyph" in offroad_source.read_text()
+  assert "power.png" not in source.read_text()
+
+
+@pytest.mark.parametrize("enabled", [False, True])
+@pytest.mark.parametrize("started", [False, True])
+def test_settings_keep_lifecycle_action_last_after_future_additions(monkeypatch, enabled, started):
+  from openpilot.selfdrive.ui.mici.layouts import flashpilot_offroad as ui
+  from openpilot.system.ui.widgets import Widget
+  from unittest.mock import Mock
+  install_params(monkeypatch, ui, status("offroad" if enabled else "off", inhibit=enabled))
+
+  class FakeScroller:
+    def __init__(self):
+      self._scroller = SimpleNamespace(items=[])
+      self._scroller.add_widgets = self._scroller.items.extend
+
+    def _update_state(self):
+      pass
+
+  source = Path(__file__).parents[1] / "layouts/settings/settings.py"
+  tree = ast.parse(source.read_text())
+  tree.body = [node for node in tree.body if not isinstance(node, (ast.Import, ast.ImportFrom))]
+  names = {node.id for node in ast.walk(tree) if isinstance(node, ast.Name)}
+  namespace = {name: Mock() for name in names if name.endswith(("Layout", "Mici", "Button")) or name == "Params"}
+  namespace.update(NavScroller=FakeScroller, BigButton=ui.BigButton, gui_app=Mock(), FontWeight=Mock(),
+                   FlashPilotOffroadButton=ui.FlashPilotOffroadButton, forced_offroad_requested=ui.forced_offroad_requested,
+                   keep_offroad_controls_last=ui.keep_offroad_controls_last, ford_lightning_connected=lambda: True)
+  # Preserve complete construction/visibility/update code, replacing only native
+  # dependencies and visual construction (the text widget is tested separately).
+  monkeypatch.setattr(ui.BigButton, "__init__", lambda self, text: (Widget.__init__(self), setattr(self, "text", text))[-1])
+  exec(compile(tree, str(source), "exec"), namespace)
+  namespace["SettingsBigButton"] = lambda *args: Mock()
+  layout = namespace["SettingsLayout"]()
+  future_setting = Mock()
+  layout._scroller.items.append(future_setting)
+  layout._update_state()
+  visible = [item for item in layout._scroller.items if item.is_visible]
+  assert visible[-1].text == ("DISABLE ALWAYS OFFROAD" if enabled else "ENABLE ALWAYS OFFROAD")
+  assert visible[-2] is future_setting
+  assert sum(isinstance(item, ui.FlashPilotOffroadButton) for item in visible) == 1
+  before = list(layout._scroller.items)
+  layout._update_state()
+  assert layout._scroller.items == before
