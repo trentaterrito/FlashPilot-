@@ -187,6 +187,54 @@ class Contracts(unittest.TestCase):
       with self.assertRaisesRegex(c.ModelCompatibilityError, 'artifact-bound'):
         c.resolve_profile(meta, {}, 'a'*64, .1, .3)
 
+  def bound_cases(self):
+    hashes = {
+      'Q67': '92e736e4f52ef0b25c4ae62e651261c3dde98a5050122699004236845256b6b9',
+      'Q73': '52fcf48bfb991f327a8982037eb0855d9a63437d78e9f4828d2be54df0f32567',
+    }
+    for row in json.loads(Path(__file__).with_name('representative_contracts.json').read_text()):
+      yield row, hashes[row['id']]
+
+  def test_exact_artifact_bindings(self):
+    for row, digest in self.bound_cases():
+      p = c.resolve_profile(row['metadata'], {'lat': '.1', 'long': '.3'}, digest, .1, .3)
+      self.assertEqual(p.name, 'action_speed_squared')
+      self.assertTrue(p.action_t_required and p.consume_action)
+      self.assertEqual((p.lateral_smoothing, p.longitudinal_smoothing, p.delay_compensation), (.1, .3, .075))
+      self.assertEqual(p.return_packaging, 'component_tuple' if row['id'] == 'Q67' else 'tensor_or_singleton')
+      self.assertEqual(p.action({'action': np.array([[4., -.2]])}, 20.), (.01, -.2))
+      inputs = {}; p.populate_action_t(inputs, .2 + p.lateral_smoothing, .4 + p.longitudinal_smoothing)
+      np.testing.assert_allclose(inputs['action_t'], [.375, .775])
+
+  def test_binding_does_not_follow_name_or_checkpoint_to_new_hash(self):
+    for row, digest in self.bound_cases():
+      with self.assertRaisesRegex(c.ModelCompatibilityError, 'artifact-bound'):
+        c.resolve_profile(row['metadata'], {'lat': '.1', 'long': '.3'}, '0' + digest[1:], .1, .3)
+
+  def test_binding_rejects_wrong_checkpoint(self):
+    for row, digest in self.bound_cases():
+      meta = row['metadata']; component = 'on_policy' if row['id'] == 'Q67' else 'model'
+      meta[component]['model_checkpoint'] = 'wrong'
+      with self.assertRaisesRegex(c.ModelCompatibilityError, 'checkpoint'):
+        c.resolve_profile(meta, {'lat': '.1', 'long': '.3'}, digest, .1, .3)
+
+  def test_binding_rejects_wrong_smoothing_or_scaling_override(self):
+    for row, digest in self.bound_cases():
+      for lat, long in ((0., .3), (.1, .0), (.2, .3)):
+        with self.assertRaisesRegex(c.ModelCompatibilityError, 'smoothing'):
+          c.resolve_profile(row['metadata'], {'lat': str(lat), 'long': str(long)}, digest, lat, long)
+      for extra in ({'compat_profile': 'action_hundred'}, {'compat_profile': 'plan'}, {'compat_sha256': 'b'*64}):
+        with self.assertRaisesRegex(c.ModelCompatibilityError, 'conflicts'):
+          c.resolve_profile(row['metadata'], {'lat': '.1', 'long': '.3', **extra}, digest, .1, .3)
+
+  def test_bound_action_drives_existing_runner(self):
+    for row, digest in self.bound_cases():
+      p = c.resolve_profile(row['metadata'], {'lat': '.1', 'long': '.3'}, digest, .1, .3)
+      model = SimpleNamespace(profile=p, generation=12, MIN_LAT_CONTROL_SPEED=.3, LAT_SMOOTH_SECONDS=.1, LONG_SMOOTH_SECONDS=.3)
+      result = action_method()(model, {'action': np.array([[4., -.2]])}, SimpleNamespace(desiredAcceleration=0., desiredCurvature=0.), .375, .775, 20.)
+      self.assertAlmostEqual(result.desiredCurvature, .01*(1-np.exp(-.05/.1)))
+      self.assertAlmostEqual(result.desiredAcceleration, -.2*(1-np.exp(-.05/.3)))
+
   def test_native_and_controls_unchanged(self):
     paths = ['openpilot/selfdrive/modeld', 'openpilot/selfdrive/controls', 'openpilot/system/manager/process_config.py', 'openpilot/sunnypilot/models', 'opendbc', 'panda']
     result = subprocess.run(['git', 'diff', 'dfd4b419f73b2bccbfd0e4d7007124a68ae04c71', '--', *paths], cwd=ROOT, check=True, capture_output=True, text=True)
