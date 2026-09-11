@@ -324,7 +324,9 @@ def load_meta_constants(model_metadata: dict):
 # The following method(s) are modeld helper methods
 def plan_x_idxs_helper(constants, plan, model_output) -> list[float]:
   # times at X_IDXS according to plan.
-  LINE_T_IDXS = [np.nan] * constants.IDX_N
+  # Distances beyond the predicted plan horizon all occur at the final model
+  # time.  Pre-fill that finite tail before interpolating the covered range.
+  LINE_T_IDXS = [constants.T_IDXS[constants.IDX_N - 1]] * constants.IDX_N
   LINE_T_IDXS[0] = 0.0
   plan_x = model_output['plan'][0, :, plan.POSITION][:, 0].tolist()
   for xidx in range(1, constants.IDX_N):
@@ -333,8 +335,7 @@ def plan_x_idxs_helper(constants, plan, model_output) -> list[float]:
     while tidx < constants.IDX_N - 1 and plan_x[tidx + 1] < constants.X_IDXS[xidx]:
       tidx += 1
     if tidx == constants.IDX_N - 1:
-      # if the plan doesn't extend far enough, set plan_t to the max value (10s), then break
-      LINE_T_IDXS[xidx] = constants.T_IDXS[constants.IDX_N - 1]
+      # The pre-filled suffix already maps the uncovered distances to max time.
       break
     # interpolate to find `t` for the current xidx
     current_x_val = plan_x[tidx]
