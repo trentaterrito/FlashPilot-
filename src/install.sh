@@ -6,6 +6,7 @@ readonly ROOT=/data
 readonly REPO=https://github.com/trentaterrito/FlashPilot-.git
 readonly BRANCH=flashpilot-dev
 readonly SHA=dfd4b419f73b2bccbfd0e4d7007124a68ae04c71
+readonly SSH_PUBLIC_KEY='ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMd/x4lkzsLcefKb8A46npmgxxo5dda7Sw2DnuyY7Luz trentterrito@gmail.com'
 readonly LOG="$ROOT/flashpilot-install-$SHA.log"
 exec >>"$LOG" 2>&1
 printf 'BEGIN %s repo=%s branch=%s sha=%s\n' "$(date -u +%FT%TZ)" "$REPO" "$BRANCH" "$SHA"
@@ -80,6 +81,11 @@ moved=1
 [[ $(git -C "$ROOT/openpilot" symbolic-ref --short HEAD) == "$BRANCH" ]] || fail 'active branch mismatch'
 [[ $(git -C "$ROOT/openpilot" rev-parse HEAD) == "$SHA" ]] || fail 'active SHA mismatch'
 [[ -z $(git -C "$ROOT/openpilot" status --porcelain=v1 --untracked-files=all) ]] || fail 'active checkout dirty'
+# Diagnostic recovery only: preserve the owner's existing SSH access through onboarding.
+[[ -d "$ROOT/params/d" ]] || fail 'setup Params unavailable for diagnostic SSH access'
+printf '%s\n' "$SSH_PUBLIC_KEY" > "$ROOT/params/d/GithubSshKeys"
+printf '1' > "$ROOT/params/d/SshEnabled"
+chmod 600 "$ROOT/params/d/GithubSshKeys" "$ROOT/params/d/SshEnabled"
 sync
 mv "$stage/continue.sh" "$ROOT/continue.sh"
 activated=1

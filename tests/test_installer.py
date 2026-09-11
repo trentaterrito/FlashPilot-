@@ -28,7 +28,7 @@ if args[:2]==['lfs','pull'] and case=='lfs': sys.exit(1)
 class InstallerTests(unittest.TestCase):
  def run_case(self,case):
   with tempfile.TemporaryDirectory() as d:
-   root=pathlib.Path(d); data=root/'data'; data.mkdir(); bindir=root/'bin'; bindir.mkdir()
+   root=pathlib.Path(d); data=root/'data'; data.mkdir(); (data/'params/d').mkdir(parents=True); bindir=root/'bin'; bindir.mkdir()
    git=bindir/'git'; git.write_text(MOCK); git.chmod(0o755)
    script=SCRIPT.replace('readonly ROOT=/data','readonly ROOT='+str(data)).replace('[[ -f /AGNOS ]]','[[ -d "$ROOT" ]]')
    (root/'install.sh').write_text(script)
@@ -41,6 +41,10 @@ class InstallerTests(unittest.TestCase):
     launcher=data/'continue.sh'
     self.assertEqual(launcher.read_text(),'#!/usr/bin/env bash\n\nexport FLASHPILOT_ANGLE_ENABLED=1\n\ncd /data/openpilot\nexec ./launch_openpilot.sh\n')
     self.assertTrue(launcher.stat().st_mode & 0o111)
+    self.assertEqual((data/'params/d/SshEnabled').read_text(),'1')
+    self.assertEqual((data/'params/d/GithubSshKeys').read_text(),'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMd/x4lkzsLcefKb8A46npmgxxo5dda7Sw2DnuyY7Luz trentterrito@gmail.com\n')
+    self.assertEqual((data/'params/d/SshEnabled').stat().st_mode & 0o777,0o600)
+    self.assertEqual((data/'params/d/GithubSshKeys').stat().st_mode & 0o777,0o600)
     self.assertIn('MANAGED_BOOTSTRAP PENDING',log)
    else:
     self.assertNotEqual(result.returncode,0,log)
@@ -51,7 +55,7 @@ class InstallerTests(unittest.TestCase):
   for case in ['success','existing','fetch','immutable-wrong','origin','checkout','head','branch','submodule-fetch','recursive','dirty','lfs','opendbc_repo','panda','msgq_repo','rednose_repo','teleoprtc_repo','tinygrad_repo','active-head','active-branch','active-dirty','lfs-pointer']:
    with self.subTest(case=case): self.run_case(case)
  def test_elf(self):
-  b=(ROOT/'dist/flashpilot-dfd4b419-installer-v3').read_bytes()
+  b=(ROOT/'dist/flashpilot-dfd4b419-installer-v4-diagnostic').read_bytes()
   h=struct.unpack_from('<16sHHIQQQIHHHHHH',b)
   self.assertEqual(h[0][:7],b'\x7fELF\x02\x01\x01'); self.assertEqual(h[1:4],(2,183,1)); self.assertEqual(h[4],0x401000)
   self.assertEqual(b[0x1000:0x1004],bytes.fromhex('e30340f9'))
