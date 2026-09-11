@@ -36,12 +36,15 @@ cleanup() {
 trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
-# Clone source fresh, then check the branch before fetching large submodule/LFS assets.
-GIT_LFS_SKIP_SMUDGE=1 git clone --depth=1 --single-branch --branch "$BRANCH" --no-checkout "$REPO" "$stage/openpilot"
+# Fetch the immutable commit directly. The public branch may legitimately move.
+mkdir "$stage/openpilot"
+git -C "$stage/openpilot" init
+git -C "$stage/openpilot" remote add origin "$REPO"
+GIT_LFS_SKIP_SMUDGE=1 git -C "$stage/openpilot" fetch --depth=1 origin "$SHA"
 cd "$stage/openpilot"
 [[ $(git remote get-url origin) == "$REPO" ]] || fail 'origin mismatch'
-[[ $(git rev-parse HEAD) == "$SHA" ]] || fail 'branch HEAD drift'
-GIT_LFS_SKIP_SMUDGE=1 git checkout "$BRANCH"
+[[ $(git rev-parse FETCH_HEAD) == "$SHA" ]] || fail 'immutable fetch SHA mismatch'
+GIT_LFS_SKIP_SMUDGE=1 git checkout -B "$BRANCH" "$SHA"
 [[ $(git symbolic-ref --short HEAD) == "$BRANCH" ]] || fail 'branch mismatch'
 [[ $(git rev-parse HEAD) == "$SHA" ]] || fail 'checkout SHA mismatch'
 git submodule update --init --recursive

@@ -3,7 +3,7 @@
 import hashlib, pathlib, struct, subprocess
 root=pathlib.Path(__file__).resolve().parent
 out=root.parent/'dist'; out.mkdir(exist_ok=True)
-obj=out/'entry-v2.o'
+obj=out/'entry-v3.o'
 subprocess.run(['clang','--target=aarch64-linux-gnu','-c','entry.S','-o',str(obj)],cwd=root,check=True)
 b=obj.read_bytes()
 h=struct.unpack_from('<16sHHIQQQIHHHHHH',b)
@@ -19,6 +19,6 @@ header=struct.pack('<16sHHIQQQIHHHHHH',ident,2,183,1,base+offset,64,0,0,64,56,2,
 load=struct.pack('<IIQQQQQQ',1,5,0,base,base,size,size,0x1000)
 stack=struct.pack('<IIQQQQQQ',0x6474e551,6,0,0,0,0,0,16)
 blob=(header+load+stack).ljust(offset,b'\0')+code
-p=out/'flashpilot-dfd4b419-installer-v2'; p.write_bytes(blob); p.chmod(0o755)
+p=out/'flashpilot-dfd4b419-installer-v3'; p.write_bytes(blob); p.chmod(0o755)
 assert (root/'install.sh').read_bytes()+b'\0' in blob
 print(hashlib.sha256(blob).hexdigest(),p.name)
