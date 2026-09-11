@@ -13,6 +13,7 @@ from openpilot.selfdrive.ui.mici.onroad.driver_state import DriverStateRenderer
 from openpilot.selfdrive.ui.mici.onroad.hud_renderer import HudRenderer
 from openpilot.selfdrive.ui.mici.onroad.model_renderer import ModelRenderer
 from openpilot.selfdrive.ui.mici.onroad.confidence_ball import ConfidenceBall
+from openpilot.selfdrive.ui.mici.onroad.flashpilot_indicators import bsm_display_state, draw_bsm_edges
 from openpilot.selfdrive.ui.mici.onroad.experimental_notification import ExperimentalNotification
 from openpilot.selfdrive.ui.mici.onroad.mode_notification import ModeNotificationView
 from openpilot.selfdrive.ui.mici.onroad.cameraview import CameraView
@@ -262,6 +263,7 @@ class AugmentedRoadView(CameraView):
     # Custom UI extension point - add custom overlays here
     # Use self._content_rect for positioning within camera bounds
     self._confidence_ball.render(self.rect)
+    draw_bsm_edges(self.rect, *bsm_display_state(ui_state.sm, ui_state.started_frame))
 
     self._bookmark_icon.render(self.rect)
 

@@ -1,6 +1,9 @@
 import math
 import pyray as rl
 from openpilot.selfdrive.ui.mici.onroad import SIDE_PANEL_WIDTH
+from openpilot.selfdrive.ui.mici.onroad.flashpilot_indicators import (
+  BSM_GLOW_WIDTH, BOLT_HEIGHT, BOLT_GAP, BOLT_BOTTOM_MARGIN, BOLT_STANDARD, draw_personality_bolt, personality_style,
+)
 from openpilot.selfdrive.ui.ui_state import ui_state, UIStatus
 from openpilot.system.ui.widgets import Widget
 from openpilot.system.ui.lib.application import gui_app
@@ -50,7 +53,11 @@ class ConfidenceBall(Widget):
     )
 
     status_dot_radius = 24
-    dot_height = (1 - self._confidence_filter.x) * (content_rect.height - 2 * status_dot_radius) + status_dot_radius
+    # Keep the complete confidence/personality group in its strip at every
+    # confidence level, with a clear gutter for the right BSM edge.
+    confidence = max(0.0, min(1.0, self._confidence_filter.x))
+    travel = max(0, content_rect.height - 2 * status_dot_radius - BOLT_GAP - BOLT_HEIGHT - BOLT_BOTTOM_MARGIN)
+    dot_height = (1 - confidence) * travel + status_dot_radius
     dot_height = self._rect.y + dot_height
 
     # confidence zones
@@ -73,6 +80,13 @@ class ConfidenceBall(Widget):
       top_dot_color = rl.Color(50, 50, 50, 255)
       bottom_dot_color = rl.Color(13, 13, 13, 255)
 
-    draw_circle_gradient(content_rect.x + content_rect.width - status_dot_radius,
+    center_x = content_rect.x + content_rect.width - status_dot_radius - BSM_GLOW_WIDTH
+    # The circle's black mask must stay out of the road viewport.
+    rl.begin_scissor_mode(int(content_rect.x), int(content_rect.y), int(content_rect.width), int(content_rect.height))
+    draw_circle_gradient(center_x,
                          dot_height, status_dot_radius,
                          top_dot_color, bottom_dot_color)
+    bolt_style = (BOLT_STANDARD, 2) if self._demo else personality_style(ui_state.sm, ui_state.started_frame)
+    bolt_top = content_rect.y + content_rect.height - BOLT_BOTTOM_MARGIN - BOLT_HEIGHT
+    draw_personality_bolt(center_x, bolt_top, *bolt_style)
+    rl.end_scissor_mode()
