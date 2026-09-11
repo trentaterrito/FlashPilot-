@@ -113,11 +113,23 @@ def manager_thread() -> None:
     ignore.append("pandad")
   ignore += [x for x in os.getenv("BLOCK", "").split(",") if len(x) > 0]
 
-  sm = messaging.SubMaster(['deviceState', 'carParams', 'pandaStates'], poll='deviceState')
+  slot = None
+  # A leftover validation cgroup requires cleanup even if opt-in was removed.
+  # This fixed, validation-only location cannot be lost with a launcher env var.
+  from openpilot.system.manager.model_slot import Reservation, baseline_eligible, CGROUP_ROOT
+  validation_enabled = os.getenv('FLASHPILOT_MODEL_SLOT_VALIDATION') == '1'
+  if validation_enabled or CGROUP_ROOT.exists():
+    slot = Reservation(listen=validation_enabled)
+    import atexit
+    atexit.register(slot.close)
+    cloudlog.info(f"validation model slot endpoint: {slot.endpoint if validation_enabled else 'cleanup only'}")
+  topics = ['deviceState', 'carParams', 'pandaStates'] + (['carState'] if slot else [])
+  sm = messaging.SubMaster(topics, poll='deviceState')
   pm = messaging.PubMaster(['managerState'])
 
   params.put_bool("IsOffroad", True, block=True)
-  ensure_running(managed_processes.values(), False, params=params, CP=sm['carParams'], not_run=ignore)
+  initial_reserved = slot.exclusions(managed_processes, False) if slot else []
+  ensure_running(managed_processes.values(), False, params=params, CP=sm['carParams'], not_run=ignore + initial_reserved)
 
   started_prev = False
   ignition_prev = False
@@ -143,7 +155,16 @@ def manager_thread() -> None:
     started_prev = started
     ignition_prev = ignition
 
-    ensure_running(managed_processes.values(), started, params=params, CP=sm['carParams'], not_run=ignore)
+    reserved = []
+    if slot:
+      try:
+        eligible = baseline_eligible(sm, params)
+      except Exception:
+        eligible = False
+      reserved = slot.exclusions(managed_processes, eligible)
+      if slot.error:
+        cloudlog.error(slot.error)
+    ensure_running(managed_processes.values(), started, params=params, CP=sm['carParams'], not_run=ignore + reserved)
 
     running = ' '.join("{}{}\u001b[0m".format("\u001b[32m" if p.proc.is_alive() else "\u001b[31m", p.name)
                        for p in managed_processes.values() if p.proc)
