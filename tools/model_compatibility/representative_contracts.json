@@ -1,0 +1,422 @@
+[
+  {
+    "id": "Q67",
+    "name": "OP Model 16 Deep (June 03, 2026)",
+    "metadata": {
+      "vision": {
+        "model_checkpoint": "1c8e05fa-bb24-42ad-af22-c0e6d59a5df5/100",
+        "output_slices": {
+          "lane_lines": {
+            "slice": [
+              0,
+              528,
+              null
+            ]
+          },
+          "lane_lines_prob": {
+            "slice": [
+              528,
+              536,
+              null
+            ]
+          },
+          "road_edges": {
+            "slice": [
+              536,
+              800,
+              null
+            ]
+          },
+          "meta": {
+            "slice": [
+              800,
+              855,
+              null
+            ]
+          },
+          "desire_pred": {
+            "slice": [
+              855,
+              887,
+              null
+            ]
+          },
+          "pose": {
+            "slice": [
+              887,
+              899,
+              null
+            ]
+          },
+          "wide_from_device_euler": {
+            "slice": [
+              899,
+              905,
+              null
+            ]
+          },
+          "road_transform": {
+            "slice": [
+              905,
+              917,
+              null
+            ]
+          },
+          "hidden_state": {
+            "slice": [
+              917,
+              1429,
+              null
+            ]
+          },
+          "pad": {
+            "slice": [
+              -3,
+              null,
+              null
+            ]
+          }
+        },
+        "input_shapes": {
+          "img": [
+            1,
+            12,
+            128,
+            256
+          ],
+          "big_img": [
+            1,
+            12,
+            128,
+            256
+          ]
+        },
+        "output_shapes": {
+          "outputs": [
+            1,
+            1432
+          ]
+        }
+      },
+      "off_policy": {
+        "model_checkpoint": "1c8e05fa-bb24-42ad-af22-c0e6d59a5df5/100",
+        "output_slices": {
+          "plan": {
+            "slice": [
+              0,
+              990,
+              null
+            ]
+          },
+          "lead": {
+            "slice": [
+              990,
+              1134,
+              null
+            ]
+          },
+          "lead_prob": {
+            "slice": [
+              1134,
+              1137,
+              null
+            ]
+          },
+          "desire_state": {
+            "slice": [
+              1137,
+              1145,
+              null
+            ]
+          },
+          "pad": {
+            "slice": [
+              -3,
+              null,
+              null
+            ]
+          }
+        },
+        "input_shapes": {
+          "desire_pulse": [
+            1,
+            25,
+            8
+          ],
+          "traffic_convention": [
+            1,
+            2
+          ],
+          "action_t": [
+            1,
+            2
+          ],
+          "features_buffer": [
+            1,
+            25,
+            512
+          ]
+        },
+        "output_shapes": {
+          "outputs": [
+            1,
+            1148
+          ]
+        }
+      },
+      "on_policy": {
+        "model_checkpoint": "1e72cf5a-785f-45ea-888f-28cdb14785de/100",
+        "output_slices": {
+          "action": {
+            "slice": [
+              0,
+              4,
+              null
+            ]
+          },
+          "pad": {
+            "slice": [
+              0,
+              null,
+              null
+            ]
+          }
+        },
+        "input_shapes": {
+          "desire_pulse": [
+            1,
+            25,
+            8
+          ],
+          "traffic_convention": [
+            1,
+            2
+          ],
+          "action_t": [
+            1,
+            2
+          ],
+          "features_buffer": [
+            1,
+            25,
+            512
+          ]
+        },
+        "output_shapes": {
+          "outputs": [
+            1,
+            4
+          ]
+        }
+      }
+    },
+    "artifact": [
+      {
+        "type": "chunked",
+        "artifact": {
+          "file_name": "driving_op_model_16_deep_june_03_2026_tinygrad.pkl",
+          "download_uri": {
+            "url": "https://huggingface.co/datasets/sunnypilot/sunnypilot_models_v1/resolve/main/models/recompiled23/model-OP%20Model%2016%20Deep%20%28June%2003%2C%202026%29-117/driving_op_model_16_deep_june_03_2026_tinygrad.pkl",
+            "sha256": "92e736e4f52ef0b25c4ae62e651261c3dde98a5050122699004236845256b6b9"
+          },
+          "chunks": [
+            {
+              "file_name": "driving_op_model_16_deep_june_03_2026_tinygrad.pkl.chunk01of03",
+              "sha256": "9eccee995af63d68c7d1f6e88cfbade529d718a0dc393b2d7ac6768233f90ef5"
+            },
+            {
+              "file_name": "driving_op_model_16_deep_june_03_2026_tinygrad.pkl.chunk02of03",
+              "sha256": "be1aab4640b1faf47405e6fa8ac0f6d8422018777e3db3f55b3dbbeb66fb6267"
+            },
+            {
+              "file_name": "driving_op_model_16_deep_june_03_2026_tinygrad.pkl.chunk03of03",
+              "sha256": "1be7991ae7db8016f12d5ec3242434f09df9fc064da5a648b181b1913901bf99"
+            }
+          ]
+        }
+      }
+    ],
+    "source": "saved hash-bound prefix metadata; no inference or unit attestation"
+  },
+  {
+    "id": "Q73",
+    "name": "RDF Model V2 (August 11, 2026)",
+    "metadata": {
+      "model": {
+        "model_checkpoint": "1acf0a93-3b20-4808-beb4-739aca6bb852/100/42a55a96-99c7-4973-9f1c-d11f33a4802e/400",
+        "output_slices": {
+          "lane_lines": {
+            "slice": [
+              0,
+              528,
+              null
+            ]
+          },
+          "lane_lines_prob": {
+            "slice": [
+              528,
+              536,
+              null
+            ]
+          },
+          "road_edges": {
+            "slice": [
+              536,
+              800,
+              null
+            ]
+          },
+          "meta": {
+            "slice": [
+              800,
+              855,
+              null
+            ]
+          },
+          "desire_pred": {
+            "slice": [
+              855,
+              887,
+              null
+            ]
+          },
+          "pose": {
+            "slice": [
+              887,
+              899,
+              null
+            ]
+          },
+          "wide_from_device_euler": {
+            "slice": [
+              899,
+              905,
+              null
+            ]
+          },
+          "road_transform": {
+            "slice": [
+              905,
+              917,
+              null
+            ]
+          },
+          "plan": {
+            "slice": [
+              917,
+              1907,
+              null
+            ]
+          },
+          "lead": {
+            "slice": [
+              1907,
+              2051,
+              null
+            ]
+          },
+          "lead_prob": {
+            "slice": [
+              2051,
+              2054,
+              null
+            ]
+          },
+          "desire_state": {
+            "slice": [
+              2054,
+              2062,
+              null
+            ]
+          },
+          "action": {
+            "slice": [
+              2062,
+              2066,
+              null
+            ]
+          },
+          "hidden_state": {
+            "slice": [
+              2066,
+              2578,
+              null
+            ]
+          },
+          "pad": {
+            "slice": [
+              -2,
+              null,
+              null
+            ]
+          }
+        },
+        "input_shapes": {
+          "img": [
+            1,
+            12,
+            128,
+            256
+          ],
+          "big_img": [
+            1,
+            12,
+            128,
+            256
+          ],
+          "desire_pulse": [
+            1,
+            33,
+            8
+          ],
+          "traffic_convention": [
+            1,
+            2
+          ],
+          "action_t": [
+            1,
+            2
+          ],
+          "features_buffer": [
+            1,
+            32,
+            512
+          ]
+        },
+        "output_shapes": {
+          "outputs": [
+            1,
+            2580
+          ]
+        }
+      }
+    },
+    "artifact": [
+      {
+        "type": "chunked",
+        "artifact": {
+          "file_name": "driving_rdf_model_v2_august_11_2026_tinygrad.pkl",
+          "download_uri": {
+            "url": "https://huggingface.co/datasets/sunnypilot/sunnypilot_models_v1/resolve/main/models/recompiled23/model-RDF%20Model%20V2%20%28August%2011%2C%202026%29-117/driving_rdf_model_v2_august_11_2026_tinygrad.pkl",
+            "sha256": "52fcf48bfb991f327a8982037eb0855d9a63437d78e9f4828d2be54df0f32567"
+          },
+          "chunks": [
+            {
+              "file_name": "driving_rdf_model_v2_august_11_2026_tinygrad.pkl.chunk01of03",
+              "sha256": "daa108d1e79cc488e0df40a518ec57db5002418c7f3e90cff39c9f4033af6098"
+            },
+            {
+              "file_name": "driving_rdf_model_v2_august_11_2026_tinygrad.pkl.chunk02of03",
+              "sha256": "08678a51a38bf7c6fe86ac69f13bedbc497093cc415e47ce81b0eab8ee2c5c76"
+            },
+            {
+              "file_name": "driving_rdf_model_v2_august_11_2026_tinygrad.pkl.chunk03of03",
+              "sha256": "88ff671dc77085cb7d39f5ceda9da2c9f2b2c30ef011eac2a0a095a8c2412aa8"
+            }
+          ]
+        }
+      }
+    ],
+    "source": "saved hash-bound prefix metadata; no inference or unit attestation"
+  }
+]

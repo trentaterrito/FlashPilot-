@@ -34,6 +34,7 @@ from openpilot.selfdrive.controls.lib.drive_helpers import get_accel_from_plan, 
 
 from openpilot.sunnypilot.modeld_v2.fill_model_msg import fill_model_msg, fill_pose_msg, PublishState, get_curvature_from_output
 from openpilot.sunnypilot.modeld_v2.constants import Plan
+from openpilot.sunnypilot.modeld_v2.compatibility import resolve_profile, normalize_outputs, merge_policy_outputs
 from openpilot.sunnypilot.modeld_v2.meta_helper import load_meta_constants
 from openpilot.sunnypilot.modeld_v2.camera_offset_helper import CameraOffsetHelper
 
@@ -126,6 +127,9 @@ class ModelState(ModelStateBase):
     jits = _load_jits(pkl_path, bundle.models[0].artifact)
 
     metadata = jits['metadata']
+    overrides = {item.key: item.value for item in bundle.overrides}
+    self.profile = resolve_profile(metadata, overrides, bundle.models[0].artifact.downloadUri.sha256,
+                                   self.LAT_SMOOTH_SECONDS, self.LONG_SMOOTH_SECONDS)
     # the catalog pkl is compiled for a fixed device; the runtime must put its inputs on the same one
     self.WARP_DEV, self.DEV = select_devices(self.chestnut, metadata)
     self.QUEUE_DEV = self.DEV
@@ -161,6 +165,7 @@ class ModelState(ModelStateBase):
                                                                      first_policy_meta['input_shapes'],
                                                                      frame_skip, device=self.QUEUE_DEV)
 
+    self.profile.validate_inputs(self.numpy_inputs)
     self._desire_key = next(key for key in self.numpy_inputs if key.startswith('desire'))
     self._road_key = next(key for key in self._vision_input_names if 'big' not in key)
     self._wide_key = next(key for key in self._vision_input_names if 'big' in key)
@@ -244,8 +249,10 @@ class ModelState(ModelStateBase):
       return None
     raw_outputs = self.run_policy(**{k: self.input_queues[k] for k in POLICY_INPUTS if k in self.input_queues}, warped=warped)
 
+    raw_outputs = normalize_outputs(raw_outputs, self.profile.return_packaging, Tensor,
+                                    1 + len(self._policy_slices_list))
     if self._combined_model_type == 'supercombo':
-      model_output = raw_outputs.numpy().flatten()
+      model_output = raw_outputs[0].numpy().flatten()
       if self.chestnut and not np.all(np.isfinite(model_output)):
         raise RuntimeError("model output not finite")
       sliced = {k: model_output[np.newaxis, v] for k, v in self.vision_output_slices.items()}
@@ -260,13 +267,13 @@ class ModelState(ModelStateBase):
       if 'prev_feat' in self.numpy_inputs and 'hidden_state' in self.vision_output_slices:
         self.numpy_inputs['prev_feat'][:] = vision_output[self.vision_output_slices['hidden_state']]
 
+      policies = []
       for i, policy_slices in enumerate(self._policy_slices_list):
         policy_output = raw_outputs[i + 1].numpy().flatten()
         policy_sliced = {k: policy_output[np.newaxis, v] for k, v in policy_slices.items()}
         parsed = self.parser.parse_policy_outputs(policy_sliced)
-        if 'off' in self._policy_keys[i] and self._has_on_policy:
-          parsed.pop('plan', None)
-        outputs.update(parsed)
+        policies.append((self._policy_keys[i], parsed))
+      merge_policy_outputs(outputs, policies)
 
       if 'planplus' in outputs and 'plan' in outputs:
         outputs['plan'] = outputs['plan'] + outputs['planplus']
@@ -280,15 +287,19 @@ class ModelState(ModelStateBase):
 
   def get_action_from_model(self, model_output: dict[str, np.ndarray], prev_action: log.ModelDataV2.Action,
                             lat_action_t: float, long_action_t: float, v_ego: float) -> log.ModelDataV2.Action:
-    plan = model_output['plan'][0]
-    desired_accel = get_accel_from_plan(plan[:, Plan.VELOCITY][:, 0], plan[:, Plan.ACCELERATION][:, 0], self.constants.T_IDXS,
-                                                     action_t=long_action_t)
+    if self.profile.consume_action:
+      desired_curvature, desired_accel = self.profile.action(model_output, v_ego)
+    else:
+      plan = model_output['plan'][0]
+      desired_accel = get_accel_from_plan(plan[:, Plan.VELOCITY][:, 0], plan[:, Plan.ACCELERATION][:, 0], self.constants.T_IDXS,
+                                        action_t=long_action_t)
+      curvature_plan = plan + (self.PLANPLUS_CONTROL - 1.0) * model_output['planplus'][0] if 'planplus' in model_output and self.PLANPLUS_CONTROL != 1.0 else plan
+      desired_curvature = get_curvature_from_output(model_output, curvature_plan, v_ego, lat_action_t, self.mlsim)
+    # Preserve FlashPilot's stop decision on UNSMOOTHED acceleration.
     stop = should_stop(v_ego, desired_accel)
     desired_accel = smooth_value(desired_accel, prev_action.desiredAcceleration, self.LONG_SMOOTH_SECONDS)
 
-    curvature_plan = plan + (self.PLANPLUS_CONTROL - 1.0) * model_output['planplus'][0] if 'planplus' in model_output and self.PLANPLUS_CONTROL != 1.0 else plan
-    desired_curvature = get_curvature_from_output(model_output, curvature_plan, v_ego, lat_action_t, self.mlsim)
-    if self.generation is not None and self.generation >= 10: # smooth curvature for post FOF models
+    if self.profile.consume_action or (self.generation is not None and self.generation >= 10):
       if v_ego > self.MIN_LAT_CONTROL_SPEED:
         desired_curvature = smooth_value(desired_curvature, prev_action.desiredCurvature, self.LAT_SMOOTH_SECONDS)
       else:
@@ -470,6 +481,9 @@ def main(demo=False):
     if 'lateral_control_params' in model.numpy_inputs:
       inputs['lateral_control_params'] = np.array([v_ego, lat_delay], dtype=np.float32)
 
+    model.profile.populate_action_t(inputs, lat_delay, long_delay)
+    lat_action_t, long_action_t = model.profile.action_times(lat_delay, long_delay)
+
     mt1 = time.perf_counter()
     try:
       model_output = model.run(bufs, transforms, inputs, prepare_only)
@@ -487,7 +501,7 @@ def main(demo=False):
       drivingdata_send = messaging.new_message('drivingModelData')
       posenet_send = messaging.new_message('cameraOdometry')
 
-      action = model.get_action_from_model(model_output, prev_action, lat_delay + DT_MDL, long_delay + DT_MDL, v_ego)
+      action = model.get_action_from_model(model_output, prev_action, lat_action_t, long_action_t, v_ego)
       prev_action = action
       fill_model_msg(drivingdata_send, modelv2_send, model_output, action,
                      publish_state, meta_main.frame_id, meta_extra.frame_id, frame_id,
