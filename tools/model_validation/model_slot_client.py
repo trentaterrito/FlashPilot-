@@ -15,12 +15,14 @@ import sys
 import time
 
 
+# Resolve the candidate's cleanup backend, not an installed older copy.
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from openpilot.system.manager.model_slot_cleanup import WorkerGroup, launch_command
+
+
 def enter(group, command):
-  group = Path(group)
-  if group != group.resolve(strict=True) or not str(group).startswith('/sys/fs/cgroup/'):
-    raise ValueError('invalid worker cgroup')
-  (group / 'cgroup.procs').write_text(str(os.getpid()))
-  os.execvp(command[0], command)
+  argv = launch_command(group, command)
+  os.execvp(argv[0], argv)
 
 
 def run(endpoint, command, session_fd=0):
@@ -63,12 +65,11 @@ def run(endpoint, command, session_fd=0):
   finally:
     connection.close()
     if group is not None:
-      try:
-        (group / 'cgroup.kill').write_text('1')
-      except FileNotFoundError:
-        pass
+      cleanup = WorkerGroup.existing(group)
+      cleanup.remove()
       deadline = time.monotonic() + 10
       while group.exists() and time.monotonic() < deadline:
+        cleanup.remove()
         time.sleep(.1)
       if worker is not None:
         worker.wait(timeout=2)
