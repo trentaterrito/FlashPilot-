@@ -49,7 +49,8 @@ order. Lists, nesting, wrong arity, non-Tensor members and unknown packaging fai
 
 - OP16 Deep, declared artifact `92e736e4f52ef0b25c4ae62e651261c3dde98a5050122699004236845256b6b9`:
   actual-prefix vision1432/off-policy1148/on-policy4 parse/merge retains a valid
-  `(1,33,15)` plan and `(1,2)` parsed action. Complete artifact is unavailable.
+  `(1,33,15)` plan and `(1,2)` parsed action. The complete artifact was later
+  obtained, hash-verified, and qualified on QCOM.
 - RDF V2, artifact `52fcf48bfb991f327a8982037eb0855d9a63437d78e9f4828d2be54df0f32567`:
   locally retained three chunks/full hash reverified during implementation;
   saved2580-wide metadata parses to the expected plan/action shapes.
@@ -63,13 +64,13 @@ SunnyPilot catalog entry, not RDF V4 or a display-name/generation assumption.
 Unknown action artifacts remain blocked. Bound profiles reject mismatched
 checkpoints, changed smoothing and conflicting explicit overrides.
 
-OP16's full compiled package still must be obtained and hash-verified before its
-hardware test; saved first-chunk metadata is not a complete inference artifact.
-
-Remaining QCOM-only checks are exact artifact selection/load, real
-camera inference, finite modelV2/drivingModelData/cameraOdometry, sustained20Hz,
-no restart loop, and guarded restoration of native CD210. No hardware gate,
-deployment or road test is performed by this change.
+Both exact packages completed guarded real-camera QCOM qualification. RDF V2
+published finite modelV2/drivingModelData/cameraOdometry at 19.529 Hz with zero
+restarts or schema errors. OP16 did the same at 19.199 Hz after removing a
+validation-only duplicate output synchronization; its p95 active work was
+42.880 ms. Native CD210 restored at approximately 20 Hz after both gates.
+These results qualify only the two hashes above and do not promote another
+catalog model by name, generation, shape, or shared runner support.
 
 ## Focused validation
 

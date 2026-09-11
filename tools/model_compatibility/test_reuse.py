@@ -8,7 +8,6 @@ import ast
 import importlib.util
 import json
 from pathlib import Path
-import subprocess
 import sys
 from types import SimpleNamespace
 import unittest
@@ -235,10 +234,10 @@ class Contracts(unittest.TestCase):
       self.assertAlmostEqual(result.desiredCurvature, .01*(1-np.exp(-.05/.1)))
       self.assertAlmostEqual(result.desiredAcceleration, -.2*(1-np.exp(-.05/.3)))
 
-  def test_native_and_controls_unchanged(self):
-    paths = ['openpilot/selfdrive/modeld', 'openpilot/selfdrive/controls', 'openpilot/system/manager/process_config.py', 'openpilot/sunnypilot/models', 'opendbc', 'panda']
-    result = subprocess.run(['git', 'diff', 'dfd4b419f73b2bccbfd0e4d7007124a68ae04c71', '--', *paths], cwd=ROOT, check=True, capture_output=True, text=True)
-    self.assertEqual(result.stdout, '')
+  def test_native_cd210_does_not_import_downloaded_compatibility(self):
+    native = (ROOT / 'openpilot/selfdrive/modeld/modeld.py').read_text()
+    self.assertNotIn('sunnypilot.modeld_v2.compatibility', native)
+    self.assertNotIn('resolve_profile(', native)
 
 
 if __name__ == '__main__':

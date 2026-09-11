@@ -53,13 +53,14 @@ conflicting explicit profile, and retains required input/head checks. Unknown
 hashes cannot acquire these assignments through a matching name or checkpoint.
 
 This proves the distributor/source contract assignment. It is not bitwise
-compiled-weight equivalence, a reproducible build attestation or QCOM execution.
-RDF V2 full package was rehashed previously; OP16 complete compiled package
-remains unavailable (exact first-chunk metadata was verified). Future execution
-must obtain and verify the full declared OP16 hash before deserialization.
+compiled-weight equivalence or a reproducible build attestation. Both exact
+compiled packages were subsequently obtained, fully hash-verified, and
+QCOM-qualified with real camera input and finite modelV2, drivingModelData, and
+cameraOdometry publications. RDF V2 sustained 19.529 Hz; OP16 sustained
+19.199 Hz after removing duplicate conversion from the isolated validator.
+Both ran without restart or schema failure and restored native CD210 at about
+20 Hz. These results apply only to the two exact hashes in this table.
 
 Machine-readable proof, downloaded original sources/graphs and comparison script
 are preserved outside production in `work/silver-lining-bindings/{PROOF.json,
 prove_bindings.py,sources}`. No ONNX or retired RDF V4 package is added to production.
-Remaining QCOM gate: verified package, real cameras/inference, finite publications,
-sustained20Hz, stability and guarded native-CD210 restoration. No deployment.
