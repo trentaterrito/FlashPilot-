@@ -1,0 +1,31 @@
+{
+  "source_repo_check": "PASS: fresh authenticated Mac clone",
+  "target": {
+    "repository": "https://github.com/trentaterrito/FlashPilot-.git",
+    "branch": "flashpilot-dev",
+    "commit": "dfd4b419f73b2bccbfd0e4d7007124a68ae04c71",
+    "submodules": {
+      "msgq": "0e266c1dbcf7328beee3e57b4a8688555387c877",
+      "opendbc": "42fa6447ed0ff9a0497a14ca136ea45d923c1106",
+      "panda": "8bcae70c896bf3aee98b28641755f82b4aa5bf8b",
+      "rednose_repo": "28d4a7f69e80e1c3e0d24ca0733d7daeaeade3d0",
+      "teleoprtc_repo": "1aa8fc433bef1519a95c0700c96258c3be6dfb34",
+      "tinygrad": "e837e367aac9e1a66e689f4f32ce20ca9367df13"
+    },
+    "agnos": "19.7",
+    "status": "Research only; no installer published or device changed"
+  },
+  "public_repo_access": "PASS: all three public; anonymous clone, recursive submodules and 240 materialized LFS objects verified",
+  "private_repositories": [],
+  "artifact_sha256": "28561e559600d6891cde687af935f88a135f602bc6a71ca68db3365083427191",
+  "artifact_bytes": 8825,
+  "validation": "20 simulated success/failure scenarios, static ELF/embedded source, reproducible build, anonymous exact HEAD/branch/six pins, LFS object checks, clean source, public binary/source downloads byte-identical",
+  "not_tested": [
+    "AArch64 execution",
+    "Comma setup and managed bootstrap",
+    "manager/UI/modeld health"
+  ],
+  "published": true,
+  "installer_url": "https://github.com/trentaterrito/FlashPilot-/releases/download/installer-dfd4b419-v1/flashpilot-dfd4b419-installer",
+  "device_contacted": false
+}

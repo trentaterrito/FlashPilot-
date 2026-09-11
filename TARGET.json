@@ -1,0 +1,15 @@
+{
+  "repository": "https://github.com/trentaterrito/FlashPilot-.git",
+  "branch": "flashpilot-dev",
+  "commit": "dfd4b419f73b2bccbfd0e4d7007124a68ae04c71",
+  "submodules": {
+    "msgq": "0e266c1dbcf7328beee3e57b4a8688555387c877",
+    "opendbc": "42fa6447ed0ff9a0497a14ca136ea45d923c1106",
+    "panda": "8bcae70c896bf3aee98b28641755f82b4aa5bf8b",
+    "rednose_repo": "28d4a7f69e80e1c3e0d24ca0733d7daeaeade3d0",
+    "teleoprtc_repo": "1aa8fc433bef1519a95c0700c96258c3be6dfb34",
+    "tinygrad": "e837e367aac9e1a66e689f4f32ce20ca9367df13"
+  },
+  "agnos": "19.7",
+  "status": "Anonymous source and assets verified; build ready for publication"
+}
