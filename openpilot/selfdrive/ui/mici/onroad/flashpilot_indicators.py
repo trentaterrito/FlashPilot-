@@ -3,8 +3,8 @@ import pyray as rl
 
 from openpilot.cereal import log
 
-BSM_EDGE_WIDTH = 2
-BSM_GLOW_WIDTH = 12
+BSM_EDGE_WIDTH = 3
+BSM_GLOW_WIDTH = 12  # Existing confidence-ball gutter; independent of hue width.
 BOLT_WIDTH = 48
 BOLT_HEIGHT = 28
 BOLT_GAP = 5
@@ -43,20 +43,28 @@ def personality_style(sm, started_frame):
     log.LongitudinalPersonality.relaxed: (BOLT_RELAXED, 1),
     log.LongitudinalPersonality.standard: (BOLT_STANDARD, 2),
     log.LongitudinalPersonality.aggressive: (BOLT_AGGRESSIVE, 3),
-  }.get(sm['selfdriveState'].personality, (BOLT_INACTIVE, 0))
+  }.get(sm['selfdriveState'].personality.raw, (BOLT_INACTIVE, 0))
+
+
+def draw_bsm_hue(rect, left, right):
+  """Low-alpha half-screen wash, drawn below model, HUD and alerts."""
+  hue = rl.Color(255, 38, 55, 64)
+  clear = rl.Color(255, 38, 55, 0)
+  x, y, w, h = int(rect.x), int(rect.y), int(rect.width), int(rect.height)
+  half = w // 2
+  if left:
+    rl.draw_rectangle_gradient_h(x, y, half, h, hue, clear)
+  if right:
+    rl.draw_rectangle_gradient_h(x + w - half, y, half, h, clear, hue)
 
 
 def draw_bsm_edges(rect, left, right):
-  """Steady outer lines with a narrow inward fade; no temporal state to latch."""
+  """Steady solid outer lines; separate from the wash to protect HUD contrast."""
   red = rl.Color(255, 38, 55, 255)
-  hue = rl.Color(255, 38, 55, 100)
-  clear = rl.Color(255, 38, 55, 0)
   x, y, w, h = int(rect.x), int(rect.y), int(rect.width), int(rect.height)
   if left:
-    rl.draw_rectangle_gradient_h(x, y, BSM_GLOW_WIDTH, h, hue, clear)
     rl.draw_rectangle(x, y, BSM_EDGE_WIDTH, h, red)
   if right:
-    rl.draw_rectangle_gradient_h(x + w - BSM_GLOW_WIDTH, y, BSM_GLOW_WIDTH, h, clear, hue)
     rl.draw_rectangle(x + w - BSM_EDGE_WIDTH, y, BSM_EDGE_WIDTH, h, red)
 
 

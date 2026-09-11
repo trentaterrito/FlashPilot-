@@ -13,7 +13,7 @@ from openpilot.selfdrive.ui.mici.onroad.driver_state import DriverStateRenderer
 from openpilot.selfdrive.ui.mici.onroad.hud_renderer import HudRenderer
 from openpilot.selfdrive.ui.mici.onroad.model_renderer import ModelRenderer
 from openpilot.selfdrive.ui.mici.onroad.confidence_ball import ConfidenceBall
-from openpilot.selfdrive.ui.mici.onroad.flashpilot_indicators import bsm_display_state, draw_bsm_edges
+from openpilot.selfdrive.ui.mici.onroad.flashpilot_indicators import bsm_display_state, draw_bsm_edges, draw_bsm_hue
 from openpilot.selfdrive.ui.mici.onroad.experimental_notification import ExperimentalNotification
 from openpilot.selfdrive.ui.mici.onroad.mode_notification import ModeNotificationView
 from openpilot.selfdrive.ui.mici.onroad.cameraview import CameraView
@@ -224,6 +224,9 @@ class AugmentedRoadView(CameraView):
 
     # Render the base camera view
     super()._render(self._content_rect)
+
+    # Tint only the camera background; model, critical HUD and alerts stay clear.
+    draw_bsm_hue(self.rect, *bsm_display_state(ui_state.sm, ui_state.started_frame))
 
     # Draw all UI overlays
     self._model_renderer.render(self._content_rect)

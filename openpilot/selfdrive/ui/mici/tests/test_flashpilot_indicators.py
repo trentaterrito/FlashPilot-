@@ -17,11 +17,17 @@ from openpilot.system.ui.lib.application import gui_app, FontWeight
 from openpilot.system.ui.lib.text_measure import _cache
 
 
+def selfdrive_state(personality):
+  message = log.Event.new_message()
+  message.init('selfdriveState').personality = personality
+  return message.as_reader().selfdriveState
+
+
 class Messages(dict):
   def __init__(self, left=False, right=False, personality=log.LongitudinalPersonality.standard):
     super().__init__(carState=SimpleNamespace(leftBlindspot=left, rightBlindspot=right,
                                              leftBlindspotValid=True, rightBlindspotValid=True),
-                     selfdriveState=SimpleNamespace(personality=personality))
+                     selfdriveState=selfdrive_state(personality))
     self.valid = dict.fromkeys(self, True)
     self.alive = dict.fromkeys(self, True)
     self.recv_frame = dict.fromkeys(self, 12)
@@ -43,13 +49,14 @@ def load_confidence():
 def test_bsm_exact_sides_and_outer_geometry(left, right):
   sm = Messages(left, right)
   with patch.object(rl, 'draw_rectangle_gradient_h') as glow, patch.object(rl, 'draw_rectangle') as line:
+    ui.draw_bsm_hue(rl.Rectangle(10, 20, 536, 240), *ui.bsm_display_state(sm, 10))
     ui.draw_bsm_edges(rl.Rectangle(10, 20, 536, 240), *ui.bsm_display_state(sm, 10))
-  assert [c.args[0] for c in line.call_args_list] == ([10] if left else []) + ([544] if right else [])
+  assert [c.args[0] for c in line.call_args_list] == ([10] if left else []) + ([543] if right else [])
   assert len(glow.call_args_list) == int(left) + int(right)
   for call in glow.call_args_list:
     x, y, w, h, start, end = call.args
-    assert (y, w, h) == (20, 12, 240)
-    assert (start.a, end.a) == ((100, 0) if x == 10 else (0, 100))
+    assert (y, w, h) == (20, 268, 240)
+    assert (start.a, end.a) == ((64, 0) if x == 10 else (0, 64))
 
 
 def test_bsm_rapid_changes_no_latch_or_turn_signal_inference():
@@ -88,7 +95,7 @@ def test_personality_live_intensity_and_identical_solid_geometry():
   for personality, count, expected in [(log.LongitudinalPersonality.relaxed, 1, (40, 214, 255, 255)),
                                  (log.LongitudinalPersonality.standard, 2, (255, 193, 64, 255)),
                                  (log.LongitudinalPersonality.aggressive, 3, (255, 82, 48, 255))] * 2:
-    sm['selfdriveState'].personality = personality
+    sm['selfdriveState'] = selfdrive_state(personality)
     with patch.object(rl, 'draw_triangle') as draws:
       ui.draw_personality_bolt(500, 204, *ui.personality_style(sm, 10))
     triangles = draws.call_args_list
@@ -112,7 +119,8 @@ def test_personality_live_intensity_and_identical_solid_geometry():
 
 
 def test_unknown_personality_uses_uniform_neutral_color():
-  sm = Messages(personality='unknown')
+  sm = Messages()
+  sm['selfdriveState'] = SimpleNamespace(personality=SimpleNamespace(raw=99))
   with patch.object(rl, 'draw_triangle') as draws:
     ui.draw_personality_bolt(500, 204, *ui.personality_style(sm, 10))
   assert len(draws.call_args_list) == 6
@@ -202,3 +210,35 @@ def test_offroad_text_fits_and_tap_only_opens_swipe(production_font, monkeypatch
   shown.assert_called_once_with('swipe')
   state.ui_state.params.put.assert_not_called()
   sys.modules.pop('openpilot.selfdrive.ui.mici.layouts.flashpilot_offroad', None)
+
+
+def test_real_message_personality_regression():
+  sm = Messages()
+  for name, count, color in [('relaxed', 1, (40, 214, 255, 255)),
+                             ('standard', 2, (255, 193, 64, 255)),
+                             ('aggressive', 3, (255, 82, 48, 255)),
+                             ('relaxed', 1, (40, 214, 255, 255))]:
+    sm['selfdriveState'] = selfdrive_state(getattr(log.LongitudinalPersonality, name))
+    assert hasattr(sm['selfdriveState'].personality, 'raw')
+    actual_color, actual_count = ui.personality_style(sm, 10)
+    assert (rgba(actual_color), actual_count) == (color, count)
+
+
+def test_bsm_wash_stays_behind_critical_overlays():
+  source = (Path(__file__).parents[1] / 'onroad/augmented_road_view.py').read_text()
+  body = source[source.index('    # Render the base camera view'):]
+  assert body.index('super()._render') < body.index('draw_bsm_hue(') < body.index('self._model_renderer.render(')
+  assert body.index('draw_bsm_hue(') < body.index('self._alert_renderer.render(') < body.index('draw_bsm_edges(')
+  assert body.index('draw_bsm_hue(') < body.index('self._hud_renderer.render(')
+  assert body.index('draw_bsm_hue(') < body.index('self._confidence_ball.render(')
+
+
+@pytest.mark.parametrize('width', [536, 535])
+def test_bsm_hue_halves_do_not_overlap_or_clip(width):
+  with patch.object(rl, 'draw_rectangle_gradient_h') as draw:
+    ui.draw_bsm_hue(rl.Rectangle(0, 0, width, 240), True, True)
+  left, right = [c.args for c in draw.call_args_list]
+  assert left[:4] == (0, 0, width // 2, 240)
+  assert right[:4] == (width - width // 2, 0, width // 2, 240)
+  assert left[0] + left[2] <= width / 2 <= right[0]
+  assert right[0] + right[2] == width
