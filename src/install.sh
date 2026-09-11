@@ -68,7 +68,7 @@ git submodule foreach --recursive 'git lfs pull && git lfs fsck --objects && fil
 [[ $(git rev-parse HEAD) == "$SHA" ]] || fail 'final SHA mismatch'
 printf 'VERIFIED repo=%s branch=%s HEAD=%s\n' "$REPO" "$BRANCH" "$SHA"
 # Standard installer handoff. No settings, source patches or runtime operations.
-printf '#!/usr/bin/env bash\n\ncd /data/openpilot\nexec ./launch_openpilot.sh\n' > "$stage/continue.sh"
+printf '#!/usr/bin/env bash\n\nexport FLASHPILOT_ANGLE_ENABLED=1\n\ncd /data/openpilot\nexec ./launch_openpilot.sh\n' > "$stage/continue.sh"
 chmod 755 "$stage/continue.sh"
 [[ ! -e "$ROOT/openpilot" && ! -L "$ROOT/openpilot" ]] || fail 'checkout appeared during install'
 [[ ! -e "$ROOT/continue.sh" && ! -L "$ROOT/continue.sh" ]] || fail 'launcher appeared during install'

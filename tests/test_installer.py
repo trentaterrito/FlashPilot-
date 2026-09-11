@@ -36,7 +36,9 @@ class InstallerTests(unittest.TestCase):
    if case=='success':
     self.assertEqual(result.returncode,0,log)
     self.assertTrue((data/'openpilot'/'launch_openpilot.sh').exists())
-    self.assertEqual((data/'continue.sh').read_text(),'#!/usr/bin/env bash\n\ncd /data/openpilot\nexec ./launch_openpilot.sh\n')
+    launcher=data/'continue.sh'
+    self.assertEqual(launcher.read_text(),'#!/usr/bin/env bash\n\nexport FLASHPILOT_ANGLE_ENABLED=1\n\ncd /data/openpilot\nexec ./launch_openpilot.sh\n')
+    self.assertTrue(launcher.stat().st_mode & 0o111)
     self.assertIn('MANAGED_BOOTSTRAP PENDING',log)
    else:
     self.assertNotEqual(result.returncode,0,log)
@@ -47,10 +49,27 @@ class InstallerTests(unittest.TestCase):
   for case in ['success','existing','clone','origin','head','branch','submodule-fetch','recursive','dirty','lfs','opendbc_repo','panda','msgq_repo','rednose_repo','teleoprtc_repo','tinygrad_repo','active-head','active-branch','active-dirty','lfs-pointer']:
    with self.subTest(case=case): self.run_case(case)
  def test_elf(self):
-  b=(ROOT/'dist/flashpilot-dfd4b419-installer').read_bytes()
+  b=(ROOT/'dist/flashpilot-dfd4b419-installer-v2').read_bytes()
   h=struct.unpack_from('<16sHHIQQQIHHHHHH',b)
   self.assertEqual(h[0][:7],b'\x7fELF\x02\x01\x01'); self.assertEqual(h[1:4],(2,183,1)); self.assertEqual(h[4],0x401000)
   self.assertEqual(b[0x1000:0x1004],bytes.fromhex('e30340f9'))
   self.assertIn(SCRIPT.encode()+b'\0',b)
   self.assertEqual(h[10],2)
+ def test_launcher_exports_selector_to_managed_child(self):
+  launcher_text='#!/usr/bin/env bash\n\nexport FLASHPILOT_ANGLE_ENABLED=1\n\ncd /data/openpilot\nexec ./launch_openpilot.sh\n'
+  for lifecycle,parent_value in [('managed-restart','0'),('reboot',None),('ignition-cycle','invalid')]:
+   with self.subTest(lifecycle=lifecycle), tempfile.TemporaryDirectory() as d:
+    root=pathlib.Path(d); openpilot=root/'openpilot'; openpilot.mkdir(); observed=root/'observed'
+    child=openpilot/'launch_openpilot.sh'
+    child.write_text('#!/usr/bin/env bash\nprintf "%s" "$FLASHPILOT_ANGLE_ENABLED" > "'+str(observed)+'"\n')
+    child.chmod(0o755)
+    launcher=root/'continue.sh'
+    launcher.write_text(launcher_text.replace('/data/openpilot',str(openpilot)))
+    launcher.chmod(0o755)
+    env=os.environ.copy()
+    if parent_value is None: env.pop('FLASHPILOT_ANGLE_ENABLED',None)
+    else: env['FLASHPILOT_ANGLE_ENABLED']=parent_value
+    result=subprocess.run(['/bin/bash',str(launcher)],env=env,capture_output=True)
+    self.assertEqual(result.returncode,0,result.stderr.decode())
+    self.assertEqual(observed.read_text(),'1')
 if __name__=='__main__': unittest.main(verbosity=2)
