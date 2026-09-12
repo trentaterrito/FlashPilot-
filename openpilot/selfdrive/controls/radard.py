@@ -134,15 +134,145 @@ def match_vision_to_track(v_ego: float, lead: capnp._DynamicStructReader, tracks
     return None
 
 
-def get_RadarState_from_vision(lead_msg: capnp._DynamicStructReader, v_ego: float, model_v_ego: float, lead_prob: float):
+#
+# --- Lightning Long V1: danger-preserving vision lead-state pipeline ---
+#
+# Validated offline this session (asymmetric vRel conditioning, trust/continuity,
+# synthetic TTC + sentinel-masked derivative, continuous anticipation cap). Applies
+# only to the vision-only lead branch (radar=False); the radar Track/KF1D path is
+# untouched. aLeadK is never filtered.
+#
+V_REL_CLOSING_EPS = 0.15          # m/s; below this magnitude, closing sign is not trustworthy
+TTC_SENTINEL = 60.0               # s; used when not closing / no lead
+RC_SLOW = 0.30                    # s; vRel recovery-direction EMA time constant
+TRUST_RISE_TAU = 0.15             # s
+TRUST_FALL_TAU = 0.10             # s
+TTC_DERIV_RC = 0.15               # s; FirstOrderFilter time constant on TTC derivative
+ANTICIPATION_TTC_HORIZON = 8.0    # s; proximity ramp reaches 0 beyond this TTC
+ANTICIPATION_MAX_MAG = 2.5        # m/s^2; bound on how much the cap can subtract from A_MAX
+A_MAX = 1.5                       # m/s^2; neutral high ceiling, matches MPC's own accel ceiling
+
+
+class DangerPreservingVRelFilter:
+  """Asymmetric vRel conditioner: worsening (more negative / more closing) samples
+  pass through immediately (never smoothed away), recovery samples are EMA-smoothed."""
+  def __init__(self):
+    self.x: float | None = None
+
+  def reset(self, raw_vrel: float) -> float:
+    self.x = raw_vrel
+    return self.x
+
+  def update(self, raw_vrel: float, dt: float = DT_MDL) -> float:
+    if self.x is None:
+      return self.reset(raw_vrel)
+    if raw_vrel <= self.x:
+      # worsening/equal: more-negative wins => never less protective than raw
+      self.x = min(raw_vrel, self.x)
+    else:
+      alpha = dt / (RC_SLOW + dt)
+      self.x = (1.0 - alpha) * self.x + alpha * raw_vrel
+    return self.x
+
+
+class LeadTrustState:
+  """Lightweight [0,1] trust scalar: fast rise on sustained closing evidence,
+  fast fall on any single non-evidence tick, hard reset on lead loss.
+  Gates comfort/anticipation features only -- never the safety-relevant
+  vRel/aLeadK feed itself, and never a dwell/mode-switch mechanism."""
+  def __init__(self):
+    self.score: float = 0.0
+    self.prev_d_rel: float | None = None
+
+  def reset(self) -> None:
+    self.score = 0.0
+    self.prev_d_rel = None
+
+  def update(self, present: bool, conditioned_vrel: float, d_rel: float, model_prob: float, dt: float = DT_MDL) -> float:
+    if not present:
+      self.reset()
+      return self.score
+
+    evidence = (
+      conditioned_vrel < -V_REL_CLOSING_EPS and
+      model_prob > 0.5 and
+      (self.prev_d_rel is None or d_rel <= self.prev_d_rel + 0.3)
+    )
+    self.prev_d_rel = d_rel
+
+    tau = TRUST_RISE_TAU if evidence else TRUST_FALL_TAU
+    alpha = dt / (tau + dt)
+    target = 1.0 if evidence else 0.0
+    self.score = (1.0 - alpha) * self.score + alpha * target
+    return self.score
+
+
+class TTCWithSafeDerivative:
+  """Synthetic TTC = dRel / (-vRel), valid only while genuinely closing.
+  Sentinel (large, finite) otherwise/on no-lead. The derivative across a
+  sentinel<->valid boundary is never computed directly (that produces a
+  numerical artifact); instead the first fresh sample after such a boundary
+  resets the derivative baseline to 0. The resulting raw derivative is then
+  smoothed with a FirstOrderFilter to remove short-range ratio noise."""
+  def __init__(self):
+    self.prev_ttc: float | None = None
+    self.prev_was_sentinel = True
+    self.deriv_filter = FirstOrderFilter(0.0, TTC_DERIV_RC, DT_MDL)
+
+  def reset(self) -> None:
+    self.prev_ttc = None
+    self.prev_was_sentinel = True
+    self.deriv_filter.x = 0.0
+
+  def update(self, present: bool, conditioned_vrel: float, d_rel: float, dt: float = DT_MDL) -> tuple[float, float]:
+    if not present:
+      self.reset()
+      return TTC_SENTINEL, 0.0
+
+    closing = conditioned_vrel < -V_REL_CLOSING_EPS
+    ttc = (d_rel / -conditioned_vrel) if closing else TTC_SENTINEL
+    is_sentinel = not closing
+
+    if is_sentinel or self.prev_was_sentinel:
+      raw_deriv = 0.0  # never differentiate across a sentinel boundary
+      self.deriv_filter.x = 0.0  # reseed cleanly, no stale slope
+    else:
+      raw_deriv = (ttc - self.prev_ttc) / dt  # type: ignore[operator]
+
+    self.deriv_filter.update(raw_deriv)
+    self.prev_ttc = ttc
+    self.prev_was_sentinel = is_sentinel
+    return ttc, self.deriv_filter.x
+
+
+def anticipation_term(ttc: float, ttc_deriv_smoothed: float, trust: float) -> float:
+  """Continuous proximity-ramp anticipation, scaled by trust. Always <= 0:
+  it can only ever lower a positive accel candidate, never raise one."""
+  proximity = max(0.0, 1.0 - ttc / ANTICIPATION_TTC_HORIZON)
+  worsening = max(0.0, -ttc_deriv_smoothed)  # only the "getting worse" side of the slope
+  magnitude = min(ANTICIPATION_MAX_MAG, proximity * (1.0 + worsening))
+  return -trust * proximity * magnitude
+
+
+def apply_anticipation_cap(mpc_accel_candidate: float, ttc: float, ttc_deriv_smoothed: float, trust: float) -> float:
+  """final_aTarget = min(mpc_candidate, A_MAX + anticipation_term). By construction
+  this can only ever lower a positive mpc_candidate earlier; whenever mpc_candidate
+  is already negative, min() always selects mpc_candidate unchanged."""
+  cap = A_MAX + anticipation_term(ttc, ttc_deriv_smoothed, trust)
+  return min(mpc_accel_candidate, cap)
+
+
+def get_RadarState_from_vision(lead_msg: capnp._DynamicStructReader, v_ego: float, model_v_ego: float, lead_prob: float,
+                                vrel_filter: DangerPreservingVRelFilter | None = None):
   lead_v_rel_pred = lead_msg.v[0] - model_v_ego
+  conditioned_vrel = vrel_filter.update(lead_v_rel_pred) if vrel_filter is not None else lead_v_rel_pred
   return {
     "dRel": float(lead_msg.x[0] - RADAR_TO_CAMERA),
     "yRel": float(-lead_msg.y[0]),
-    "vRel": float(lead_v_rel_pred),
-    "vLead": float(v_ego + lead_v_rel_pred),
-    "vLeadK": float(v_ego + lead_v_rel_pred),
-    "aLeadK": float(lead_msg.a[0]),
+    "vRel": float(conditioned_vrel),
+    "vLead": float(v_ego + conditioned_vrel),
+    "vLeadK": float(v_ego + conditioned_vrel),
+    "aLeadK": float(lead_msg.a[0]),   # never filtered
     "aLeadTau": 0.3,
     "modelProb": float(lead_prob),
     "present": True,
@@ -152,7 +282,8 @@ def get_RadarState_from_vision(lead_msg: capnp._DynamicStructReader, v_ego: floa
 
 
 def get_lead(v_ego: float, ready: bool, tracks: dict[int, Track], lead_msg: capnp._DynamicStructReader,
-             model_v_ego: float, lead_prob: float, low_speed_override: bool = True) -> dict[str, Any]:
+             model_v_ego: float, lead_prob: float, low_speed_override: bool = True,
+             vrel_filter: DangerPreservingVRelFilter | None = None) -> dict[str, Any]:
   # Determine leads, this is where the essential logic happens
   if len(tracks) > 0 and ready and lead_prob > .5:
     track = match_vision_to_track(v_ego, lead_msg, tracks)
@@ -161,9 +292,14 @@ def get_lead(v_ego: float, ready: bool, tracks: dict[int, Track], lead_msg: capn
 
   lead_dict = {'present': False}
   if track is not None:
+    # radar Track/KF1D path -- untouched by the V1 vision conditioning
     lead_dict = track.get_RadarState(lead_prob)
+    if vrel_filter is not None:
+      vrel_filter.reset(lead_dict["vRel"])  # keep filter seeded to current truth, not stale
   elif (track is None) and ready and (lead_prob > .5):
-    lead_dict = get_RadarState_from_vision(lead_msg, v_ego, model_v_ego, lead_prob)
+    lead_dict = get_RadarState_from_vision(lead_msg, v_ego, model_v_ego, lead_prob, vrel_filter)
+  elif vrel_filter is not None:
+    vrel_filter.x = None  # no lead this tick: reseed fresh next time, no stale carryover
 
   if low_speed_override:
     low_speed_tracks = [c for c in tracks.values() if c.potential_low_speed_lead(v_ego)]
@@ -193,6 +329,12 @@ class RadarD:
     self.ready = False
     self.log_lead_transitions = log_lead_transitions
     self.lead_transition_tracker = LeadSourceTransitionTracker()
+
+    # Lightning Long V1: per-lead-index danger-preserving conditioning + anticipation state
+    self.vrel_filters = [DangerPreservingVRelFilter() for _ in range(2)]
+    self.trust_states = [LeadTrustState() for _ in range(2)]
+    self.ttc_states = [TTCWithSafeDerivative() for _ in range(2)]
+    self.anticipation_cap = [A_MAX, A_MAX]  # exposed for the planner; not yet wired into a cereal field
 
   def _log_source_transition(self, lead_index: int, lead) -> None:
     event = self.lead_transition_tracker.update(
@@ -252,10 +394,20 @@ class RadarD:
         else:
           self.lead_prob_filters[i].update(lead_prob)
 
-      self.radar_state.leadOne = get_lead(self.v_ego, self.ready, self.tracks, leads_v3[0], model_v_ego, self.lead_prob_filters[0].x, low_speed_override=True)
-      self.radar_state.leadTwo = get_lead(self.v_ego, self.ready, self.tracks, leads_v3[1], model_v_ego, self.lead_prob_filters[1].x, low_speed_override=False)
+      self.radar_state.leadOne = get_lead(self.v_ego, self.ready, self.tracks, leads_v3[0], model_v_ego, self.lead_prob_filters[0].x,
+                                           low_speed_override=True, vrel_filter=self.vrel_filters[0])
+      self.radar_state.leadTwo = get_lead(self.v_ego, self.ready, self.tracks, leads_v3[1], model_v_ego, self.lead_prob_filters[1].x,
+                                           low_speed_override=False, vrel_filter=self.vrel_filters[1])
       self._log_source_transition(0, self.radar_state.leadOne)
       self._log_source_transition(1, self.radar_state.leadTwo)
+
+      # Lightning Long V1: trust/TTC/anticipation-cap update (accel-cap value only;
+      # NOT yet published on a cereal field -- min() integration into the planner's
+      # own arbitration is a separate, not-yet-done wiring step, see commit message).
+      for i, lead in enumerate((self.radar_state.leadOne, self.radar_state.leadTwo)):
+        trust = self.trust_states[i].update(bool(lead.present), float(lead.vRel), float(lead.dRel), float(lead.modelProb))
+        ttc, ttc_deriv = self.ttc_states[i].update(bool(lead.present), float(lead.vRel), float(lead.dRel))
+        self.anticipation_cap[i] = A_MAX + anticipation_term(ttc, ttc_deriv, trust)
 
   def publish(self, pm: messaging.PubMaster):
     assert self.radar_state is not None

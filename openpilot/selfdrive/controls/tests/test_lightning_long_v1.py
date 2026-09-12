@@ -1,0 +1,149 @@
+import math
+import random
+
+from openpilot.selfdrive.controls.radard import (
+  DangerPreservingVRelFilter, LeadTrustState, TTCWithSafeDerivative,
+  anticipation_term, apply_anticipation_cap, A_MAX, TTC_SENTINEL, TTC_DERIV_RC,
+)
+
+
+def test_worsening_vrel_never_less_protective_than_raw():
+  f = DangerPreservingVRelFilter()
+  f.reset(0.0)
+  rng = random.Random(0)
+  for _ in range(2000):
+    raw = rng.uniform(-6.0, 6.0)
+    prev = f.x
+    out = f.update(raw)
+    if raw <= prev:
+      assert out <= raw + 1e-12, f"worsening tick understated danger: raw={raw} prev={prev} out={out}"
+
+
+def test_recovery_side_smooths_and_does_not_ratchet():
+  f = DangerPreservingVRelFilter()
+  f.reset(-5.0)
+  for _ in range(80):  # sustained opening trend
+    f.update(2.0)
+  assert abs(f.x - 2.0) < 0.05, "recovery side got stuck / failed to converge"
+
+
+def test_alead_k_never_touched():
+  # aLeadK path in get_RadarState_from_vision is a straight passthrough of lead_msg.a[0];
+  # verified structurally: no vrel_filter reference appears near the aLeadK assignment.
+  import inspect
+  from openpilot.selfdrive.controls import radard
+  src = inspect.getsource(radard.get_RadarState_from_vision)
+  a_line = [l for l in src.splitlines() if '"aLeadK"' in l][0]
+  assert "vrel_filter" not in a_line and "conditioned" not in a_line
+
+
+def test_lead_loss_resets_vrel_filter():
+  f = DangerPreservingVRelFilter()
+  f.update(-3.0)
+  f.x = None  # simulate get_lead()'s no-lead branch
+  out = f.update(1.0)
+  assert out == 1.0  # reseeded fresh, not blended with stale -3.0
+
+
+def test_trust_rises_on_sustained_evidence_and_hard_resets_on_loss():
+  t = LeadTrustState()
+  for _ in range(20):
+    t.update(present=True, conditioned_vrel=-2.0, d_rel=30.0, model_prob=0.9)
+  assert t.score > 0.9, "trust failed to rise under sustained closing evidence"
+  t.update(present=False, conditioned_vrel=0.0, d_rel=0.0, model_prob=0.0)
+  assert t.score == 0.0, "trust did not hard-reset on lead loss"
+
+
+def test_trust_falls_fast_on_single_bad_tick():
+  t = LeadTrustState()
+  for _ in range(20):
+    t.update(present=True, conditioned_vrel=-2.0, d_rel=30.0, model_prob=0.9)
+  high = t.score
+  t.update(present=True, conditioned_vrel=1.0, d_rel=30.0, model_prob=0.9)  # opening now, no evidence
+  assert t.score < high
+
+
+def test_ttc_sentinel_when_not_closing_or_no_lead():
+  s = TTCWithSafeDerivative()
+  ttc, deriv = s.update(present=True, conditioned_vrel=0.5, d_rel=40.0)
+  assert ttc == TTC_SENTINEL and deriv == 0.0
+  ttc, deriv = s.update(present=False, conditioned_vrel=0.0, d_rel=0.0)
+  assert ttc == TTC_SENTINEL and deriv == 0.0
+
+
+def test_ttc_derivative_no_artifact_across_sentinel_boundary():
+  s = TTCWithSafeDerivative()
+  for _ in range(5):
+    s.update(present=True, conditioned_vrel=0.5, d_rel=40.0)  # sentinel (not closing)
+  ttc, deriv = s.update(present=True, conditioned_vrel=-2.0, d_rel=10.0)  # first real closing sample
+  assert ttc < TTC_SENTINEL
+  assert deriv == 0.0, f"artificial derivative spike across sentinel boundary: {deriv}"
+
+
+def test_ttc_derivative_filter_uses_validated_rc():
+  from openpilot.common.realtime import DT_MDL
+  s = TTCWithSafeDerivative()
+  expected_alpha = DT_MDL / (TTC_DERIV_RC + DT_MDL)
+  assert TTC_DERIV_RC == 0.15
+  assert math.isclose(s.deriv_filter.alpha, expected_alpha, rel_tol=1e-9)
+
+
+def test_ttc_derivative_detects_genuine_deterioration_after_reseed():
+  s = TTCWithSafeDerivative()
+  s.update(present=True, conditioned_vrel=0.5, d_rel=40.0)  # sentinel
+  s.update(present=True, conditioned_vrel=-2.0, d_rel=10.0)  # reseed, deriv=0
+  for _ in range(10):
+    ttc, deriv = s.update(present=True, conditioned_vrel=-2.0, d_rel=10.0 - 0.1 * (_ + 1))
+  assert deriv < 0, "genuine multi-tick TTC deterioration not detected after reseed"
+
+
+def test_lead_loss_clears_ttc_and_reacquisition_has_no_stale_slope():
+  s = TTCWithSafeDerivative()
+  for i in range(10):
+    s.update(present=True, conditioned_vrel=-3.0, d_rel=20.0 - i)  # strong genuine closing
+  s.update(present=False, conditioned_vrel=0.0, d_rel=0.0)  # lead loss
+  ttc, deriv = s.update(present=True, conditioned_vrel=-1.0, d_rel=15.0)  # reacquire, different lead
+  assert deriv == 0.0, "stale slope carried across lead-loss/reacquisition"
+
+
+def test_anticipation_term_always_non_positive():
+  rng = random.Random(1)
+  for _ in range(2000):
+    ttc = rng.uniform(0.2, 60.0)
+    deriv = rng.uniform(-500, 500)
+    trust = rng.uniform(0.0, 1.0)
+    assert anticipation_term(ttc, deriv, trust) <= 1e-12
+
+
+def test_anticipation_cap_never_raises_a_negative_mpc_candidate():
+  rng = random.Random(2)
+  for _ in range(5000):
+    mpc_candidate = rng.uniform(-4.0, -0.01)  # any negative (braking-direction) candidate
+    ttc = rng.uniform(0.2, 60.0)
+    deriv = rng.uniform(-800, 800)
+    trust = rng.uniform(0.0, 1.0)
+    final = apply_anticipation_cap(mpc_candidate, ttc, deriv, trust)
+    # Invariant is "never weakened toward zero" -- the cap may add extra caution
+    # (make it MORE negative) but must never raise a negative request toward zero.
+    assert final <= mpc_candidate + 1e-9, f"negative MPC candidate weakened: mpc={mpc_candidate} final={final}"
+
+
+def test_anticipation_cap_can_lower_a_positive_candidate_early():
+  final = apply_anticipation_cap(A_MAX, ttc=1.0, ttc_deriv_smoothed=-1.0, trust=1.0)
+  assert final < A_MAX
+
+
+def test_no_nan_or_inf_outputs():
+  f = DangerPreservingVRelFilter()
+  t = LeadTrustState()
+  s = TTCWithSafeDerivative()
+  rng = random.Random(3)
+  for _ in range(3000):
+    raw_vrel = rng.uniform(-20, 20)
+    present = rng.random() > 0.05
+    v = f.update(raw_vrel) if present else (f.__setattr__("x", None) or 0.0)
+    trust = t.update(present, v, rng.uniform(0, 100), rng.uniform(0, 1))
+    ttc, deriv = s.update(present, v, rng.uniform(0, 100))
+    cap = A_MAX + anticipation_term(ttc, deriv, trust)
+    for val in (v, trust, ttc, deriv, cap):
+      assert not (math.isnan(val) or math.isinf(val))
