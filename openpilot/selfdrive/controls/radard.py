@@ -144,7 +144,7 @@ def match_vision_to_track(v_ego: float, lead: capnp._DynamicStructReader, tracks
 #
 V_REL_CLOSING_EPS = 0.15          # m/s; below this magnitude, closing sign is not trustworthy
 TTC_SENTINEL = 60.0               # s; used when not closing / no lead
-RC_SLOW = 0.30                    # s; vRel recovery-direction EMA time constant
+RC_SLOW = 0.15                    # s; vRel recovery-direction EMA time constant
 TRUST_RISE_TAU = 0.15             # s
 TRUST_FALL_TAU = 0.10             # s
 TTC_DERIV_RC = 0.15               # s; FirstOrderFilter time constant on TTC derivative
