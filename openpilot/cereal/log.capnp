@@ -750,6 +750,12 @@ struct RadarState @0x9a185389d6fdd05f {
     modelProb @13 :Float32;  # vision model lead probability
     radar @14 :Bool;  # true if lead is radar-matched (vs vision-only)
     radarTrackId @15 :Int32 = -1;  # for debugging
+    accelCapV1 @16 :Float32 = 1000.0;  # m/s^2; Lightning Long V1 anticipation cap on ego accel.
+                                        # 1000.0 (default) means "no valid cap this tick" (lead
+                                        # absent, not closing, or trust/TTC not yet established) --
+                                        # this sentinel is far outside any physically valid ego
+                                        # accel range and must never be treated as a real candidate
+                                        # by a naive min() unless explicitly checked for validity.
 
     deprecated :group {
       aRel @3 :Float32;

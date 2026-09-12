@@ -14,6 +14,7 @@ from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import T_IDX
 from openpilot.selfdrive.controls.lib.drive_helpers import CONTROL_N, get_accel_from_plan, should_stop
 from openpilot.selfdrive.car.cruise import V_CRUISE_MAX, V_CRUISE_UNSET
 from openpilot.common.swaglog import cloudlog
+from openpilot.selfdrive.controls.radard import ACCEL_CAP_SENTINEL
 
 A_CRUISE_MAX_VALS = [1.6, 1.2, 0.8, 0.6]
 A_CRUISE_MAX_BP = [0., 10.0, 25., 40.]
@@ -142,6 +143,19 @@ class LongitudinalPlanner:
 
     output_a_target, self.mpc.source, _ = min(candidates, key=lambda c: c[0])
     self.output_should_stop = any(should_stop for _, _, should_stop in candidates)
+
+    # Lightning Long V1: anticipatory acceleration cap (radard.py). A sentinel value
+    # (ACCEL_CAP_SENTINEL) means no valid cap this tick (no lead / not closing / trust
+    # not established) and must be ignored -- final = min(existing arbitration, cap) is
+    # mathematically identical to including the cap as another arbitration candidate,
+    # since min() over a set is associative; it can only ever lower output_a_target
+    # (never raise a negative candidate toward zero), and it never touches
+    # self.output_should_stop, MPC internals, or the source label used for the other
+    # candidates.
+    lead_accel_cap = sm['radarState'].leadOne.accelCapV1
+    if lead_accel_cap < ACCEL_CAP_SENTINEL:
+      output_a_target = min(output_a_target, lead_accel_cap)
+
     self.output_a_target = np.clip(output_a_target, ACCEL_MIN, ACCEL_MAX)
 
     self.v_desired_filter.x = self.v_desired_filter.x + self.dt * (self.output_a_target + a_prev) / 2.0

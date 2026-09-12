@@ -151,6 +151,7 @@ TTC_DERIV_RC = 0.15               # s; FirstOrderFilter time constant on TTC der
 ANTICIPATION_TTC_HORIZON = 8.0    # s; proximity ramp reaches 0 beyond this TTC
 ANTICIPATION_MAX_MAG = 2.5        # m/s^2; bound on how much the cap can subtract from A_MAX
 A_MAX = 1.5                       # m/s^2; neutral high ceiling, matches MPC's own accel ceiling
+ACCEL_CAP_SENTINEL = 1000.0       # matches LeadData.accelCapV1's capnp default; "no valid cap"
 
 
 class DangerPreservingVRelFilter:
@@ -334,7 +335,7 @@ class RadarD:
     self.vrel_filters = [DangerPreservingVRelFilter() for _ in range(2)]
     self.trust_states = [LeadTrustState() for _ in range(2)]
     self.ttc_states = [TTCWithSafeDerivative() for _ in range(2)]
-    self.anticipation_cap = [A_MAX, A_MAX]  # exposed for the planner; not yet wired into a cereal field
+    self.anticipation_cap = [ACCEL_CAP_SENTINEL, ACCEL_CAP_SENTINEL]  # published via LeadData.accelCapV1
 
   def _log_source_transition(self, lead_index: int, lead) -> None:
     event = self.lead_transition_tracker.update(
@@ -401,13 +402,17 @@ class RadarD:
       self._log_source_transition(0, self.radar_state.leadOne)
       self._log_source_transition(1, self.radar_state.leadTwo)
 
-      # Lightning Long V1: trust/TTC/anticipation-cap update (accel-cap value only;
-      # NOT yet published on a cereal field -- min() integration into the planner's
-      # own arbitration is a separate, not-yet-done wiring step, see commit message).
+      # Lightning Long V1: trust/TTC/anticipation-cap update, published on
+      # LeadData.accelCapV1 for the planner's own min() arbitration to consume.
       for i, lead in enumerate((self.radar_state.leadOne, self.radar_state.leadTwo)):
         trust = self.trust_states[i].update(bool(lead.present), float(lead.vRel), float(lead.dRel), float(lead.modelProb))
         ttc, ttc_deriv = self.ttc_states[i].update(bool(lead.present), float(lead.vRel), float(lead.dRel))
-        self.anticipation_cap[i] = A_MAX + anticipation_term(ttc, ttc_deriv, trust)
+        if lead.present and trust > 0.0:
+          cap = A_MAX + anticipation_term(ttc, ttc_deriv, trust)
+        else:
+          cap = ACCEL_CAP_SENTINEL  # no valid cap this tick -- planner must treat as absent
+        self.anticipation_cap[i] = cap
+        lead.accelCapV1 = cap
 
   def publish(self, pm: messaging.PubMaster):
     assert self.radar_state is not None
