@@ -153,6 +153,7 @@ def test_review_repeat_mismatch_fails_and_never_promotes(contract, monkeypatch):
 
 
 def test_cli_review_and_normal_v2_dispatch_without_registration_mutation(contract, monkeypatch, tmp_path):
+  protected_before = copy.deepcopy(cli.tool_bundle(strict=True)['contracts'])
   path = tmp_path / 'review.json'; cli.save(path, contract)
   captured = []
   def fake_reproduce(root, payload, invoke, ssh, python, bundle, **kwargs):
@@ -162,7 +163,9 @@ def test_cli_review_and_normal_v2_dispatch_without_registration_mutation(contrac
   assert cli.main(['strict-review', str(path), '--source-root', '/unused-synthetic', '--output', str(tmp_path/'review-result.json')]) == 0
   assert captured[0][2]['review_only'] is True
   assert {'first_golden', 'runtime_identity', 'carparams_identity', 'strict_contract', 'strict_runtime'} <= set(captured[0][1]['sources'])
-  assert all('contract_v2' not in entry for entry in captured[0][1]['contracts']['cases'].values())
+  assert captured[0][1]['contracts'] == protected_before
+  assert cli.tool_bundle(strict=True)['contracts'] == protected_before
+  assert contract['case']['id'] not in protected_before['cases']
 
 
 def test_cli_descriptive_protected_baseline_and_targeted_suite(contract, monkeypatch, tmp_path):
