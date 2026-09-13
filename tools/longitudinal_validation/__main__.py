@@ -12,9 +12,10 @@ from .provenance import ValidationError, canonical_hash, compare_provenance, rea
 MODULES = ("provenance", "diagnostics", "comparison", "engine")
 
 
-def tool_bundle():
+def tool_bundle(first_golden=False):
   package = Path(__file__).parent
-  sources = {name: (package / (name + ".py")).read_text() for name in MODULES}
+  modules = MODULES + (("carparams_identity", "runtime_identity", "first_golden") if first_golden else ())
+  sources = {name: (package / (name + ".py")).read_text() for name in modules}
   return {"sources": sources, "contracts": read_json(package / "data/replay-contracts.json")}
 
 
@@ -32,7 +33,10 @@ try:
   sys.modules[m.__name__]=m;exec(compile(src,m.__file__,"exec"),m.__dict__)
  engine=sys.modules["lightning_validation.engine"]
  engine.CONTRACTS=d["bundle"]["contracts"]
- result=(engine.execute(d["root"],d["payload"],candidate=d["candidate"]) if d["action"]=="execute" else engine.discover(d["root"],d["payload"]))
+ if d["action"]=="first_golden_measure":
+  result=sys.modules["lightning_validation.first_golden"].measure(d["root"],d["payload"])
+ else:
+  result=(engine.execute(d["root"],d["payload"],candidate=d["candidate"]) if d["action"]=="execute" else engine.discover(d["root"],d["payload"]))
  result["tool_sha256"]=sys.modules["lightning_validation.provenance"].canonical_hash(d["bundle"])
  print("LIGHTNING_RESULT="+json.dumps(result,allow_nan=False,separators=(",",":")))
 except Exception as e:
@@ -95,7 +99,7 @@ def main(argv=None):
   qualify.add_argument("rlogs", nargs="+")
   qualify.add_argument("--source-root", required=True)
   qualify.add_argument("--output", required=True)
-  for name in ("discover", "run", "baseline", "suite"):
+  for name in ("discover", "run", "baseline", "suite", "first-golden-measure"):
     p = sub.add_parser(name)
     if name != "suite":
       p.add_argument("input", help="discovery request, reviewed manifest, or protected case ID for baseline")
@@ -124,8 +128,11 @@ def main(argv=None):
       save(args.output, result)
       print(json.dumps({"status": result["status"], "output": args.output}, allow_nan=False))
       return 0
-    bundle = tool_bundle()
-    if args.command == "suite":
+    bundle = tool_bundle(first_golden=args.command == "first-golden-measure")
+    if args.command == "first-golden-measure":
+      from .first_golden import measure_twice
+      result = measure_twice(args.source_root, read_json(args.input), invoke, args.ssh, args.python, bundle)
+    elif args.command == "suite":
       cases = bundle["contracts"]["cases"]
       blockers = {k: cases.get(k, {"status": "blocked", "reason": "missing case"}) for k in "ABCDEFGHI"
                   if cases.get(k, {}).get("status") != "qualified"}

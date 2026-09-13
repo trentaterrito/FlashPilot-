@@ -5,6 +5,11 @@ fail-closed tooling candidate, not a reproduced or ready permanent baseline.
 No protected case currently has a qualified executable manifest. Do not convert
 missing values into defaults to make a run pass.
 
+For a newly provenance-qualified route without existing golden tolerances, the
+explicit [FIRST_GOLDEN_MEASURE workflow](FIRST_GOLDEN_MEASURE.md) produces only
+UNREVIEWED_BASELINE_MEASUREMENT evidence. It does not qualify a corpus entry or
+change the strict regression commands below.
+
 Future-recording instrumentation and the separate `qualify-route` evidence gate
 are documented in [RUNTIME_PROVENANCE.md](RUNTIME_PROVENANCE.md). This does not
 qualify historical cases, install instrumentation on a device, or approve goldens.

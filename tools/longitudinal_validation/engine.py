@@ -184,9 +184,41 @@ def execute(root, manifest, candidate=False):
   for key, value in timing.items():
     require(value == m["replay"][key], f"timing mismatch: {key}")
   require(float(planner_module.DT_MDL) == m["replay"]["dt"], "planner cadence mismatch")
+  from .comparison import compare_records, compute_metrics
+  rows, recorded, recurrence_sha256 = collect_replay(root, m, planner_module, mpc_module, events, ticks, raw, context, init)
+  comparison = compare_records(recorded, rows)
+  errors = [r["a_target"] - b["a_target"] for b, r in zip(recorded, rows)]
+  import math
+  rmse = math.sqrt(sum(x * x for x in errors) / len(errors))
+  source_agreement = sum(b["source"] == r["source"] for b, r in zip(recorded, rows)) / len(rows)
+  def onsets(values):
+    return [values[i]["t_ns"] for i in range(1, len(values)) if values[i]["a_target"] < -.03 <= values[i-1]["a_target"]]
+  rb, rr = onsets(recorded), onsets(rows)
+  onset_error = max((abs(x-y) * 1e-9 for x, y in zip(rb, rr)), default=0.) if len(rb) == len(rr) else None
+  gates = {"solver_healthy": True, "finite": True, "timing": True, "rmse": rmse <= m["acceptance"]["rmse_max"],
+           "stop_intent_agreement": all(b["should_stop"] == r["should_stop"] for b, r in zip(recorded, rows)),
+           "source_agreement": source_agreement >= m["acceptance"]["source_agreement_min"],
+           "braking_onset": onset_error is not None and onset_error <= m["acceptance"]["braking_onset_error_s_max"]}
+  # Re-check immutable inputs and runtime after execution to detect concurrent edits.
+  verify_inputs(m)
+  require(source_identity(root) == m["source"] and runtime_identity(root) == m["runtime"], "source/runtime drift during replay")
+  return {"status": "PASS" if all(gates.values()) else "FAIL", "manifest": m, "manifest_sha256": canonical_hash(m),
+          "case_id": m["replay"]["case_id"], "gates": gates, "baseline_rmse": rmse,
+          "source_agreement": source_agreement, "braking_onset_error_s": onset_error,
+          "recurrence_sha256": recurrence_sha256, "recurrent_ticks": len(ticks), "rows": rows,
+          "executed_scope": "Original planner.update and compiled MPC over recorded radar/model/state inputs; no radard, LongControl, actuation or model inference",
+          "candidate_changed_files": changed,
+          "metrics": compute_metrics(rows), "recorded_comparison": comparison,
+          "limitations": ["Latest-before-plan publication join reproduces the historical method; actual SubMaster consumption is not logged.",
+                          "Fresh planner at beginning of listed segments, then uninterrupted preroll; no logged-state injection.",
+                          "Recorded ego and lead motion are exogenous; spacing and target jerk are not physical counterfactual outcomes.",
+                          "recorded_comparison uses logged aTarget/source/stop only; solver health and danger margin in it are replay-derived, not logged solver truth."]}
+
+
+def collect_replay(root, m, planner_module, mpc_module, events, ticks, raw, context, init):
+  """Shared numerical core. Callers must enforce their separate admission gates."""
   # Recorded init identity can differ from replay source only as explicitly bound
   # in this manifest. No replacement of CP, personality or feature flags occurs.
-  from .comparison import compare_records, compute_metrics
   from .diagnostics import CanFrame, FordDiagnosticDecoder
   decoder = FordDiagnosticDecoder()
   can_events = iter(e for e in events if e.which() == "can")
@@ -235,30 +267,4 @@ def execute(root, manifest, candidate=False):
       recorded.append({**row, "a_target": float(plan.aTarget), "source": int(plan.longitudinalPlanSource.raw),
                        "should_stop": bool(plan.shouldStop)})
   require(rows, "missing scoring window")
-  comparison = compare_records(recorded, rows)
-  errors = [r["a_target"] - b["a_target"] for b, r in zip(recorded, rows)]
-  import math
-  rmse = math.sqrt(sum(x * x for x in errors) / len(errors))
-  source_agreement = sum(b["source"] == r["source"] for b, r in zip(recorded, rows)) / len(rows)
-  def onsets(values):
-    return [values[i]["t_ns"] for i in range(1, len(values)) if values[i]["a_target"] < -.03 <= values[i-1]["a_target"]]
-  rb, rr = onsets(recorded), onsets(rows)
-  onset_error = max((abs(x-y) * 1e-9 for x, y in zip(rb, rr)), default=0.) if len(rb) == len(rr) else None
-  gates = {"solver_healthy": True, "finite": True, "timing": True, "rmse": rmse <= m["acceptance"]["rmse_max"],
-           "stop_intent_agreement": all(b["should_stop"] == r["should_stop"] for b, r in zip(recorded, rows)),
-           "source_agreement": source_agreement >= m["acceptance"]["source_agreement_min"],
-           "braking_onset": onset_error is not None and onset_error <= m["acceptance"]["braking_onset_error_s_max"]}
-  # Re-check immutable inputs and runtime after execution to detect concurrent edits.
-  verify_inputs(m)
-  require(source_identity(root) == m["source"] and runtime_identity(root) == m["runtime"], "source/runtime drift during replay")
-  return {"status": "PASS" if all(gates.values()) else "FAIL", "manifest": m, "manifest_sha256": canonical_hash(m),
-          "case_id": m["replay"]["case_id"], "gates": gates, "baseline_rmse": rmse,
-          "source_agreement": source_agreement, "braking_onset_error_s": onset_error,
-          "recurrence_sha256": recurrence.hexdigest(), "recurrent_ticks": len(ticks), "rows": rows,
-          "executed_scope": "Original planner.update and compiled MPC over recorded radar/model/state inputs; no radard, LongControl, actuation or model inference",
-          "candidate_changed_files": changed,
-          "metrics": compute_metrics(rows), "recorded_comparison": comparison,
-          "limitations": ["Latest-before-plan publication join reproduces the historical method; actual SubMaster consumption is not logged.",
-                          "Fresh planner at beginning of listed segments, then uninterrupted preroll; no logged-state injection.",
-                          "Recorded ego and lead motion are exogenous; spacing and target jerk are not physical counterfactual outcomes.",
-                          "recorded_comparison uses logged aTarget/source/stop only; solver health and danger margin in it are replay-derived, not logged solver truth."]}
+  return rows, recorded, recurrence.hexdigest()
