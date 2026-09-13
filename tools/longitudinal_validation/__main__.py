@@ -12,9 +12,11 @@ from .provenance import ValidationError, canonical_hash, compare_provenance, rea
 MODULES = ("provenance", "diagnostics", "comparison", "events", "engine")
 
 
-def tool_bundle(first_golden=False):
+def tool_bundle(first_golden=False, strict=False):
   package = Path(__file__).parent
-  modules = MODULES + (("carparams_identity", "runtime_identity", "first_golden") if first_golden else ())
+  modules = MODULES + (("carparams_identity", "runtime_identity", "first_golden") if first_golden or strict else ())
+  if strict:
+    modules += ("strict_contract", "strict_runtime")
   sources = {name: (package / (name + ".py")).read_text() for name in modules}
   return {"sources": sources, "contracts": read_json(package / "data/replay-contracts.json")}
 
@@ -35,6 +37,8 @@ try:
  engine.CONTRACTS=d["bundle"]["contracts"]
  if d["action"]=="first_golden_measure":
   result=sys.modules["lightning_validation.first_golden"].measure(d["root"],d["payload"])
+ elif d["action"] in ("strict_execute","strict_review"):
+  result=sys.modules["lightning_validation.strict_runtime"].execute(d["root"],d["payload"],review_only=d["action"]=="strict_review")
  else:
   result=(engine.execute(d["root"],d["payload"],candidate=d["candidate"]) if d["action"]=="execute" else engine.discover(d["root"],d["payload"]))
  result["tool_sha256"]=sys.modules["lightning_validation.provenance"].canonical_hash(d["bundle"])
@@ -99,7 +103,7 @@ def main(argv=None):
   qualify.add_argument("rlogs", nargs="+")
   qualify.add_argument("--source-root", required=True)
   qualify.add_argument("--output", required=True)
-  for name in ("discover", "run", "baseline", "suite", "first-golden-measure"):
+  for name in ("discover", "run", "baseline", "suite", "first-golden-measure", "strict-review"):
     p = sub.add_parser(name)
     if name != "suite":
       p.add_argument("input", help="discovery request, reviewed manifest, or protected case ID for baseline")
@@ -107,6 +111,8 @@ def main(argv=None):
     p.add_argument("--ssh", help="trusted SSH target; keys are never accepted/changed automatically")
     p.add_argument("--python")
     p.add_argument("--output", required=True)
+    if name == "suite":
+      p.add_argument("--cases", nargs='+', help="explicit protected subset; historical default cases remain required otherwise")
   compare = sub.add_parser("compare")
   compare.add_argument("baseline_manifest")
   compare.add_argument("candidate_manifest")
@@ -118,7 +124,12 @@ def main(argv=None):
   args = parser.parse_args(argv)
   try:
     if args.command == "check-manifest":
-      validate_manifest(read_json(args.manifest))
+      document = read_json(args.manifest)
+      if document.get('version') == 2:
+        from .strict_contract import validate_contract
+        validate_contract(document)
+      else:
+        validate_manifest(document)
       print("Manifest structure complete; runtime and input validation still required.")
       return 0
     require(not Path(args.output).exists(), "output already exists; refusing overwrite")
@@ -128,13 +139,19 @@ def main(argv=None):
       save(args.output, result)
       print(json.dumps({"status": result["status"], "output": args.output}, allow_nan=False))
       return 0
-    bundle = tool_bundle(first_golden=args.command == "first-golden-measure")
+    bundle = tool_bundle(first_golden=args.command == "first-golden-measure",
+                         strict=args.command in ('strict-review', 'run', 'baseline', 'suite'))
     if args.command == "first-golden-measure":
       from .first_golden import measure_twice
       result = measure_twice(args.source_root, read_json(args.input), invoke, args.ssh, args.python, bundle)
+    elif args.command == 'strict-review':
+      from .strict_runtime import reproduce as reproduce_strict
+      result = reproduce_strict(args.source_root, read_json(args.input), invoke, args.ssh, args.python, bundle, review_only=True)
     elif args.command == "suite":
       cases = bundle["contracts"]["cases"]
-      blockers = {k: cases.get(k, {"status": "blocked", "reason": "missing case"}) for k in "ABCDEFGHI"
+      selected = args.cases if args.cases else list('ABCDEFGHI') + sorted(k for k,v in cases.items() if 'contract_v2' in v and k not in 'ABCDEFGHIJ')
+      require(len(selected) == len(set(selected)), 'duplicate protected suite cases')
+      blockers = {k: cases.get(k, {"status": "blocked", "reason": "missing case"}) for k in selected
                   if cases.get(k, {}).get("status") != "qualified"}
       if blockers:
         result = {"status": "BLOCKED", "error": "protected corpus qualification incomplete; no solver execution started",
@@ -142,24 +159,32 @@ def main(argv=None):
                   "tool_sha256": canonical_hash(bundle), "baseline_reproduced": False}
       else:
         results = {}
-        for case_id in "ABCDEFGHI":
-          results[case_id] = reproduce(args.source_root, cases[case_id]["manifest"], args.ssh, args.python, bundle)
+        for case_id in selected:
+          if 'contract_v2' in cases[case_id]:
+            from .strict_runtime import reproduce as reproduce_strict
+            results[case_id] = reproduce_strict(args.source_root, cases[case_id]['contract_v2'], invoke, args.ssh, args.python, bundle)
+          else:
+            results[case_id] = reproduce(args.source_root, cases[case_id]["manifest"], args.ssh, args.python, bundle)
           if results[case_id].get("status") != "PASS":
             break
-        passed = len(results) == 9 and all(r["status"] == "PASS" for r in results.values())
+        passed = len(results) == len(selected) and all(r["status"] == "PASS" for r in results.values())
         result = {"status": "PASS" if passed else "FAIL", "cases": results, "reference_only": {"J": cases.get("J")},
                   "tool_sha256": canonical_hash(bundle), "baseline_reproduced": passed}
     elif args.command in ("discover", "run", "baseline"):
       if args.command == "baseline":
-        contract = bundle["contracts"]["cases"].get(args.input.upper())
+        contract = bundle["contracts"]["cases"].get(args.input) or bundle["contracts"]["cases"].get(args.input.upper())
         require(contract is not None, "unknown protected case")
         require(contract["status"] == "qualified", f"protected case {args.input.upper()} is not qualified: {contract.get('reason')}")
-        payload = contract["manifest"]
+        payload = contract['contract_v2'] if 'contract_v2' in contract else contract["manifest"]
       else:
         payload = read_json(args.input)
       if args.command != "discover":
-        validate_manifest(payload)
-        result = reproduce(args.source_root, payload, args.ssh, args.python, bundle)
+        if payload.get('version') == 2:
+          from .strict_runtime import reproduce as reproduce_strict
+          result = reproduce_strict(args.source_root, payload, invoke, args.ssh, args.python, bundle)
+        else:
+          validate_manifest(payload)
+          result = reproduce(args.source_root, payload, args.ssh, args.python, bundle)
       else:
         result = invoke(args.source_root, "discover", payload, args.ssh, args.python, bundle)
     else:

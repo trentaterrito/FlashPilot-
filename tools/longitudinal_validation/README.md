@@ -234,3 +234,10 @@ See [EVENT_DEFINITION.md](EVENT_DEFINITION.md) for explicit new-case event seman
 and preserved legacy-contract behavior. Unsupported optional RB5T layout now
 degrades only that corroboration to explicit unavailability; required diagnostic
 failures and all provenance/solver gates remain fail-closed.
+
+## Explicit strict contracts
+
+[STRICT_CONTRACTS.md](STRICT_CONTRACTS.md) describes version-2 enforceable
+contracts, shared full-route qualification, required/reported/unsupported metrics,
+and separate unpromoted `strict-review` execution. Historical contracts are not
+migrated or promoted. Exact ARM runtime remains required.

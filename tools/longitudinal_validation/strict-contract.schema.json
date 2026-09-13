@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flashpilot.longitudinal-strict-contract.v2",
+  "title": "Explicit reviewed strict longitudinal contract, never implicit promotion",
+  "description": "Runtime validate_contract additionally validates the unchanged FIRST_GOLDEN_MEASURE request, exact event semantics, complete finite aligned rows, limitations and review-body hash. Schema validation alone does not qualify source logs or runtime.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "kind", "case", "request", "baseline", "assertions", "event_policy", "review"],
+  "properties": {
+    "version": {"const": 2},
+    "kind": {"enum": ["review_candidate", "golden"]},
+    "case": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "name", "classification", "purpose", "limitations"],
+      "properties": {
+        "id": {"$ref": "#/$defs/text"}, "name": {"$ref": "#/$defs/text"},
+        "classification": {"enum": ["partial_approach", "low_speed_deceleration", "following", "other"]},
+        "purpose": {"$ref": "#/$defs/text"},
+        "limitations": {
+          "type": "object", "additionalProperties": false,
+          "required": ["left_censored_onset", "observational_only", "unsupported_diagnostics", "not_steady_follow", "caveats"],
+          "properties": {
+            "left_censored_onset": {"type": "boolean"}, "not_steady_follow": {"type": "boolean"},
+            "observational_only": {"type": "array", "uniqueItems": true, "items": {"enum": ["solver_status", "planner_source", "stop_intent_agreement", "a_target_recorded_rmse", "a_target_recorded_max_error", "a_target_baseline_rmse", "a_target_baseline_max_error", "reversal_count", "negative_request_events", "jerk_rms", "jerk_max", "danger_margin_minimum", "danger_margin_trajectory", "complete_braking_onset", "steady_follow", "rb5t_support"]}},
+            "unsupported_diagnostics": {"type": "array", "uniqueItems": true, "items": {"enum": ["rb5t", "ford_object", "health", "aeb", "acc", "cruise"]}},
+            "caveats": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/text"}}
+          }
+        }
+      }
+    },
+    "request": {"type": "object", "description": "Exact unchanged FIRST_GOLDEN_MEASURE request, semantically validated by the shared validator; all full-rlog and loaded-identity evidence is mandatory."},
+    "baseline": {
+      "type": "object", "additionalProperties": false,
+      "required": ["rows", "recorded_rows", "recurrence_sha256", "recurrent_ticks", "source_measurement_sha256", "source_tool_sha256"],
+      "properties": {
+        "rows": {"$ref": "#/$defs/rows"}, "recorded_rows": {"$ref": "#/$defs/rows"},
+        "recurrence_sha256": {"$ref": "#/$defs/hash"}, "recurrent_ticks": {"type": "integer", "minimum": 1},
+        "source_measurement_sha256": {"$ref": "#/$defs/hash"}, "source_tool_sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "assertions": {
+      "type": "object", "additionalProperties": false,
+      "required": ["solver_status", "planner_source", "stop_intent_agreement", "a_target_recorded_rmse", "a_target_recorded_max_error", "a_target_baseline_rmse", "a_target_baseline_max_error", "reversal_count", "negative_request_events", "jerk_rms", "jerk_max", "danger_margin_minimum", "danger_margin_trajectory", "complete_braking_onset", "steady_follow", "rb5t_support"],
+      "properties": {
+        "solver_status": {
+          "type": "object", "additionalProperties": false, "required": ["disposition", "expected", "rationale"],
+          "properties": {"disposition": {"const": "required"}, "expected": {"const": 0}, "rationale": {"$ref": "#/$defs/text"}}
+        },
+        "stop_intent_agreement": {
+          "type": "object", "additionalProperties": false, "required": ["disposition", "expected", "rationale"],
+          "properties": {"disposition": {"const": "required"}, "expected": {"const": true}, "rationale": {"$ref": "#/$defs/text"}}
+        },
+        "planner_source": {
+          "type": "object", "additionalProperties": false, "required": ["disposition", "minimum_agreement", "rationale"],
+          "properties": {"disposition": {"const": "required"}, "minimum_agreement": {"type": "number", "minimum": 0, "maximum": 1}, "rationale": {"$ref": "#/$defs/text"}}
+        },
+        "a_target_recorded_rmse": {"$ref": "#/$defs/maximum"},
+        "a_target_recorded_max_error": {"$ref": "#/$defs/maximum"},
+        "a_target_baseline_rmse": {"$ref": "#/$defs/maximum"},
+        "a_target_baseline_max_error": {"$ref": "#/$defs/maximum"},
+        "reversal_count": {"oneOf": [{"$ref": "#/$defs/integerRange"}, {"$ref": "#/$defs/notRequired"}]},
+        "jerk_rms": {"oneOf": [{"$ref": "#/$defs/nonnegativeRange"}, {"$ref": "#/$defs/notRequired"}]},
+        "jerk_max": {"oneOf": [{"$ref": "#/$defs/nonnegativeRange"}, {"$ref": "#/$defs/notRequired"}]},
+        "danger_margin_minimum": {"oneOf": [{"$ref": "#/$defs/range"}, {"$ref": "#/$defs/notRequired"}]},
+        "danger_margin_trajectory": {"oneOf": [
+          {"type": "object", "additionalProperties": false, "required": ["disposition", "maximum_absolute_delta", "rationale"], "properties": {"disposition": {"const": "required"}, "maximum_absolute_delta": {"type": "number", "minimum": 0}, "rationale": {"$ref": "#/$defs/text"}}},
+          {"$ref": "#/$defs/notRequired"}
+        ]},
+        "negative_request_events": {"oneOf": [{"$ref": "#/$defs/events"}, {"$ref": "#/$defs/notRequired"}]},
+        "complete_braking_onset": {"oneOf": [{"allOf": [{"$ref": "#/$defs/events"}, {"properties": {"count": {"minimum": 1}}}]}, {"$ref": "#/$defs/notRequired"}]},
+        "steady_follow": {"$ref": "#/$defs/unsupported"}, "rb5t_support": {"$ref": "#/$defs/unsupported"}
+      }
+    },
+    "event_policy": {
+      "type": "object", "additionalProperties": false,
+      "required": ["definition", "definition_sha256", "reviewer", "review_date", "rationale"],
+      "properties": {
+        "definition": {"const": {"id": "negative-request-epsilon-state-v2", "threshold_mps2": -0.03, "epsilon_mps2": 0.0005, "enter": "a < threshold - epsilon", "exit": "a >= threshold + epsilon", "inside_band": "retain previously established state; initially unknown", "persistence_samples": 1, "initial_negative": "left-censored, not a measured onset"}},
+        "definition_sha256": {"$ref": "#/$defs/hash"}, "reviewer": {"$ref": "#/$defs/text"},
+        "review_date": {"type": "string", "format": "date"}, "rationale": {"$ref": "#/$defs/text"}
+      }
+    },
+    "review": {
+      "type": "object", "additionalProperties": false, "required": ["reviewer", "date", "rationale", "body_sha256"],
+      "properties": {"reviewer": {"$ref": "#/$defs/text"}, "date": {"type": "string", "format": "date"}, "rationale": {"$ref": "#/$defs/text"}, "body_sha256": {"$ref": "#/$defs/hash"}}
+    }
+  },
+  "$defs": {
+    "text": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "rows": {"type": "array", "minItems": 2, "items": {"type": "object", "required": ["t_ns", "a_target", "source", "solver_status", "should_stop", "d_rel", "danger_margin"], "properties": {"t_ns": {"type": "integer", "minimum": 0}, "a_target": {"type": "number"}, "source": {"type": ["string", "integer"]}, "solver_status": {"type": "integer"}, "should_stop": {"type": "boolean"}, "d_rel": {"type": "number"}, "danger_margin": {"type": "number"}}}},
+    "notRequired": {"type": "object", "additionalProperties": false, "required": ["disposition", "reason"], "properties": {"disposition": {"enum": ["report_only", "unsupported"]}, "reason": {"$ref": "#/$defs/text"}}},
+    "unsupported": {"allOf": [{"$ref": "#/$defs/notRequired"}, {"properties": {"disposition": {"const": "unsupported"}}}]},
+    "maximum": {"type": "object", "additionalProperties": false, "required": ["disposition", "maximum", "rationale"], "properties": {"disposition": {"const": "required"}, "maximum": {"type": "number", "minimum": 0}, "rationale": {"$ref": "#/$defs/text"}}},
+    "range": {"type": "object", "additionalProperties": false, "required": ["disposition", "minimum", "maximum", "rationale"], "properties": {"disposition": {"const": "required"}, "minimum": {"type": "number"}, "maximum": {"type": "number"}, "rationale": {"$ref": "#/$defs/text"}}},
+    "nonnegativeRange": {"allOf": [{"$ref": "#/$defs/range"}, {"properties": {"minimum": {"minimum": 0}, "maximum": {"minimum": 0}}}]},
+    "integerRange": {"allOf": [{"$ref": "#/$defs/nonnegativeRange"}, {"properties": {"minimum": {"type": "integer"}, "maximum": {"type": "integer"}}}]},
+    "events": {"type": "object", "additionalProperties": false, "required": ["disposition", "count", "maximum_timing_error_s", "rationale"], "properties": {"disposition": {"const": "required"}, "count": {"type": "integer", "minimum": 0}, "maximum_timing_error_s": {"type": "number", "minimum": 0}, "rationale": {"$ref": "#/$defs/text"}}}
+  }
+}

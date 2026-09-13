@@ -1,0 +1,2 @@
+# Host schema tests only; never install into or substitute the ARM replay runtime.
+jsonschema==4.23.0
