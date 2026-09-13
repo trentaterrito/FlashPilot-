@@ -199,7 +199,7 @@ def qualify_normalized(records, rlog_paths, source_root=None, expected_rlog_hash
   identities = defaultdict(list)
   loaded_events = defaultdict(list); fallback_events = []
   groups = defaultdict(dict)
-  init = []; car_params = []; contexts = {"selfdriveState": [], "carControl": []}
+  init = []; car_params = []; live_car_params = []; contexts = {"selfdriveState": [], "carControl": []}
   for record in sorted(records, key=lambda x: (x["log_mono_ns"], x["topic"])):
     topic = record["topic"]
     if topic in ("runtimeIdentity", "runtimeProtocol"):
@@ -239,6 +239,7 @@ def qualify_normalized(records, rlog_paths, source_root=None, expected_rlog_hash
       groups[key][topic] = (record, ref)
     elif topic == "initData": init.append(record)
     elif topic == "carParamsPersistent": car_params.append(record)
+    elif topic == "carParams": live_car_params.append(record)
     elif topic in contexts: contexts[topic].append(record)
   require(identities and groups and init and car_params, "missing identity/publication/source/CarParams evidence")
   for key, topics in groups.items():
@@ -307,9 +308,31 @@ def qualify_normalized(records, rlog_paths, source_root=None, expected_rlog_hash
   require(len(source_shas) == 1 and dirty == {False}, "initData source missing/dirty/ambiguous")
   require(all(identity["environment"]["source"]["sha"] in source_shas for identity in active.values()), "identity/initData source mismatch")
   cp_hashes = {x["car_params_sha256"] for x in car_params}; fingerprints = {x["fingerprint"] for x in car_params}
-  require(len(cp_hashes) == len(fingerprints) == 1, "CarParams ambiguous")
-  require(all(identity["vehicle"]["car_params_sha256"] in cp_hashes and identity["vehicle"]["fingerprint"] in fingerprints for identity in active.values()),
-          "identity/CarParams mismatch")
+  require(len(fingerprints) == 1 and all(identity["vehicle"]["fingerprint"] in fingerprints for identity in active.values()),
+          "identity/CarParams fingerprint mismatch")
+  cp_proof = {"method": "exact_raw_bytes", "snapshot_raw_sha256": sorted(cp_hashes)}
+  raw_matches = len(cp_hashes) == 1 and all(identity["vehicle"]["car_params_sha256"] in cp_hashes for identity in active.values())
+  # Real-route normalization supplies structural proofs for BOTH snapshots and
+  # live CP publications. Abstract legacy test records can still exercise the
+  # stricter exact-raw path; no synthetic canonical proof is manufactured here.
+  proofs = [record.get('canonical_carparams') for record in (*car_params, *live_car_params)]
+  if not raw_matches or any(proofs):
+    require(live_car_params and proofs and all(isinstance(p, dict) for p in proofs), "missing canonical/live CarParams evidence")
+    from .carparams_identity import validate_proof
+    for proof in proofs: validate_proof(proof)
+    schemas = {identity['environment']['source']['schema_files']['opendbc_repo/opendbc/car/car.capnp'] for identity in active.values()}
+    require(len(schemas) == 1 and all(p['schema_sha256'] in schemas and p['version'] == 1 for p in proofs), "CarParams schema incompatible")
+    require(len({p['canonical_sha256'] for p in proofs}) == 1, "CarParams canonical semantic mismatch")
+    require(all(p['raw_sha256'] == record['car_params_sha256'] for p, record in zip(proofs, (*car_params, *live_car_params))), "CarParams raw/proof mismatch")
+    for load, identity in active.items():
+      first_pub = min(published for published, item_load, _ in ordered if item_load == load)
+      require(any(record['car_params_sha256'] == identity['vehicle']['car_params_sha256'] and
+                  record['fingerprint'] == identity['vehicle']['fingerprint'] and record['log_mono_ns'] <= first_pub
+                  for record in live_car_params), "runtime CarParams hash lacks preceding recorded live object")
+    cp_proof = {"method": "schema_bound_complete_wire_tree_v1", "canonical_sha256": proofs[0]['canonical_sha256'],
+                "schema_sha256": proofs[0]['schema_sha256'], "snapshot_raw_sha256": sorted(cp_hashes),
+                "live_raw_sha256": sorted({record['car_params_sha256'] for record in live_car_params}),
+                "serialization_only_raw_mismatch": not raw_matches}
   first, last = ordered[0][0], ordered[-1][0]
   for topic, max_age in (("selfdriveState", 500_000_000), ("carControl", 100_000_000)):
     values = sorted(contexts[topic], key=lambda x: x["log_mono_ns"])
@@ -342,6 +365,7 @@ def qualify_normalized(records, rlog_paths, source_root=None, expected_rlog_hash
   return {"status": "MODEL_RUNTIME_PROVENANCE_QUALIFIED_NOT_GOLDEN_APPROVAL", "protocol": PROTOCOL,
           "rlogs": [{"path": str(path), "sha256": sha} for path, sha in zip(paths, actual_hashes)],
           "identity_sha256": sorted({next(iter(topics.values()))[1]["identity_sha256"] for topics in groups.values()}),
+          "carparams_identity": cp_proof,
           "load_ids": sorted(active), "publication_groups": len(groups), "first_published_mono_ns": first,
           "last_published_mono_ns": last, "context": {"personalities": sorted({str(x["personality"]) for x in contexts["selfdriveState"]}),
           "experimental_modes": sorted({bool(x["experimental_mode"]) for x in contexts["selfdriveState"]}),
@@ -357,6 +381,18 @@ def qualify_route(rlog_paths, source_root=None):
   require(source_root is not None, "source_root is required for route qualification")
   paths = [Path(path).resolve() for path in rlog_paths]
   before_hashes = [digest(path) for path in paths]
+  from .carparams_identity import fingerprint
+  schema_sha = digest(Path(source_root) / 'opendbc_repo/opendbc/car/car.capnp')
+  cp_cache = {}
+  def cp_record(raw, topic, mono):
+    from opendbc.car.structs import car
+    raw_hash = hashlib.sha256(raw).hexdigest()
+    if raw_hash not in cp_cache:
+      proof = fingerprint(raw, schema_sha)
+      with car.CarParams.from_bytes(raw) as cp:
+        cp_cache[raw_hash] = {'car_params_sha256': raw_hash, 'fingerprint': str(cp.carFingerprint),
+                              'canonical_carparams': proof}
+    return dict(cp_cache[raw_hash], topic=topic, log_mono_ns=mono)
   records = []
   for path in paths:
     for event in LogReader(str(path)):
@@ -376,13 +412,12 @@ def qualify_route(rlog_paths, source_root=None):
       elif topic == "initData":
         records.append({"topic": topic, "log_mono_ns": mono, "source_sha": str(event.initData.gitCommit),
                         "source_dirty": bool(event.initData.dirty)})
-        from opendbc.car.structs import car
         for item in event.initData.params.entries:
           if item.key == "CarParamsPersistent":
             raw = bytes(item.value)
-            with car.CarParams.from_bytes(raw) as cp:
-              records.append({"topic": "carParamsPersistent", "log_mono_ns": mono,
-                              "car_params_sha256": hashlib.sha256(raw).hexdigest(), "fingerprint": str(cp.carFingerprint)})
+            records.append(cp_record(raw, 'carParamsPersistent', mono))
+      elif topic == 'carParams':
+        records.append(cp_record(event.carParams.as_builder().to_bytes(), 'carParams', mono))
       elif topic == "selfdriveState":
         records.append({"topic": topic, "log_mono_ns": mono, "personality": str(event.selfdriveState.personality),
                         "experimental_mode": bool(event.selfdriveState.experimentalMode), "valid": bool(event.valid)})

@@ -95,6 +95,13 @@ sequence continuity, unambiguous lifecycle binding, and valid/fresh original
 mode/personality context. A publication's creation-to-binding skew must be at
 most 100 ms. This is an evidence-integrity cutoff, not a driving-performance
 tolerance. Failed, unsupported, partial or historical evidence fails closed.
+
+CarParams agreement uses the [schema-bound complete wire-tree proof](CARPARAMS_IDENTITY.md)
+when serialized allocation layouts differ. The runtime's original raw CP hash
+must still match a preceding recorded live CP object; every snapshot/live object
+must have the same complete canonical fingerprint under the exact schema.
+Unknown or lossy projections are rejected. This is an offline qualifier-only
+rule and does not alter runtime identities, artifact hashes or vehicle behavior.
 The initial implementation deliberately requires the complete publication
 sequence from load sequence 1; partial route prefixes are not qualified.
 

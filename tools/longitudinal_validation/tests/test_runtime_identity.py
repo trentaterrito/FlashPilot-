@@ -63,7 +63,7 @@ def test_complete_identity_and_three_topic_binding(tmp_path):
   (lambda r: r[next(i for i,x in enumerate(r) if x["topic"]=="modelV2")].update(runtime_ref=""),"missing modelRuntimeRef"),
   (lambda r: r[next(i for i,x in enumerate(r) if x["topic"]=="modelV2")].update(log_mono_ns=200_000_000),"timestamp skew"),
   (lambda r: r[next(i for i,x in enumerate(r) if x["topic"]=="initData")].update(source_sha="9"*40),"source mismatch"),
-  (lambda r: r[next(i for i,x in enumerate(r) if x["topic"]=="carParamsPersistent")].update(car_params_sha256="9"*64),"CarParams mismatch"),
+  (lambda r: r[next(i for i,x in enumerate(r) if x["topic"]=="carParamsPersistent")].update(car_params_sha256="9"*64),"missing canonical/live CarParams evidence"),
   (lambda r: r.__setitem__(slice(None),[x for x in r if x["topic"]!="selfdriveState"]),"selfdriveState"),
 ])
 def test_fail_closed_record_errors(tmp_path,mutation,match):
@@ -196,6 +196,11 @@ def test_serialized_rlog_extractor_uses_initdata_carparams_and_all_markers(tmp_p
   from openpilot.cereal import log as cereal_log, messaging
   from opendbc.car.structs import car
   from tools.longitudinal_validation import runtime_identity as module
+  from pathlib import Path
+  import opendbc.car.structs as structs
+  schema_path=tmp_path/'opendbc_repo/opendbc/car/car.capnp'
+  schema_path.parent.mkdir(parents=True)
+  schema_path.write_bytes(Path(structs.__file__).with_name('car.capnp').read_bytes())
   cp=car.CarParams.new_message();cp.carFingerprint="FORD_F_150_LIGHTNING_MK1";cp.longitudinalActuatorDelay=.15
   raw_cp=cp.to_bytes()
   messages=[]
