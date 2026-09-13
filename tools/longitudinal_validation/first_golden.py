@@ -5,6 +5,7 @@ from pathlib import Path
 from . import engine
 from .comparison import compare_records, compute_metrics
 from .diagnostics import FordDiagnosticDecoder
+from .events import compare as compare_events
 from .provenance import canonical_hash, check_sha, digest, finite_tree, require, runtime_identity, source_identity
 from .runtime_identity import qualify_route, validate_identity
 
@@ -15,34 +16,7 @@ REPLAY_FIELDS = {'case_id', 'segment_ids', 'score_start_ns', 'score_end_ns', 'dt
                  'initialization', 'schedule_sha256', 'tick_count', 'first_tick_ns', 'last_tick_ns'}
 
 
-class MeasurementDiagnostics:
-  """Diagnostic loss is explicit, not solver/provenance failure or stale support.
-
-  No alternative Ford/RB5T semantics are inferred. The strict regression decoder
-  is untouched; this wrapper exists only in the explicit measurement mode.
-  """
-  def __init__(self):
-    self.decoder = FordDiagnosticDecoder()
-    self.error = None
-
-  def update(self, frames):
-    if self.error is not None:
-      return
-    for frame in frames:
-      try:
-        self.decoder.update([frame])
-      except ValueError as exc:
-        self.error = {'t_ns': frame.t_ns, 'address': frame.address, 'bus': frame.bus,
-                      'size_bytes': len(frame.data), 'raw_hex': frame.data.hex(),
-                      'reason': str(exc), 'error_type': type(exc).__name__}
-        return
-
-  def snapshot(self, now_ns):
-    if self.error is not None:
-      return {'offline_only': True, 'pass_fail_eligible': False, 'available': False,
-              'status': 'UNAVAILABLE_DECODE_ERROR', 'first_error': dict(self.error),
-              'caveat': 'All decoded Ford/RB5T diagnostics disabled after this error; raw CAN and original shadow remain preserved.'}
-    return self.decoder.snapshot(now_ns)
+MeasurementDiagnostics = FordDiagnosticDecoder  # No blanket exception wrapper.
 
 
 def validate_request(request):
@@ -165,6 +139,7 @@ def measurement_result(request, qualification, source, runtime, rows, recorded, 
             'replay_crossings_ns': replayed, 'recorded_left_censored': recorded[0]['a_target'] < -.03,
             'replay_left_censored': rows[0]['a_target'] < -.03,
             'paired_delta_s': [(b-a)*1e-9 for a,b in zip(actual,replayed)] if len(actual)==len(replayed) else None},
+          'negative_request_events_v2': compare_events(recorded, rows),
           'golden_approved': False, 'regression_baseline_eligible': False,
           'limitations': ['No tolerance, golden acceptance, promotion or vehicle-safety decision is produced.',
             'Original latest-before-plan publication join; actual SubMaster consumption is not logged.',
@@ -194,8 +169,11 @@ def measure(root, request):
   require(verify_environment(root, request['identities'][0]) == (source,runtime), 'source/runtime drift during measurement')
   engine.runtime_guard(root)
   result = measurement_result(request, qualification, source, runtime, rows, recorded, recurrence, len(ticks))
-  result['ford_diagnostic_availability'] = {'available': decoder.error is None, 'first_error': decoder.error,
-    'pass_fail_eligible': False, 'scope': 'measurement-only; strict regression decoder unchanged'}
+  snapshot = decoder.snapshot()
+  result['ford_diagnostic_availability'] = {'rb5t': snapshot['rb5t'],
+    'independent': {k: {'fresh': v['fresh'], 'age_s': v['age_s']} for k,v in snapshot.items()
+                    if k not in ('rb5t', 'offline_only', 'pass_fail_eligible')},
+    'pass_fail_eligible': False, 'scope': 'Only optional RB5T degrades; required diagnostics fail closed.'}
   return result
 
 
@@ -211,7 +189,8 @@ def measure_twice(root, request, invoke, ssh=None, python=None, bundle=None):
                first['recurrent_ticks'] == second['recurrent_ticks'] and canonical_hash(first['rows']) == canonical_hash(second['rows']))
   first['repeat_measurement'] = {'identical': identical, 'status': second['status'],
     'recurrence_sha256': second['recurrence_sha256'], 'rows_sha256': canonical_hash(second['rows']),
-    'recorded_comparison': second['recorded_comparison']}
+    'recorded_comparison': second['recorded_comparison'],
+    'negative_request_events_v2': second['negative_request_events_v2']}
   # Non-repeatability is measured and explicitly retained, never turned into a
   # numerical tolerance or automatic baseline acceptance.
   return first

@@ -227,3 +227,10 @@ motion is exogenous: spacing is not a counterfactual closed-loop outcome, target
 jerk is not measured vehicle jerk, and logged-comparison danger/solver values
 are replay-derived. Good stops/departures require controller/actuator evidence
 outside this runner. Offline qualification never authorizes deployment.
+
+## Versioned event and diagnostic handling
+
+See [EVENT_DEFINITION.md](EVENT_DEFINITION.md) for explicit new-case event semantics
+and preserved legacy-contract behavior. Unsupported optional RB5T layout now
+degrades only that corroboration to explicit unavailability; required diagnostic
+failures and all provenance/solver gates remain fail-closed.

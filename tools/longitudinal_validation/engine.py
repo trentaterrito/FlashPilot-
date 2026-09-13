@@ -24,6 +24,13 @@ def verify_contract(manifest, candidate=False):
   require(contract is not None, f"unknown protected case: {case_id}")
   require(contract.get("status") == "qualified", f"protected case {case_id} is not qualified: {contract.get('reason')}")
   expected = validate_manifest(contract["manifest"])
+  from .events import reviewed_policy
+  reviewed_policy(contract)  # Missing policy means unchanged hard-threshold v1.
+  required_diagnostics = contract.get("required_diagnostics", [])
+  require(isinstance(required_diagnostics, list) and all(isinstance(x, str) for x in required_diagnostics)
+          and len(set(required_diagnostics)) == len(required_diagnostics)
+          and set(required_diagnostics) <= {"ford_object", "health", "aeb", "acc", "cruise", "rb5t"},
+          "unknown/incomplete required diagnostics contract")
   for key in ("runtime", "evidence", "replay", "acceptance"):
     require(manifest[key] == expected[key], f"protected contract mismatch: {key}")
   if not candidate:
@@ -195,6 +202,19 @@ def execute(root, manifest, candidate=False):
     return [values[i]["t_ns"] for i in range(1, len(values)) if values[i]["a_target"] < -.03 <= values[i-1]["a_target"]]
   rb, rr = onsets(recorded), onsets(rows)
   onset_error = max((abs(x-y) * 1e-9 for x, y in zip(rb, rr)), default=0.) if len(rb) == len(rr) else None
+  # New semantics require an explicit manifest-bound review in the protected
+  # contract. Existing contracts take neither branch and retain their old gate.
+  contract = CONTRACTS["cases"][m["replay"]["case_id"]]
+  from .events import LEGACY, compare as compare_events, reviewed_policy
+  event_comparison = None
+  if reviewed_policy(contract) != LEGACY:
+    event_comparison = compare_events(recorded, rows)
+    deltas = event_comparison["paired_delta_s"]
+    onset_error = max(map(abs, deltas), default=0.) if deltas is not None and event_comparison['boundary_agreement'] else None
+  if contract.get("required_diagnostics"):
+    from .diagnostics import require_diagnostics
+    for row in rows:
+      require_diagnostics(row["ford"], contract["required_diagnostics"])
   gates = {"solver_healthy": True, "finite": True, "timing": True, "rmse": rmse <= m["acceptance"]["rmse_max"],
            "stop_intent_agreement": all(b["should_stop"] == r["should_stop"] for b, r in zip(recorded, rows)),
            "source_agreement": source_agreement >= m["acceptance"]["source_agreement_min"],
@@ -209,6 +229,8 @@ def execute(root, manifest, candidate=False):
           "executed_scope": "Original planner.update and compiled MPC over recorded radar/model/state inputs; no radard, LongControl, actuation or model inference",
           "candidate_changed_files": changed,
           "metrics": compute_metrics(rows), "recorded_comparison": comparison,
+          **({'negative_request_events_v2': event_comparison,
+              'event_policy_review': contract['negative_request_event_policy']} if event_comparison is not None else {}),
           "limitations": ["Latest-before-plan publication join reproduces the historical method; actual SubMaster consumption is not logged.",
                           "Fresh planner at beginning of listed segments, then uninterrupted preroll; no logged-state injection.",
                           "Recorded ego and lead motion are exogenous; spacing and target jerk are not physical counterfactual outcomes.",

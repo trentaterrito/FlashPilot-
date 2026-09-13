@@ -21,6 +21,11 @@ ACCDATA_3 = 0x18A
 ENG_BRAKE_DATA = 0x165
 RB5T_FIRST = 0x120
 RB5T_LAST = 0x135
+DBC_SOURCE = "opendbc:516a857a88afb54cd545cdad5f2697e76a3d1d48/FORD_CADS_64.dbc"
+INDEPENDENT_KINDS = {
+  STEER_ASSIST_DATA: "ford_object", ACCDATA_3: "health", ACCDATA_2: "aeb",
+  ACCDATA: "acc", ENG_BRAKE_DATA: "cruise",
+}
 
 # Signal positions below are copied from opendbc commit
 # 516a857a88afb54cd545cdad5f2697e76a3d1d48.  Keep this decoder offline-only:
@@ -69,9 +74,26 @@ def _rb5t_detections(frame: CanFrame) -> dict:
   expected_length = 24 if message_index == 22 else 64
   if len(frame.data) != expected_length:
     return {
-      "available": False, "malformed": True, "detections": [],
+      "available": False, "malformed": True, "detections": None,
       "expected_length": expected_length, "actual_length": len(frame.data),
+      "status": "UNAVAILABLE_FRAME_LENGTH", "error": _frame_error(frame, "frame length differs from declared layout"),
     }
+  # Structural completeness is separate from validity. Skipping an invalid
+  # slot's payload must not claim that an inconsistent declared layout is known.
+  errors = []
+  for slot in range(slots):
+    for name, offset, length in (("valid", 0, 1), ("scan", 17, 2), ("distance", 31, 14), ("azimuth", 47, 14)):
+      start = slot * 72 + offset
+      position = start // 8 * 8 + 7 - start % 8
+      shift = len(frame.data) * 8 - position - length
+      if shift < 0:
+        errors.append({"slot": slot + 1, "signal": name, "dbc_start": start, "length_bits": length,
+                       "linear_start": position, "linear_end_exclusive": position + length,
+                       "available_bits": len(frame.data) * 8, "shift": shift, "predicate": "shift < 0"})
+  if errors:
+    return {"available": False, "malformed": False, "detections": None,
+            "status": "UNAVAILABLE_UNSUPPORTED_LAYOUT", "unavailable_slots": sorted({e["slot"] for e in errors}),
+            "error": {**_frame_error(frame, "signal exceeds frame"), "dbc_source": DBC_SOURCE, "layout_errors": errors}}
   detections = []
   slot_scans = set()
   for slot in range(slots):
@@ -80,24 +102,48 @@ def _rb5t_detections(frame: CanFrame) -> dict:
     scan = int(motorola_unsigned(frame.data, base + 17, 2))
     if scan in (2, 3):
       slot_scans.add(scan)
-    distance = motorola_unsigned(frame.data, base + 31, 14, 0.015625)
-    azimuth = motorola_unsigned(frame.data, base + 47, 14, 0.0003834, -3.1416)
     if valid and scan in (2, 3):
+      distance = motorola_unsigned(frame.data, base + 31, 14, 0.015625)
+      azimuth = motorola_unsigned(frame.data, base + 47, 14, 0.0003834, -3.1416)
       detections.append({
         "scan": scan,
         "d_rel": math.cos(azimuth) * distance,
         "y_rel": -math.sin(azimuth) * distance,
       })
   if len(slot_scans) > 1:
-    return {"available": False, "malformed": True, "detections": [], "reason": "mixed_scan_indices"}
+    return {"available": False, "malformed": True, "detections": None, "reason": "mixed_scan_indices",
+            "status": "UNAVAILABLE_MIXED_SCAN_INDICES", "error": _frame_error(frame, "mixed_scan_indices")}
   return {
     "available": True, "malformed": False, "detections": detections,
     "scan": next(iter(slot_scans), None),
   }
 
 
+def _frame_error(frame: CanFrame, reason: str) -> dict:
+  return {"t_ns": frame.t_ns, "address": frame.address, "bus": frame.bus,
+          "size_bytes": len(frame.data), "raw_hex": frame.data.hex(), "reason": reason}
+
+
+class DiagnosticUnavailable(ValueError):
+  """An explicitly required diagnostic lacks current, decodable evidence."""
+
+
+def require_diagnostics(snapshot: dict, required: Iterable[str]) -> None:
+  """Availability gate only; never asserts sensor safety or object identity."""
+  for kind in required:
+    if kind not in {*INDEPENDENT_KINDS.values(), "rb5t"}:
+      raise DiagnosticUnavailable(f"unknown required diagnostic: {kind}")
+    item = snapshot.get(kind, {})
+    if not item.get("fresh") or item.get("available") is False or item.get("malformed"):
+      raise DiagnosticUnavailable(f"required diagnostic unavailable: {kind}: {item.get('status', 'missing_or_stale')}")
+
+
 def decode_ford_frame(frame: CanFrame) -> dict | None:
   """Decode one known Ford/RB5T frame without importing opendbc."""
+  if frame.bus == FORD_BUS and frame.address in INDEPENDENT_KINDS and len(frame.data) != 8:
+    return {"kind": INDEPENDENT_KINDS[frame.address], "t_ns": frame.t_ns, "available": False,
+            "malformed": True, "status": "UNAVAILABLE_FRAME_LENGTH", "expected_length": 8,
+            "error": _frame_error(frame, "frame length differs from declared layout")}
   if frame.bus == FORD_BUS and frame.address == STEER_ASSIST_DATA and len(frame.data) == 8:
     return {
       "kind": "ford_object", "t_ns": frame.t_ns,
@@ -160,6 +206,8 @@ class FordDiagnosticDecoder:
     self._rb5t_scan = -1
     self._rb5t_by_address: dict[int, list[dict]] = {}
     self._rb5t_detections: list[dict] = []
+    self._rb5t_unavailable: dict | None = None
+    self._rb5t_unavailable_count = 0
 
   def update(self, frames: Iterable[CanFrame]) -> None:
     for frame in frames:
@@ -172,8 +220,12 @@ class FordDiagnosticDecoder:
         # Each message contributes one part of a 22-message scan. Empty frames
         # replace their address's contribution; malformed/scanless empty frames
         # conservatively invalidate all accumulated proximity evidence.
+        if not decoded["available"]:
+          self._rb5t_unavailable_count += 1
+          if self._rb5t_unavailable is None:
+            self._rb5t_unavailable = {k: v for k, v in decoded.items() if k != "detections"}
         scan = decoded.get("scan")
-        if not decoded["available"] or scan is None:
+        if self._rb5t_unavailable is not None or scan is None:
           self._rb5t_by_address.clear()
         else:
           if scan != self._rb5t_scan:
@@ -184,8 +236,10 @@ class FordDiagnosticDecoder:
         self.latest["rb5t"] = {k: v for k, v in decoded.items() if k != "detections"}
       else:
         self.latest[kind] = decoded
+        if decoded.get("available") is False:
+          raise DiagnosticUnavailable(f"required independent diagnostic malformed: {kind}: {decoded['error']}")
 
-  def snapshot(self, now_ns: int | None = None) -> dict:
+  def snapshot(self, now_ns: int | None = None, *, required: Iterable[str] = ()) -> dict:
     now = self.now_ns if now_ns is None else now_ns
     if not isinstance(now, int) or now < self.now_ns:
       raise ValueError("now_ns cannot precede observed frames")
@@ -193,7 +247,7 @@ class FordDiagnosticDecoder:
     for kind in ("ford_object", "health", "aeb", "acc", "cruise"):
       item = dict(self.latest.get(kind, {}))
       age_ns = now - item["t_ns"] if item else None
-      item["fresh"] = age_ns is not None and 0 <= age_ns <= self.fresh_ns
+      item["fresh"] = age_ns is not None and 0 <= age_ns <= self.fresh_ns and item.get("available") is not False
       item["age_s"] = age_ns / 1e9 if age_ns is not None else None
       result[kind] = item
 
@@ -211,4 +265,13 @@ class FordDiagnosticDecoder:
       "support_count": len(matches), "support_present": bool(matches),
       "ambiguous": len(matches) > 1, "association_semantics": "proximity_only_not_identity",
     }
+    if self._rb5t_unavailable is not None:
+      result["rb5t"].update({
+        "available": False, "fresh": False, "support_count": None, "support_present": None, "ambiguous": None,
+        "status": "UNAVAILABLE_INCOMPLETE_CORROBORATION", "unavailable_latched": True,
+        "first_unavailable_contribution": self._rb5t_unavailable,
+        "unavailable_contribution_count": self._rb5t_unavailable_count,
+        "latest_contribution": rb_item,
+      })
+    require_diagnostics(result, required)
     return result

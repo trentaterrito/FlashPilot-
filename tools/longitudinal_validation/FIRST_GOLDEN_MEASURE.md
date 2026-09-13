@@ -72,13 +72,23 @@ does not establish closed-loop vehicle safety or counterfactual motion. Original
 comparison's recorded-side solver/danger values are replay-derived, not logged
 solver truth; shadow records remain diagnostic only.
 
-Measurement-only diagnostic error handling: if the existing Ford/RB5T decoder
-raises ValueError, preserve the first offending frame's timestamp/address/bus/
-length/raw bytes and error, then mark all decoded Ford/RB5T output unavailable
-for the remainder of that measurement. Never retain stale corroboration or
-infer a replacement decode. Original raw CAN and recorded shadow telemetry stay
-preserved. This does not catch provenance, input, solver, finiteness or recurrence
-errors. Normal regression retains its existing decoder and failure behavior.
+Optional RB5T structural error handling is now shared with strict replay: preflight
+the declared signals, preserve raw frame/bounds/error, and mark unsupported
+contributions and aggregate corroboration unavailable for this decoder lifetime.
+Support/count/ambiguity become null, not fake absence. Independent valid Ford
+object/health/AEB/ACC/cruise diagnostics remain available with their original
+freshness rules. Invalid slots' payloads are never decoded. No missing bits or
+new layouts are inferred. The former blanket ValueError wrapper is removed.
+Malformed independent Ford frames and explicitly required unavailable diagnostics
+remain fatal; provenance, input, solver, finiteness and recurrence failures are
+never caught by this handling.
+
+`negative_request_events_v2` reports the fixed, versioned epsilon-state event
+definition alongside unchanged `negative_request_timing` and legacy comparison
+metrics. Both independent repeats retain v2 evidence. See EVENT_DEFINITION.md for
+the independent numeric-scale rationale, exact endpoints, corpus limitations and
+explicit reviewed-contract opt-in. Existing golden contracts retain hard-v1;
+FIRST_GOLDEN_MEASURE never performs that opt-in or approves a golden/tolerance.
 
 ## Separate reviewed promotion — never performed by this command
 

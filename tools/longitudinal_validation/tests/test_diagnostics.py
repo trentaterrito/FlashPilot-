@@ -1,9 +1,11 @@
 from pathlib import Path
 import os
+import math
 
 import pytest
 
-from tools.longitudinal_validation.diagnostics import CanFrame, FordDiagnosticDecoder, decode_ford_frame, motorola_unsigned
+from tools.longitudinal_validation.diagnostics import (CanFrame, DiagnosticUnavailable, FordDiagnosticDecoder,
+                                                      decode_ford_frame, motorola_unsigned, require_diagnostics)
 
 
 def _pack(signals, size=8):
@@ -127,3 +129,115 @@ def test_frame_validation():
   for bus in (-1, 256, True, 1.5):
     with pytest.raises(ValueError):
       CanFrame(1, 1, b"", bus)
+
+
+PRESERVED_135 = bytes.fromhex("808003000080088000808003000080088000000000000000")
+
+
+@pytest.mark.parametrize("raw", [PRESERVED_135, bytes.fromhex("808000000080088000808000000080088000000000000000")])
+def test_preserved_135_layout_degrades_without_guessing(raw):
+  frame = CanFrame(12368721052122, 0x135, raw, 1)
+  decoded = decode_ford_frame(frame)
+  assert decoded["status"] == "UNAVAILABLE_UNSUPPORTED_LAYOUT"
+  assert decoded["available"] is False and decoded["malformed"] is False
+  assert decoded["detections"] is None and decoded["unavailable_slots"] == [3]
+  error = decoded["error"]
+  assert error["raw_hex"] == raw.hex() and error["size_bytes"] == 24
+  assert (error["t_ns"], error["address"], error["bus"]) == (frame.t_ns, 0x135, 1)
+  assert error["reason"] == "signal exceeds frame"
+  assert error["layout_errors"] == [{"slot": 3, "signal": "azimuth", "dbc_start": 191,
+    "length_bits": 14, "linear_start": 184, "linear_end_exclusive": 198,
+    "available_bits": 192, "shift": -6, "predicate": "shift < 0"}]
+
+
+def test_unsupported_layout_preflight_never_reads_payload(monkeypatch):
+  from tools.longitudinal_validation import diagnostics
+  def unexpected_read(*args, **kwargs):
+    pytest.fail("unsupported layout must be rejected before signal extraction")
+  monkeypatch.setattr(diagnostics, "motorola_unsigned", unexpected_read)
+  assert decode_ford_frame(CanFrame(1, 0x135, PRESERVED_135, 1))["detections"] is None
+
+
+def test_invalid_slot_payload_not_decoded(monkeypatch):
+  from tools.longitudinal_validation import diagnostics
+  original = diagnostics.motorola_unsigned
+  calls = []
+  def tracked(data, start, length, *args):
+    calls.append(start)
+    return original(data, start, length, *args)
+  monkeypatch.setattr(diagnostics, "motorola_unsigned", tracked)
+  decode_ford_frame(CanFrame(1, 0x120, bytes(64), 1))
+  assert calls == [start for slot in range(6) for start in (slot * 72, slot * 72 + 17)]
+
+
+@pytest.mark.parametrize("address", range(0x120, 0x135))
+def test_valid_rb5t_values_identical_to_original_contract(address):
+  raw_az = round(3.1416 / 0.0003834)
+  raw = _pack([(72 * slot + offset, length, value) for slot in range(6)
+               for offset, length, value in ((0, 1, 1), (17, 2, 2), (31, 14, 1280 + slot), (47, 14, raw_az))], size=64)
+  expected = [{"scan": 2, "d_rel": math.cos(raw_az * .0003834 - 3.1416) * (1280 + slot) * .015625,
+               "y_rel": -math.sin(raw_az * .0003834 - 3.1416) * (1280 + slot) * .015625} for slot in range(6)]
+  assert decode_ford_frame(CanFrame(1, address, raw, 1)) == {
+    "kind": "rb5t", "t_ns": 1, "available": True, "malformed": False, "detections": expected, "scan": 2}
+
+
+def test_rb5t_unavailable_latches_no_stale_support_or_fake_no_target():
+  decoder = FordDiagnosticDecoder()
+  obj = _pack([(7, 10, 200), (9, 2, 3), (45, 9, 255)])
+  rb = _pack([(0, 1, 1), (17, 2, 2), (31, 14, 1280), (47, 14, round(3.1416 / .0003834))], size=64)
+  decoder.update([CanFrame(1, 0x3D7, obj, 2), CanFrame(2, 0x120, rb, 1)])
+  assert decoder.snapshot()["rb5t"]["support_present"] is True
+  decoder.update([CanFrame(3, 0x135, PRESERVED_135, 1), CanFrame(4, 0x120, rb, 1)])
+  result = decoder.snapshot()
+  assert decoder._rb5t_detections == [] and decoder._rb5t_by_address == {}
+  assert result["rb5t"]["available"] is False and result["rb5t"]["fresh"] is False
+  for name in ("support_count", "support_present", "ambiguous"):
+    assert result["rb5t"][name] is None
+  assert result["rb5t"]["first_unavailable_contribution"]["error"]["raw_hex"] == PRESERVED_135.hex()
+  assert result["rb5t"]["unavailable_contribution_count"] == 1
+  assert result["ford_object"]["fresh"] is True
+  with pytest.raises(DiagnosticUnavailable, match="rb5t"):
+    decoder.snapshot(required=("rb5t",))
+
+
+def test_all_independent_diagnostics_and_freshness_unchanged_after_135():
+  frames = [CanFrame(10, address, bytes(8), 2) for address in (0x3D7, 0x18A, 0x187, 0x186, 0x165)]
+  reference, tested = FordDiagnosticDecoder(), FordDiagnosticDecoder()
+  reference.update(frames)
+  tested.update([CanFrame(9, 0x135, PRESERVED_135, 1), *frames])
+  kinds = ("ford_object", "health", "aeb", "acc", "cruise")
+  for now in (10, 300_000_010):
+    a, b = reference.snapshot(now), tested.snapshot(now)
+    assert {k: a[k] for k in kinds} == {k: b[k] for k in kinds}
+  tested.snapshot(10, required=kinds)
+  with pytest.raises(DiagnosticUnavailable, match="missing_or_stale"):
+    tested.snapshot(300_000_010, required=kinds)
+
+
+@pytest.mark.parametrize("address,kind", [(0x3D7, "ford_object"), (0x18A, "health"), (0x187, "aeb"),
+                                          (0x186, "acc"), (0x165, "cruise")])
+def test_malformed_independent_diagnostic_is_fatal_and_invalidates_prior(address, kind):
+  decoder = FordDiagnosticDecoder()
+  decoder.update([CanFrame(1, address, bytes(8), 2)])
+  with pytest.raises(DiagnosticUnavailable, match="required independent diagnostic malformed"):
+    decoder.update([CanFrame(2, address, bytes(7), 2)])
+  assert decoder.snapshot()[kind]["available"] is False
+  assert decoder.snapshot()[kind]["fresh"] is False
+  assert decoder.snapshot()[kind]["error"]["raw_hex"] == "00" * 7
+  with pytest.raises(DiagnosticUnavailable):
+    decoder.snapshot(required=(kind,))
+
+
+def test_required_unknown_and_missing_diagnostics_fail_closed():
+  for name in ("rb5t", "ford_object", "unrecognized"):
+    with pytest.raises(DiagnosticUnavailable):
+      require_diagnostics(FordDiagnosticDecoder().snapshot(), [name])
+
+
+def test_unrelated_decoder_exception_is_not_swallowed(monkeypatch):
+  from tools.longitudinal_validation import diagnostics
+  def broken(frame):
+    raise RuntimeError("unrelated decoder bug")
+  monkeypatch.setattr(diagnostics, "decode_ford_frame", broken)
+  with pytest.raises(RuntimeError, match="unrelated decoder bug"):
+    FordDiagnosticDecoder().update([CanFrame(1, 0x135, PRESERVED_135, 1)])

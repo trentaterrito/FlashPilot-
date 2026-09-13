@@ -9,7 +9,7 @@ from pathlib import Path
 
 from .provenance import ValidationError, canonical_hash, compare_provenance, read_json, require, validate_manifest
 
-MODULES = ("provenance", "diagnostics", "comparison", "engine")
+MODULES = ("provenance", "diagnostics", "comparison", "events", "engine")
 
 
 def tool_bundle(first_golden=False):
