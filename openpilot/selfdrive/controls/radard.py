@@ -9,6 +9,8 @@ from openpilot.cereal import messaging, log
 from opendbc.car.structs import car
 from openpilot.common.filter_simple import FirstOrderFilter
 from openpilot.common.params import Params
+from openpilot.common.producer_consumption import Recorder, ObservedSubMaster, ObservedPubMaster
+from openpilot.common.producer_state import note_reset, watch_resets, radar_state
 from openpilot.common.realtime import DT_MDL, Priority, config_realtime_process
 from openpilot.common.swaglog import cloudlog
 from openpilot.common.simple_kalman import KF1D
@@ -164,6 +166,7 @@ class DangerPreservingVRelFilter:
 
   def reset(self, raw_vrel: float) -> float:
     self.x = raw_vrel
+    note_reset(self, "seed")
     return self.x
 
   def update(self, raw_vrel: float, dt: float = DT_MDL) -> float:
@@ -190,6 +193,7 @@ class LeadTrustState:
   def reset(self) -> None:
     self.score = 0.0
     self.prev_d_rel = None
+    note_reset(self, "lead_loss")
 
   def update(self, present: bool, conditioned_vrel: float, d_rel: float, model_prob: float, dt: float = DT_MDL) -> float:
     if not present:
@@ -226,6 +230,7 @@ class TTCWithSafeDerivative:
     self.prev_ttc = None
     self.prev_was_sentinel = True
     self.deriv_filter.x = 0.0
+    note_reset(self, "lead_loss")
 
   def update(self, present: bool, conditioned_vrel: float, d_rel: float, dt: float = DT_MDL) -> tuple[float, float]:
     if not present:
@@ -239,6 +244,7 @@ class TTCWithSafeDerivative:
     if is_sentinel or self.prev_was_sentinel:
       raw_deriv = 0.0  # never differentiate across a sentinel boundary
       self.deriv_filter.x = 0.0  # reseed cleanly, no stale slope
+      note_reset(self, "derivative_baseline")
     else:
       raw_deriv = (ttc - self.prev_ttc) / dt  # type: ignore[operator]
 
@@ -404,6 +410,7 @@ def get_lead(v_ego: float, ready: bool, tracks: dict[int, Track], lead_msg: capn
     lead_dict = get_RadarState_from_vision(lead_msg, v_ego, model_v_ego, lead_prob, vrel_filter)
   elif vrel_filter is not None:
     vrel_filter.x = None  # no lead this tick: reseed fresh next time, no stale carryover
+    note_reset(vrel_filter, "lead_loss")
 
   if low_speed_override:
     low_speed_tracks = [c for c in tracks.values() if c.potential_low_speed_lead(v_ego)]
@@ -467,6 +474,7 @@ class RadarD:
     for ids in list(self.tracks.keys()):
       if ids not in ar_pts:
         self.tracks.pop(ids, None)
+        note_reset(self, "track_removed")
 
     # *** compute the tracks ***
     for ids in ar_pts:
@@ -478,6 +486,7 @@ class RadarD:
       # create the track if it doesn't exist or it's a new track
       if ids not in self.tracks:
         self.tracks[ids] = Track(ids, v_lead, self.kalman_params)
+        note_reset(self, "track_created")
       self.tracks[ids].update(rpt[0], rpt[1], rpt[2], v_lead)
 
     # *** publish radarState ***
@@ -542,21 +551,34 @@ def main() -> None:
   cloudlog.info("radard got CarParams")
 
   # *** setup messaging
-  sm = messaging.SubMaster(['modelV2', 'carState', 'radarTracks'], poll='modelV2')
-  pm = messaging.PubMaster(['radarState'])
+  recorder = Recorder("radard")
+  sm = ObservedSubMaster(['modelV2', 'carState', 'radarTracks'], poll='modelV2', recorder=recorder)
+  pm = ObservedPubMaster(['radarState'], recorder=recorder, observed={'radarState'})
+  pm.sm = sm
 
   ford_observability = FordObservabilityShadow() if CP.brand == "ford" else None
   can_sock = messaging.sub_sock("can", conflate=False) if ford_observability is not None else None
   RD = RadarD(CP.radarDelay, log_lead_transitions=params.get_bool("ExperimentalFordSteerAssistRadarShadow"),
               ford_observability=ford_observability)
+  watch_resets(RD, recorder, "radard")
+  for i in range(2):
+    watch_resets(RD.vrel_filters[i], recorder, f"vrel.{i}")
+    watch_resets(RD.trust_states[i], recorder, f"trust.{i}")
+    watch_resets(RD.ttc_states[i], recorder, f"ttc.{i}")
+  recorder.capture_state("initial", lambda: radar_state(RD))
 
   while 1:
     sm.update()
+    recorder.begin(sm)
+    recorder.capture_state("before", lambda: radar_state(RD))
 
     if can_sock is not None and ford_observability is not None:
-      ford_observability.update(can_capnp_to_list(messaging.drain_sock_raw(can_sock)))
+      can_events = messaging.drain_sock_raw(can_sock)
+      recorder.can_batch(can_events)
+      ford_observability.update(can_capnp_to_list(can_events))
 
     RD.update(sm, sm['radarTracks'])
+    recorder.capture_state("after", lambda: radar_state(RD))
     RD.publish(pm)
 
 

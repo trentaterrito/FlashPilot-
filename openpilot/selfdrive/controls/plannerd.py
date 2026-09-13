@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from opendbc.car.structs import car
 from openpilot.common.params import Params
+from openpilot.common.producer_consumption import Recorder, ObservedSubMaster, ObservedPubMaster
+from openpilot.common.producer_state import planner_state, watch_resets
 from openpilot.common.realtime import Priority, config_realtime_process
 from openpilot.common.swaglog import cloudlog
 from openpilot.selfdrive.controls.lib.ldw import LaneDepartureWarning
@@ -18,14 +20,21 @@ def main():
 
   ldw = LaneDepartureWarning()
   longitudinal_planner = LongitudinalPlanner(CP)
-  pm = messaging.PubMaster(['longitudinalPlan', 'driverAssistance'])
-  sm = messaging.SubMaster(['carControl', 'carState', 'controlsState', 'vehicleParameters', 'radarState', 'modelV2', 'selfdriveState'],
-                           poll='modelV2')
+  recorder = Recorder("plannerd")
+  pm = ObservedPubMaster(['longitudinalPlan', 'driverAssistance'], recorder=recorder, observed={'longitudinalPlan'})
+  sm = ObservedSubMaster(['carControl', 'carState', 'controlsState', 'vehicleParameters', 'radarState', 'modelV2', 'selfdriveState'],
+                         poll='modelV2', recorder=recorder)
+  pm.sm = sm
+  watch_resets(longitudinal_planner, recorder, "longitudinal_planner")
+  recorder.capture_state("initial", lambda: planner_state(longitudinal_planner))
 
   while True:
     sm.update()
     if sm.updated['modelV2']:
+      recorder.begin(sm)
+      recorder.capture_state("before", lambda: planner_state(longitudinal_planner))
       longitudinal_planner.update(sm)
+      recorder.capture_state("after", lambda: planner_state(longitudinal_planner))
       longitudinal_planner.publish(sm, pm)
 
       ldw.update(sm.frame, sm['modelV2'], sm['carState'], sm['carControl'])

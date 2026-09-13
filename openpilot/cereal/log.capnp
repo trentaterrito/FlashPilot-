@@ -2601,6 +2601,9 @@ struct Event {
   # Diagnostic only: exact loaded-model identity and publication group reference.
   # Empty in legacy recordings; never used for control or model selection.
   modelRuntimeRef @153 :Text;
+  # Diagnostic-only actual producer/consumed-input receipt, canonical JSON v1.
+  # Empty means unavailable, never a reconstructed scheduling or control input.
+  producerConsumption @154 :Text;
 
   union {
     # *********** log metadata ***********
