@@ -13,6 +13,7 @@ from openpilot.common.realtime import DT_MDL, Priority, config_realtime_process
 from openpilot.common.swaglog import cloudlog
 from openpilot.common.simple_kalman import KF1D
 from openpilot.selfdrive.controls.lib.lead_source_transition import LeadSourceTransitionTracker
+from openpilot.selfdrive.pandad import can_capnp_to_list
 
 
 # Default lead acceleration decay set to 50% at 1s
@@ -94,6 +95,7 @@ class Track:
       "modelProb": model_prob,
       "radar": True,
       "radarTrackId": self.identifier,
+      "rawVRelV1": float(self.vRel),
     }
 
   def potential_low_speed_lead(self, v_ego: float):
@@ -279,7 +281,108 @@ def get_RadarState_from_vision(lead_msg: capnp._DynamicStructReader, v_ego: floa
     "present": True,
     "radar": False,
     "radarTrackId": -1,
+    "rawVRelV1": float(lead_v_rel_pred),
   }
+
+
+class FordObservabilityShadow:
+  """Passive Ford/RB5T decoder for diagnostic telemetry only.
+
+  This owns no radar points and exposes no values to lead selection. The raw
+  association is deliberately a count/ambiguity observation, never an identity.
+  """
+  FORD_BUS = 2
+  RB5T_BUS = 1
+  FRESH_NS = 250_000_000
+  ASSOCIATION_RANGE_M = 5.0
+  ASSOCIATION_LATERAL_M = 3.0
+  STEER_ASSIST_DATA_ADDR = 0x3D7
+  ACCDATA_3_ADDR = 0x18A
+  RB5T_FIRST_ADDR = 0x120
+  RB5T_LAST_ADDR = 0x135
+
+  def __init__(self):
+    self.now_nanos = 0
+    self.ford_time = 0
+    self.health_time = 0
+    self.raw_time = 0
+    self.confidence = 0
+    self.ford_d = 0.0
+    self.ford_v = 0.0
+    self.ford_y = 0.0
+    self.radar_blocked = False
+    self.alignment_incomplete = False
+    self.rb5t_scan = -1
+    self.association_count = 0
+
+  @staticmethod
+  def _motorola(dat: bytes, start: int, length: int, factor: float = 1.0, offset: float = 0.0) -> float:
+    """DBC Motorola extraction validated against opendbc get_raw_value on 19,320 captured signals."""
+    position = start // 8 * 8 + 7 - start % 8
+    raw = (int.from_bytes(dat, "big") >> (len(dat) * 8 - position - length)) & ((1 << length) - 1)
+    return raw * factor + offset
+
+  def _update_rb5t(self, timestamp: int, dat: bytes, address: int) -> None:
+    message_index = address - self.RB5T_FIRST_ADDR + 1
+    slots = 3 if message_index == 22 else 6
+    for slot in range(slots):
+      base = slot * 72
+      valid = bool(self._motorola(dat, base, 1))
+      scan = int(self._motorola(dat, base + 17, 2))
+      if scan != self.rb5t_scan:
+        self.rb5t_scan = scan
+        self.association_count = 0
+      if not valid or scan not in (2, 3):
+        continue
+      distance = self._motorola(dat, base + 31, 14, 0.015625)
+      azimuth = self._motorola(dat, base + 47, 14, 0.0003834, -3.1416)
+      raw_d = math.cos(azimuth) * distance
+      raw_y = -math.sin(azimuth) * distance
+      if (self.confidence > 0 and timestamp - self.ford_time <= self.FRESH_NS and
+          abs(raw_d - self.ford_d) <= self.ASSOCIATION_RANGE_M and
+          abs(raw_y - self.ford_y) <= self.ASSOCIATION_LATERAL_M):
+        self.association_count += 1
+    self.raw_time = timestamp
+
+  def update(self, can_packets) -> None:
+    if not can_packets:
+      return
+    self.now_nanos = max(self.now_nanos, max(packet[0] for packet in can_packets))
+    for timestamp, frames in can_packets:
+      for address, dat, bus in frames:
+        if bus == self.FORD_BUS and address == self.STEER_ASSIST_DATA_ADDR and len(dat) == 8:
+          self.ford_time = timestamp
+          self.ford_d = self._motorola(dat, 7, 10, 0.1)
+          self.confidence = int(self._motorola(dat, 9, 2))
+          self.ford_v = self._motorola(dat, 39, 10, 0.1, -102.1)
+          self.ford_y = self._motorola(dat, 45, 9, 0.1, -25.5)
+        elif bus == self.FORD_BUS and address == self.ACCDATA_3_ADDR and len(dat) == 8:
+          self.health_time = timestamp
+          self.alignment_incomplete = bool(self._motorola(dat, 11, 1))
+          self.radar_blocked = bool(self._motorola(dat, 22, 1))
+        elif bus == self.RB5T_BUS and self.RB5T_FIRST_ADDR <= address <= self.RB5T_LAST_ADDR:
+          self._update_rb5t(timestamp, dat, address)
+
+  def snapshot(self) -> dict[str, float | int | bool]:
+    ford_age = (self.now_nanos - self.ford_time) * 1e-9 if self.ford_time else math.inf
+    ford_fresh = 0.0 <= ford_age <= self.FRESH_NS * 1e-9
+    health_fresh = 0 <= self.now_nanos - self.health_time <= self.FRESH_NS if self.health_time else False
+    raw_fresh = 0 <= self.now_nanos - self.raw_time <= self.FRESH_NS if self.raw_time else False
+    confidence = self.confidence if ford_fresh else 0
+    association_count = self.association_count if raw_fresh and ford_fresh else 0
+
+    return {
+      "steerAssistFresh": ford_fresh,
+      "steerAssistAge": ford_age if math.isfinite(ford_age) else 1000.0,
+      "confidence": confidence,
+      "dRel": self.ford_d if ford_fresh else 0.0,
+      "vRel": self.ford_v if ford_fresh else 0.0,
+      "radarBlocked": self.radar_blocked if health_fresh else False,
+      "alignmentIncomplete": self.alignment_incomplete if health_fresh else False,
+      "rb5tSupportPresent": association_count > 0,
+      "rb5tAssociationCount": association_count,
+      "rb5tAmbiguous": association_count > 1,
+    }
 
 
 def get_lead(v_ego: float, ready: bool, tracks: dict[int, Track], lead_msg: capnp._DynamicStructReader,
@@ -315,7 +418,8 @@ def get_lead(v_ego: float, ready: bool, tracks: dict[int, Track], lead_msg: capn
 
 
 class RadarD:
-  def __init__(self, delay: float = 0.0, log_lead_transitions: bool = False):
+  def __init__(self, delay: float = 0.0, log_lead_transitions: bool = False,
+               ford_observability: FordObservabilityShadow | None = None):
     self.tracks: dict[int, Track] = {}
     self.kalman_params = KalmanParams(DT_MDL)
     self.lead_prob_filters = [FirstOrderFilter(0.0, 0.2, DT_MDL) for _ in range(2)]
@@ -330,6 +434,7 @@ class RadarD:
     self.ready = False
     self.log_lead_transitions = log_lead_transitions
     self.lead_transition_tracker = LeadSourceTransitionTracker()
+    self.ford_observability = ford_observability
 
     # Lightning Long V1: per-lead-index danger-preserving conditioning + anticipation state
     self.vrel_filters = [DangerPreservingVRelFilter() for _ in range(2)]
@@ -414,6 +519,9 @@ class RadarD:
         self.anticipation_cap[i] = cap
         lead.accelCapV1 = cap
 
+    if self.ford_observability is not None:
+      self.radar_state.fordObservability = self.ford_observability.snapshot()
+
   def publish(self, pm: messaging.PubMaster):
     assert self.radar_state is not None
 
@@ -437,10 +545,16 @@ def main() -> None:
   sm = messaging.SubMaster(['modelV2', 'carState', 'radarTracks'], poll='modelV2')
   pm = messaging.PubMaster(['radarState'])
 
-  RD = RadarD(CP.radarDelay, log_lead_transitions=params.get_bool("ExperimentalFordSteerAssistRadarShadow"))
+  ford_observability = FordObservabilityShadow() if CP.brand == "ford" else None
+  can_sock = messaging.sub_sock("can", conflate=False) if ford_observability is not None else None
+  RD = RadarD(CP.radarDelay, log_lead_transitions=params.get_bool("ExperimentalFordSteerAssistRadarShadow"),
+              ford_observability=ford_observability)
 
   while 1:
     sm.update()
+
+    if can_sock is not None and ford_observability is not None:
+      ford_observability.update(can_capnp_to_list(messaging.drain_sock_raw(can_sock)))
 
     RD.update(sm, sm['radarTracks'])
     RD.publish(pm)

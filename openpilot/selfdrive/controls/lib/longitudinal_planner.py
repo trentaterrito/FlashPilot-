@@ -10,7 +10,9 @@ from openpilot.common.realtime import DT_MDL
 from openpilot.selfdrive.modeld.constants import ModelConstants
 from openpilot.selfdrive.controls.lib.longcontrol import LongCtrlState
 from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import LongitudinalMpc, LongitudinalPlanSource
+from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import LEAD_DANGER_FACTOR, get_safe_obstacle_distance
 from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import T_IDXS as T_IDXS_MPC
+from openpilot.selfdrive.controls.lib.longitudinal_observability import LongitudinalObservabilityShadow
 from openpilot.selfdrive.controls.lib.drive_helpers import CONTROL_N, get_accel_from_plan, should_stop
 from openpilot.selfdrive.car.cruise import V_CRUISE_MAX, V_CRUISE_UNSET
 from openpilot.common.swaglog import cloudlog
@@ -23,6 +25,11 @@ A_CRUISE_MIN = -1.2
 CONTROL_N_T_IDX = ModelConstants.T_IDXS[:CONTROL_N]
 ALLOW_THROTTLE_THRESHOLD = 0.4
 MIN_ALLOW_THROTTLE_SPEED = 2.5
+
+
+def finite_or(value, fallback=0.0):
+  value = float(value)
+  return value if math.isfinite(value) else fallback
 
 # Lookup table for turns
 _A_TOTAL_MAX_V = [1.7, 3.2]
@@ -70,6 +77,10 @@ class LongitudinalPlanner:
     self.v_desired_trajectory = np.zeros(CONTROL_N)
     self.a_desired_trajectory = np.zeros(CONTROL_N)
     self.j_desired_trajectory = np.zeros(CONTROL_N)
+    self.observability = LongitudinalObservabilityShadow()
+    self.observability_result = None
+    self.observability_danger_margin = 0.0
+    self.observability_raw_mpc_accel = 0.0
 
   def update(self, sm):
     if len(sm['carControl'].orientationNED) == 3:
@@ -127,6 +138,7 @@ class LongitudinalPlanner:
     action_t =  self.CP.longitudinalActuatorDelay + DT_MDL
     output_a_target_mpc = get_accel_from_plan(self.v_desired_trajectory, self.a_desired_trajectory, CONTROL_N_T_IDX,
                                               action_t=action_t)
+    self.observability_raw_mpc_accel = finite_or(output_a_target_mpc, ACCEL_MIN)
     output_should_stop_mpc = should_stop(v_ego, output_a_target_mpc)
     output_a_target_e2e = sm['modelV2'].action.desiredAcceleration
     output_should_stop_e2e = sm['modelV2'].action.shouldStop
@@ -158,6 +170,23 @@ class LongitudinalPlanner:
 
     self.output_a_target = np.clip(output_a_target, ACCEL_MIN, ACCEL_MAX)
 
+    # Shadow instrumentation is intentionally downstream of every control-path
+    # calculation above. It observes immutable scalar copies and never writes an
+    # MPC state, arbitration candidate, trajectory, or output acceleration.
+    safe_distance = get_safe_obstacle_distance(self.mpc.x_sol[:, 1], self.mpc.params[:, 4])
+    self.observability_danger_margin = finite_or(np.min(
+      (self.mpc.params[:, 2] - self.mpc.x_sol[:, 0]) - LEAD_DANGER_FACTOR * safe_distance), -1e6)
+    lead = sm['radarState'].leadOne
+    ford = sm['radarState'].fordObservability
+    self.observability_result = self.observability.update(
+      now=sm.logMonoTime['modelV2'] * 1e-9, v_ego=float(v_ego), lead_present=bool(lead.present),
+      d_rel=float(lead.dRel), raw_v_rel=float(lead.rawVRelV1), conditioned_v_rel=float(lead.vRel),
+      source=int(self.mpc.source), danger_margin=self.observability_danger_margin,
+      raw_mpc_accel=self.observability_raw_mpc_accel, fcw=bool(self.fcw), stock_aeb=bool(sm['carState'].stockAeb),
+      ford_fresh=bool(ford.steerAssistFresh), ford_confidence=int(ford.confidence), ford_v_rel=float(ford.vRel),
+      radar_blocked=bool(ford.radarBlocked), alignment_incomplete=bool(ford.alignmentIncomplete),
+      rb5t_support=bool(ford.rb5tSupportPresent), rb5t_ambiguous=bool(ford.rb5tAmbiguous))
+
     self.v_desired_filter.x = self.v_desired_filter.x + self.dt * (self.output_a_target + a_prev) / 2.0
 
   def publish(self, sm, pm):
@@ -182,5 +211,44 @@ class LongitudinalPlanner:
     longitudinalPlan.shouldStop = bool(self.output_should_stop)
     longitudinalPlan.allowBrake = True
     longitudinalPlan.allowThrottle = bool(self.allow_throttle)
+
+    if self.observability_result is not None:
+      lead = sm['radarState'].leadOne
+      ford = sm['radarState'].fordObservability
+      shadow = longitudinalPlan.flashpilotObservability
+      shadow.state = self.observability_result.state
+      shadow.transition = self.observability_result.transition
+      shadow.evidenceMask = self.observability_result.evidence_mask
+      shadow.stateSinceMonoTime = self.observability_result.state_since_mono_time
+      shadow.dRel = finite_or(lead.dRel)
+      shadow.rawVRel = finite_or(lead.rawVRelV1)
+      shadow.conditionedVRel = finite_or(lead.vRel)
+      shadow.aLeadK = finite_or(lead.aLeadK)
+      shadow.leadPresent = bool(lead.present)
+      shadow.leadRadar = bool(lead.radar)
+      shadow.leadModelProb = finite_or(lead.modelProb)
+      shadow.sourceTransition = self.observability_result.source_transition
+      shadow.dRelTrend = self.observability_result.drel_trend
+      shadow.ttcTrend = self.observability_result.ttc_trend
+      shadow.trendValid = self.observability_result.trend_valid
+      shadow.syntheticTtc = self.observability_result.synthetic_ttc
+      shadow.dangerMargin = self.observability_danger_margin
+      shadow.rawMpcAcceleration = self.observability_raw_mpc_accel
+      shadow.materiallyNegative = self.observability_result.materially_negative
+      shadow.materiallyNegativeOnset = self.observability_result.materially_negative_onset
+      shadow.plannerSource = self.mpc.source
+      shadow.finalATarget = float(self.output_a_target)
+      shadow.fcw = bool(self.fcw)
+      shadow.stockAeb = bool(sm['carState'].stockAeb)
+      shadow.fordFresh = bool(ford.steerAssistFresh)
+      shadow.fordAge = finite_or(ford.steerAssistAge, 1000.0)
+      shadow.fordConfidence = int(ford.confidence)
+      shadow.fordDRel = finite_or(ford.dRel)
+      shadow.fordVRel = finite_or(ford.vRel)
+      shadow.radarBlocked = bool(ford.radarBlocked)
+      shadow.alignmentIncomplete = bool(ford.alignmentIncomplete)
+      shadow.rb5tSupportPresent = bool(ford.rb5tSupportPresent)
+      shadow.rb5tAssociationCount = int(ford.rb5tAssociationCount)
+      shadow.rb5tAmbiguous = bool(ford.rb5tAmbiguous)
 
     pm.send('longitudinalPlan', plan_send)

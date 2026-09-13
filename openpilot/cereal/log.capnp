@@ -756,6 +756,7 @@ struct RadarState @0x9a185389d6fdd05f {
                                         # this sentinel is far outside any physically valid ego
                                         # accel range and must never be treated as a real candidate
                                         # by a naive min() unless explicitly checked for validity.
+    rawVRelV1 @17 :Float32;  # diagnostic-only unconditioned vision relative velocity
 
     deprecated :group {
       aRel @3 :Float32;
@@ -764,6 +765,22 @@ struct RadarState @0x9a185389d6fdd05f {
       vLat @7 :Float32;
       fcw @10 :Bool;
     }
+  }
+
+  # Diagnostic-only Ford/RB5T observability inputs. These fields are populated by
+  # radard's passive CAN reader and are never consumed by lead selection or control.
+  fordObservability @14 :FordObservability;
+  struct FordObservability {
+    steerAssistFresh @0 :Bool;
+    steerAssistAge @1 :Float32;  # seconds
+    confidence @2 :UInt8;
+    dRel @3 :Float32;
+    vRel @4 :Float32;
+    radarBlocked @5 :Bool;
+    alignmentIncomplete @6 :Bool;
+    rb5tSupportPresent @7 :Bool;
+    rb5tAssociationCount @8 :UInt16;
+    rb5tAmbiguous @9 :Bool;
   }
 
   deprecated :group {
@@ -1250,6 +1267,51 @@ struct LongitudinalPlan @0xe00b5b3eba12876c {
   shouldStop @37: Bool;
   allowThrottle @38: Bool;
   allowBrake @39: Bool;
+  flashpilotObservability @40 :FlashpilotLongitudinalObservability;
+
+  struct FlashpilotLongitudinalObservability {
+    enum State {
+      disabled @0;
+      materialDeterioration @1;
+      noMaterialDeterioration @2;
+      disturbedAmbiguous @3;
+    }
+
+    state @0 :State;
+    transition @1 :Bool;
+    evidenceMask @2 :UInt32;
+    stateSinceMonoTime @3 :UInt64;
+    dRel @4 :Float32;
+    rawVRel @5 :Float32;
+    conditionedVRel @6 :Float32;
+    aLeadK @7 :Float32;
+    leadPresent @8 :Bool;
+    leadRadar @9 :Bool;
+    leadModelProb @10 :Float32;
+    sourceTransition @11 :Bool;
+    dRelTrend @12 :Float32;  # causal trailing-window slope, m/s
+    ttcTrend @13 :Float32;  # causal trailing-window slope, s/s
+    trendValid @14 :Bool;
+    syntheticTtc @15 :Float32;
+    dangerMargin @16 :Float32;  # minimum MPC-horizon obstacle constraint margin, m
+    rawMpcAcceleration @17 :Float32;
+    materiallyNegative @18 :Bool;
+    materiallyNegativeOnset @19 :Bool;
+    plannerSource @20 :LongitudinalPlanSource;
+    finalATarget @21 :Float32;
+    fcw @22 :Bool;
+    stockAeb @23 :Bool;
+    fordFresh @24 :Bool;
+    fordAge @25 :Float32;
+    fordConfidence @26 :UInt8;
+    fordDRel @27 :Float32;
+    fordVRel @28 :Float32;
+    radarBlocked @29 :Bool;
+    alignmentIncomplete @30 :Bool;
+    rb5tSupportPresent @31 :Bool;
+    rb5tAssociationCount @32 :UInt16;
+    rb5tAmbiguous @33 :Bool;
+  }
 
 
   solverExecutionTime @35 :Float32;
