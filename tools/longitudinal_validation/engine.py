@@ -215,12 +215,12 @@ def execute(root, manifest, candidate=False):
                           "recorded_comparison uses logged aTarget/source/stop only; solver health and danger margin in it are replay-derived, not logged solver truth."]}
 
 
-def collect_replay(root, m, planner_module, mpc_module, events, ticks, raw, context, init):
+def collect_replay(root, m, planner_module, mpc_module, events, ticks, raw, context, init, decoder=None):
   """Shared numerical core. Callers must enforce their separate admission gates."""
   # Recorded init identity can differ from replay source only as explicitly bound
   # in this manifest. No replacement of CP, personality or feature flags occurs.
   from .diagnostics import CanFrame, FordDiagnosticDecoder
-  decoder = FordDiagnosticDecoder()
+  decoder = FordDiagnosticDecoder() if decoder is None else decoder
   can_events = iter(e for e in events if e.which() == "can")
   next_can = next(can_events, None)
   rows, recorded = [], []

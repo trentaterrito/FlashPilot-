@@ -72,6 +72,14 @@ does not establish closed-loop vehicle safety or counterfactual motion. Original
 comparison's recorded-side solver/danger values are replay-derived, not logged
 solver truth; shadow records remain diagnostic only.
 
+Measurement-only diagnostic error handling: if the existing Ford/RB5T decoder
+raises ValueError, preserve the first offending frame's timestamp/address/bus/
+length/raw bytes and error, then mark all decoded Ford/RB5T output unavailable
+for the remainder of that measurement. Never retain stale corroboration or
+infer a replacement decode. Original raw CAN and recorded shadow telemetry stay
+preserved. This does not catch provenance, input, solver, finiteness or recurrence
+errors. Normal regression retains its existing decoder and failure behavior.
+
 ## Separate reviewed promotion — never performed by this command
 
 After measurements, a separately authorized human/reviewer action must document:

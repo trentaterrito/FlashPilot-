@@ -4,6 +4,7 @@ from pathlib import Path
 
 from . import engine
 from .comparison import compare_records, compute_metrics
+from .diagnostics import FordDiagnosticDecoder
 from .provenance import canonical_hash, check_sha, digest, finite_tree, require, runtime_identity, source_identity
 from .runtime_identity import qualify_route, validate_identity
 
@@ -12,6 +13,36 @@ STATUS = 'UNREVIEWED_BASELINE_MEASUREMENT'
 QUALIFIED = 'MODEL_RUNTIME_PROVENANCE_QUALIFIED_NOT_GOLDEN_APPROVAL'
 REPLAY_FIELDS = {'case_id', 'segment_ids', 'score_start_ns', 'score_end_ns', 'dt', 'join_policy',
                  'initialization', 'schedule_sha256', 'tick_count', 'first_tick_ns', 'last_tick_ns'}
+
+
+class MeasurementDiagnostics:
+  """Diagnostic loss is explicit, not solver/provenance failure or stale support.
+
+  No alternative Ford/RB5T semantics are inferred. The strict regression decoder
+  is untouched; this wrapper exists only in the explicit measurement mode.
+  """
+  def __init__(self):
+    self.decoder = FordDiagnosticDecoder()
+    self.error = None
+
+  def update(self, frames):
+    if self.error is not None:
+      return
+    for frame in frames:
+      try:
+        self.decoder.update([frame])
+      except ValueError as exc:
+        self.error = {'t_ns': frame.t_ns, 'address': frame.address, 'bus': frame.bus,
+                      'size_bytes': len(frame.data), 'raw_hex': frame.data.hex(),
+                      'reason': str(exc), 'error_type': type(exc).__name__}
+        return
+
+  def snapshot(self, now_ns):
+    if self.error is not None:
+      return {'offline_only': True, 'pass_fail_eligible': False, 'available': False,
+              'status': 'UNAVAILABLE_DECODE_ERROR', 'first_error': dict(self.error),
+              'caveat': 'All decoded Ford/RB5T diagnostics disabled after this error; raw CAN and original shadow remain preserved.'}
+    return self.decoder.snapshot(now_ns)
 
 
 def validate_request(request):
@@ -157,11 +188,15 @@ def measure(root, request):
   # Get a fresh CP reader for the common numerical core, which owns its context.
   raw, context, init = engine.cp_from_events(cp_events)
   m = {'source': source, 'runtime': runtime, 'evidence': evidence, 'replay': request['replay']}
-  rows, recorded, recurrence = engine.collect_replay(root, m, planner_module, mpc_module, events, ticks, raw, context, init)
+  decoder = MeasurementDiagnostics()
+  rows, recorded, recurrence = engine.collect_replay(root, m, planner_module, mpc_module, events, ticks, raw, context, init, decoder=decoder)
   verify_files(request)
   require(verify_environment(root, request['identities'][0]) == (source,runtime), 'source/runtime drift during measurement')
   engine.runtime_guard(root)
-  return measurement_result(request, qualification, source, runtime, rows, recorded, recurrence, len(ticks))
+  result = measurement_result(request, qualification, source, runtime, rows, recorded, recurrence, len(ticks))
+  result['ford_diagnostic_availability'] = {'available': decoder.error is None, 'first_error': decoder.error,
+    'pass_fail_eligible': False, 'scope': 'measurement-only; strict regression decoder unchanged'}
+  return result
 
 
 def measure_twice(root, request, invoke, ssh=None, python=None, bundle=None):

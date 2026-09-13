@@ -11,6 +11,7 @@ from unittest.mock import Mock
 import pytest
 
 from tools.longitudinal_validation import __main__ as cli, engine, first_golden as fg
+from tools.longitudinal_validation.diagnostics import CanFrame, FordDiagnosticDecoder
 from tools.longitudinal_validation.provenance import ValidationError, canonical_hash, digest
 from tools.longitudinal_validation.tests.test_runtime_identity import identity
 
@@ -180,6 +181,7 @@ def test_measure_without_contract_outputs_only_unreviewed(request_data, monkeypa
   monkeypatch.setattr(engine, 'CONTRACTS', None)
   out = fg.measure('/unused', request_data)
   collector.assert_called_once()
+  assert isinstance(collector.call_args.kwargs['decoder'], fg.MeasurementDiagnostics)
   assert out['status'] == fg.STATUS
   assert out['golden_approved'] is False
   assert out['regression_baseline_eligible'] is False
@@ -275,16 +277,83 @@ def test_regression_core_and_acceptance_exactly_preserved_from_pinned_baseline()
   # This proves a mechanical extraction, not solver equivalence on any hardware.
   tree = ast.parse(Path(engine.__file__).read_text())
   functions = {x.name: x for x in tree.body if isinstance(x, ast.FunctionDef)}
+  assert functions['collect_replay'].args.args[-1].arg == 'decoder'
+  assert ast.dump(functions['collect_replay'].args.defaults[-1]) == 'Constant(value=None)'
   core = functions['collect_replay'].body[1:-1]  # Exclude new docstring/tuple return.
+  # Only the optional diagnostic injection is new; strict callers omit it.
+  assert ast.unparse(core[1]) == 'decoder = FordDiagnosticDecoder() if decoder is None else decoder'
+  core[1] = ast.parse('decoder = FordDiagnosticDecoder()').body[0]
   def fingerprint(nodes):
     return hashlib.sha256('\n'.join(ast.dump(x, include_attributes=False) for x in nodes).encode()).hexdigest()
   assert fingerprint(core) == 'ea815ceee9791722cd7e0a3c7e9e28e59917cb091b4da4ab403c6876fefe1415'
   body = functions['execute'].body
   call = next(i for i, x in enumerate(body) if isinstance(x, ast.Assign) and
               isinstance(x.value, ast.Call) and ast.unparse(x.value.func) == 'collect_replay')
+  assert body[call].value.keywords == []
+  assert len(body[call].value.args) == 9
   restored = body[:call] + core + body[call+1:]
   class RestoreOriginalRecurrenceReference(ast.NodeTransformer):
     def visit_Name(self, node):
       return ast.parse('recurrence.hexdigest()', mode='eval').body if node.id == 'recurrence_sha256' else node
   restored = [RestoreOriginalRecurrenceReference().visit(x) for x in restored]
   assert fingerprint(restored) == '9b8bf8e7244761badd1e494488f7f570a7463f0a26d5e7e2a7200e5f0a25ed25'
+
+
+def recorded_decode_failure():
+  return CanFrame(12368721052122, 0x135,
+    bytes.fromhex('808003000080088000808003000080088000000000000000'), 1)
+
+
+def test_measurement_diagnostic_error_preserves_exact_frame_and_disables_stale_output():
+  frame = recorded_decode_failure()
+  decoder = fg.MeasurementDiagnostics()
+  # Seed an ordinary decoded Ford observation before the actual problematic frame.
+  decoder.update([CanFrame(frame.t_ns-1, 0x3d7, bytes(8), 2)])
+  decoder.update([frame])
+  snapshot = decoder.snapshot(frame.t_ns)
+  assert snapshot['available'] is False
+  assert snapshot['status'] == 'UNAVAILABLE_DECODE_ERROR'
+  assert snapshot['pass_fail_eligible'] is False
+  assert snapshot['first_error'] == {'t_ns': frame.t_ns, 'address': 0x135, 'bus': 1,
+    'size_bytes': 24, 'raw_hex': frame.data.hex(), 'reason': 'signal exceeds frame', 'error_type': 'ValueError'}
+  assert set(snapshot) == {'offline_only', 'pass_fail_eligible', 'available', 'status', 'first_error', 'caveat'}
+  # No subsequent frame can turn old decoded state back into corroboration.
+  decoder.update([CanFrame(frame.t_ns+1, 0x3d7, bytes(8), 2)])
+  assert decoder.snapshot(frame.t_ns+2) == snapshot
+
+
+def test_diagnostic_wrapper_preserves_successful_existing_decoding():
+  frame = CanFrame(100, 0x3d7, bytes(8), 2)
+  normal = FordDiagnosticDecoder()
+  measurement = fg.MeasurementDiagnostics()
+  normal.update([frame]); measurement.update([frame])
+  assert normal.snapshot(100) == measurement.snapshot(100)
+  assert measurement.error is None
+
+
+def test_diagnostic_wrapper_does_not_catch_unrelated_exception():
+  measurement = fg.MeasurementDiagnostics()
+  measurement.decoder = Mock()
+  measurement.decoder.update.side_effect = RuntimeError('unrelated failure')
+  with pytest.raises(RuntimeError, match='unrelated failure'):
+    measurement.update([recorded_decode_failure()])
+  assert measurement.error is None
+
+
+def test_normal_regression_default_decoder_still_raises_original_failure(monkeypatch):
+  frame = recorded_decode_failure()
+  can_event = SimpleNamespace(logMonoTime=frame.t_ns, which=lambda: 'can',
+    can=[SimpleNamespace(address=frame.address, dat=frame.data, src=frame.bus)])
+  monkeypatch.setattr(engine, 'runtime_guard', lambda *a: None)
+  monkeypatch.setattr(engine, 'evidence_metadata', lambda *a: {})
+  planner_module = SimpleNamespace(LongitudinalPlanner=lambda *a: object())
+  with pytest.raises(ValueError, match='signal exceeds frame'):
+    engine.collect_replay('/unused', {'evidence': {}}, planner_module, None, [can_event],
+      [(SimpleNamespace(logMonoTime=frame.t_ns), {})], b'cp', nullcontext(object()), object())
+
+
+def test_measurement_does_not_swallow_solver_or_provenance_errors(request_data, monkeypatch):
+  collector, _ = measurement_stubs(monkeypatch, request_data)
+  collector.side_effect = ValidationError('unhealthy solver')
+  with pytest.raises(ValidationError, match='unhealthy solver'):
+    fg.measure('/unused', request_data)
