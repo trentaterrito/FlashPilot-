@@ -32,6 +32,7 @@ from openpilot.selfdrive.controls.lib.drive_helpers import get_accel_from_plan, 
 from openpilot.selfdrive.modeld.parse_model_outputs import Parser
 from openpilot.selfdrive.modeld.compile_modeld import make_input_queues, nv12_copy_size, MODELD_INPUTS
 from openpilot.selfdrive.modeld.fill_model_msg import fill_model_msg, fill_driving_model_data, fill_pose_msg, PublishState
+from openpilot.selfdrive.modeld.runtime_provenance import bind_outputs, load_native_artifact, make_identity, mark_fallback, prepare_runtime_provenance, record_failure
 from openpilot.common.file_chunker import open_file_chunked
 from openpilot.common.hardware.usb import CHESTNUT_USB_IDS
 from openpilot.selfdrive.modeld.constants import ModelConstants, Plan
@@ -44,6 +45,13 @@ LONG_SMOOTH_SECONDS = 0.3
 MIN_LAT_CONTROL_SPEED = 0.3
 BIG_MODEL_TIMEOUT = 60
 NUDGELESS_CARSTATE_MAX_AGE = 0.2
+
+
+def provenance_failure_reason(label: str, error: Exception) -> str:
+  try:
+    return f"{label}: {type(error).__name__}: {error}"
+  except Exception:
+    return label
 
 
 def nudgeless_carstate_valid(sm, now_ns: int) -> bool:
@@ -184,7 +192,8 @@ class ModelState:
   prev_desire: np.ndarray  # for tracking the rising edge of the pulse
 
   def __init__(self, cam_w: int, cam_h: int, chestnut: bool):
-    jits = load_oob(open_file_chunked(modeld_pkl_path(chestnut)))
+    artifact_path = modeld_pkl_path(chestnut)
+    jits, artifact_receipt = load_native_artifact(load_oob, open_file_chunked(artifact_path))
     input_devices = jits['input_devices']
     self.model_device = input_devices['model']
     metadata = jits['metadata']
@@ -201,6 +210,25 @@ class ModelState:
       self.input_shapes, self.frame_skip, device=self.model_device, frame_copy_size=self.frame_copy_size)
     self.parser = Parser()
     self.run_model = jits['run_model'][(cam_w,cam_h)]
+    try:
+      artifact_sha = artifact_receipt.get('sha256') or 'unqualified'
+      identity_profile = {
+        'metadata': metadata, 'input_devices': input_devices, 'input_shapes': self.input_shapes,
+        'generation': None, 'overrides': {},
+        'smoothing_constants': {'lateral_seconds': LAT_SMOOTH_SECONDS, 'longitudinal_seconds': LONG_SMOOTH_SECONDS,
+                                'minimum_lateral_control_speed_mps': MIN_LAT_CONTROL_SPEED},
+      }
+      identity_package = {'source': 'legacy-native', 'registry': 'N/A', 'artifact_path': artifact_path}
+    except Exception:
+      artifact_sha = 'unqualified'
+      identity_profile = {'diagnostic_error': 'native_identity_input_failed'}
+      identity_package = {'source': 'legacy-native', 'registry': 'N/A'}
+    self.runtime_identity = make_identity(
+      model_id=f"native:{artifact_sha}", artifact=artifact_receipt,
+      runner='native-chestnut' if chestnut else 'native-qcom',
+      profile=identity_profile, package=identity_package,
+      native=True,
+    )
 
   def slice_outputs(self, model_outputs: np.ndarray, output_slices: dict[str, slice]) -> dict[str, np.ndarray]:
     parsed_model_outputs = {k: model_outputs[np.newaxis, v] for k,v in output_slices.items()}
@@ -291,32 +319,45 @@ def main(demo=False):
   if use_extra_client:
     cloudlog.warning(f"connected extra cam with buffer size: {vipc_client_extra.buffer_len} ({vipc_client_extra.width} x {vipc_client_extra.height})")
 
+  prepare_runtime_provenance()
   st = time.monotonic()
   cloudlog.warning("loading model")
   model = None
   if CHESTNUT:
     big_model = None
+    big_failure_reason = None
     def load_big():
-      nonlocal big_model
+      nonlocal big_model, big_failure_reason
       try:
         m = ModelState(vipc_client_main.width, vipc_client_main.height, True)
         m.warmup()
         big_model = m
-      except Exception:
+      except Exception as exc:
+        big_failure_reason = provenance_failure_reason('big_model_load_failed', exc)
+        record_failure('native-chestnut', big_failure_reason)
         cloudlog.exception("big model load failed")
     loader = threading.Thread(target=load_big, daemon=True)
     loader.start()
     loader.join(BIG_MODEL_TIMEOUT)
     model = big_model
     if model is None:
+      if big_failure_reason is None:
+        big_failure_reason = 'big_model_load_timeout' if loader.is_alive() else 'big_model_load_unavailable'
+        record_failure('native-chestnut', big_failure_reason)
       params.put_bool("ChestnutModelError", True)
     params.put_bool("ChestnutActive", model is not None)
     if model is not None:
       params.remove("ChestnutModelError")
 
-  small_model = ModelState(vipc_client_main.width, vipc_client_main.height, False) if model is None or CHESTNUT else None
+  try:
+    small_model = ModelState(vipc_client_main.width, vipc_client_main.height, False) if model is None or CHESTNUT else None
+  except Exception as exc:
+    record_failure('native-qcom', provenance_failure_reason('small_model_load_failed', exc))
+    raise
   if model is None:
     model = small_model
+    if CHESTNUT:
+      mark_fallback(None, model, big_failure_reason or 'big_model_load_unavailable')
   params.put_bool("ChestnutLoading", False)
   cloudlog.warning(f"models loaded in {time.monotonic() - st:.1f}s, modeld starting")
 
@@ -443,14 +484,18 @@ def main(demo=False):
       send_chestnut = (chestnut_state is not None and
                        run_count % round(ModelConstants.MODEL_RUN_FREQ / SERVICE_LIST['chestnutState'].frequency) == 0)
       model_output = model.run(bufs, transforms, inputs, chestnut_state.send if send_chestnut else None)
-    except Exception:
+    except Exception as exc:
+      failure_reason = provenance_failure_reason('model_execution_failed', exc)
+      record_failure('native-chestnut' if model.chestnut else 'native-qcom', failure_reason)
       if not params.get_bool("ChestnutActive"):
         raise
       # fallback to small model
       cloudlog.exception("big model failed, fall back to small")
       params.put_bool("ChestnutModelError", True)
       params.put_bool("ChestnutActive", False)
+      old_model = model
       model = small_model
+      mark_fallback(old_model, model, failure_reason)
       if chestnut_state is not None:
         chestnut_state.big = False
       run_count = 0
@@ -483,6 +528,7 @@ def main(demo=False):
 
       fill_driving_model_data(drivingdata_send, modelv2_send)
       fill_pose_msg(posenet_send, model_output, meta_main.frame_id, vipc_dropped_frames, meta_main.timestamp_eof, extrinsics_calibration_seen)
+      bind_outputs(model, [modelv2_send, drivingdata_send, posenet_send], CP, params)
       pm.send('modelV2', modelv2_send)
       pm.send('drivingModelData', drivingdata_send)
       pm.send('cameraOdometry', posenet_send)

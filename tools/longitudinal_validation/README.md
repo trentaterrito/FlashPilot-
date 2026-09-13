@@ -5,6 +5,10 @@ fail-closed tooling candidate, not a reproduced or ready permanent baseline.
 No protected case currently has a qualified executable manifest. Do not convert
 missing values into defaults to make a run pass.
 
+Future-recording instrumentation and the separate `qualify-route` evidence gate
+are documented in [RUNTIME_PROVENANCE.md](RUNTIME_PROVENANCE.md). This does not
+qualify historical cases, install instrumentation on a device, or approve goldens.
+
 ## Scope and layout
 
 This package preserves the historical `device_baseline_gate.py` replay method:

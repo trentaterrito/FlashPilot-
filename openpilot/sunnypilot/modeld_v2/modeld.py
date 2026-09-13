@@ -43,9 +43,17 @@ from openpilot.sunnypilot.modeld_v2.modeld_base import ModelStateBase
 from openpilot.sunnypilot.modeld_v2.compile_modeld import WARP_INPUTS, POLICY_INPUTS
 from openpilot.sunnypilot.models.helpers import get_verified_active_bundle, chestnut_present
 from openpilot.sunnypilot.models.artifact import ArtifactIdentityError, verified_artifact
+from openpilot.selfdrive.modeld.runtime_provenance import bind_outputs, make_identity, mark_fallback, prepare_runtime_provenance, record_failure
 
 PROCESS_NAME = "selfdrive.modeld.modeld_tinygrad"
 BIG_MODEL_TIMEOUT = 60
+
+
+def provenance_failure_reason(label: str, error: Exception) -> str:
+  try:
+    return f"{label}: {type(error).__name__}: {error}"
+  except Exception:
+    return label
 
 
 def select_devices(chestnut: bool, metadata: dict) -> tuple[str, str]:
@@ -193,6 +201,30 @@ class ModelState(ModelStateBase):
     frame_tensor = Tensor(np.zeros(yuv_size, dtype=np.uint8), device=self.WARP_DEV).contiguous().realize()
     big_frame_tensor = Tensor(np.zeros(yuv_size, dtype=np.uint8), device=self.WARP_DEV).contiguous().realize()
     self.warp(**{k: self.input_queues[k] for k in WARP_INPUTS}, frame=frame_tensor, big_frame=big_frame_tensor)
+    artifact_sha = str(bundle.models[0].artifact.downloadUri.sha256)
+    try:
+      source_package = bundle.to_dict()
+      identity_model_id = str(getattr(bundle, 'ref', '') or f"catalog:{artifact_sha}")
+      identity_profile = {
+        'resolved': self.profile, 'metadata': metadata, 'input_devices': {'warp': self.WARP_DEV, 'model': self.DEV,
+                                                                         'queue': self.QUEUE_DEV},
+        'input_shapes': {key: tuple(value.shape) for key, value in self.numpy_inputs.items()},
+        'generation': self.generation, 'overrides': overrides,
+        'smoothing_constants': {'lateral_seconds': self.LAT_SMOOTH_SECONDS,
+                                'longitudinal_seconds': self.LONG_SMOOTH_SECONDS,
+                                'minimum_lateral_control_speed_mps': self.MIN_LAT_CONTROL_SPEED},
+      }
+    except Exception:
+      source_package = None
+      identity_model_id = f"catalog:{artifact_sha}"
+      identity_profile = {'diagnostic_error': 'downloaded_identity_input_failed'}
+    self.runtime_identity = make_identity(
+      model_id=identity_model_id,
+      artifact={'sha256': artifact_sha, 'method': 'verified_artifact_snapshot', 'size_bytes': None},
+      runner='downloaded-chestnut' if self.chestnut else 'downloaded-qcom',
+      profile=identity_profile,
+      package={'source': 'catalog', 'bundle': source_package}, native=False,
+    )
 
   def warmup(self) -> None:
     dummy_frames = {k: np.zeros(self.frame_buf_params[k][3], dtype=np.uint8) for k in self._vision_input_names}
@@ -339,6 +371,7 @@ def main(demo=False):
   if use_extra_client:
     cloudlog.warning(f"connected extra cam with buffer size: {vipc_client_extra.buffer_len} ({vipc_client_extra.width} x {vipc_client_extra.height})")
 
+  prepare_runtime_provenance()
   cloudlog.warning("loading model")
   # BluePilot: the catalog and the runtime share one USB GPU probe; a big-model load that fails
   # or times out falls back to the small (qcom slot) model instead of crashing the daemon
@@ -346,21 +379,33 @@ def main(demo=False):
   model = None
   if CHESTNUT:
     big_model = None
+    big_failure_reason = None
     def load_big():
-      nonlocal big_model
+      nonlocal big_model, big_failure_reason
       try:
         m = ModelState(cam_w=vipc_client_main.width, cam_h=vipc_client_main.height, chestnut=True)
         m.warmup()
         big_model = m
-      except Exception:
+      except Exception as exc:
+        big_failure_reason = provenance_failure_reason('big_model_load_failed', exc)
+        record_failure('downloaded-chestnut', big_failure_reason)
         cloudlog.exception("chestnut load failed")
     loader = threading.Thread(target=load_big, daemon=True)
     loader.start()
     loader.join(BIG_MODEL_TIMEOUT)
     model = big_model
-  small_model = ModelState(cam_w=vipc_client_main.width, cam_h=vipc_client_main.height, chestnut=False) if model is None or CHESTNUT else None
+    if model is None and big_failure_reason is None:
+      big_failure_reason = 'big_model_load_timeout' if loader.is_alive() else 'big_model_load_unavailable'
+      record_failure('downloaded-chestnut', big_failure_reason)
+  try:
+    small_model = ModelState(cam_w=vipc_client_main.width, cam_h=vipc_client_main.height, chestnut=False) if model is None or CHESTNUT else None
+  except Exception as exc:
+    record_failure('downloaded-qcom', provenance_failure_reason('small_model_load_failed', exc))
+    raise
   if model is None:
     model = small_model
+    if CHESTNUT:
+      mark_fallback(None, model, big_failure_reason or 'big_model_load_unavailable')
   # End BluePilot
   cloudlog.warning("models loaded, modeld starting")
 
@@ -487,11 +532,15 @@ def main(demo=False):
     mt1 = time.perf_counter()
     try:
       model_output = model.run(bufs, transforms, inputs, prepare_only)
-    except Exception:
+    except Exception as exc:
+      failure_reason = provenance_failure_reason('model_execution_failed', exc)
+      record_failure('downloaded-chestnut' if model.chestnut else 'downloaded-qcom', failure_reason)
       if not model.chestnut or small_model is None:
         raise
       cloudlog.exception("chestnut failed, falling back to small")  # BluePilot: one-way failover, see load above
+      old_model = model
       model = small_model
+      mark_fallback(old_model, model, failure_reason)
       continue
     mt2 = time.perf_counter()
     model_execution_time = mt2 - mt1
@@ -518,6 +567,7 @@ def main(demo=False):
       drivingdata_send.drivingModelData.meta.laneChangeDirection = DH.lane_change_direction
 
       fill_pose_msg(posenet_send, model_output, meta_main.frame_id, vipc_dropped_frames, meta_main.timestamp_eof, live_calib_seen)
+      bind_outputs(model, [modelv2_send, drivingdata_send, posenet_send], CP, params)
       pm.send('modelV2', modelv2_send)
       pm.send('drivingModelData', drivingdata_send)
       pm.send('cameraOdometry', posenet_send)
@@ -533,6 +583,7 @@ if __name__ == "__main__":
     main(demo=args.demo)
   except KeyboardInterrupt:
     cloudlog.warning(f"child {PROCESS_NAME} got SIGINT")
-  except Exception:
+  except Exception as exc:
+    record_failure('downloaded-process', provenance_failure_reason('process_failed', exc))
     sentry.capture_exception()
     raise

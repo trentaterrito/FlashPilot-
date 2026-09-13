@@ -2598,6 +2598,9 @@ struct Touch {
 struct Event {
   logMonoTime @0 :UInt64;  # nanoseconds
   valid @67 :Bool = true;
+  # Diagnostic only: exact loaded-model identity and publication group reference.
+  # Empty in legacy recordings; never used for control or model selection.
+  modelRuntimeRef @153 :Text;
 
   union {
     # *********** log metadata ***********

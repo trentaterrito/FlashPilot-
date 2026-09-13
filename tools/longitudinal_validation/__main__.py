@@ -91,6 +91,10 @@ def main(argv=None):
   sub = parser.add_subparsers(dest="command", required=True)
   check = sub.add_parser("check-manifest")
   check.add_argument("manifest")
+  qualify = sub.add_parser("qualify-route", help="verify recorded model/runtime provenance only")
+  qualify.add_argument("rlogs", nargs="+")
+  qualify.add_argument("--source-root", required=True)
+  qualify.add_argument("--output", required=True)
   for name in ("discover", "run", "baseline", "suite"):
     p = sub.add_parser(name)
     if name != "suite":
@@ -114,6 +118,12 @@ def main(argv=None):
       print("Manifest structure complete; runtime and input validation still required.")
       return 0
     require(not Path(args.output).exists(), "output already exists; refusing overwrite")
+    if args.command == "qualify-route":
+      from .runtime_identity import qualify_route
+      result = qualify_route(args.rlogs, args.source_root)
+      save(args.output, result)
+      print(json.dumps({"status": result["status"], "output": args.output}, allow_nan=False))
+      return 0
     bundle = tool_bundle()
     if args.command == "suite":
       cases = bundle["contracts"]["cases"]
