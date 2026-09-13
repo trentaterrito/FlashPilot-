@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "policy": {
+    "resourceHashVerificationDoesNotQualifyACase": true,
+    "qualifiedEntryShape": {
+      "status": "qualified",
+      "manifest": "full approved baseline manifest containing exact runtime, evidence, replay, acceptance, and baseline-source invariants"
+    },
+    "constraint": "No case may execute as an acceptance replay unless its entry is independently reviewed and replaced with the complete qualified manifest. A case name, evidence hash, historical result, or reference-only designation is insufficient."
+  },
+  "cases": {
+    "A": {"status": "blocked", "reason": "Missing loaded-model artifact attestation and exact reviewed acceptance/golden binding."},
+    "B": {"status": "blocked", "reason": "No clean-baseline good-stop fixture is authoritatively labeled; historical dirty-runtime evidence is reference-only."},
+    "C": {"status": "blocked", "reason": "No clean-baseline good-departure fixture is authoritatively labeled; historical coverage is incomplete and reference-only."},
+    "D": {"status": "blocked", "reason": "Missing loaded-model artifact attestation and exact reviewed acceptance/golden binding."},
+    "E": {"status": "blocked", "reason": "Missing loaded-model artifact attestation and exact reviewed acceptance/golden binding."},
+    "F": {"status": "blocked", "reason": "Missing loaded-model artifact attestation and exact reviewed acceptance/golden binding."},
+    "G": {"status": "blocked", "reason": "Missing loaded-model artifact attestation and exact reviewed acceptance/golden binding."},
+    "H": {"status": "blocked", "reason": "Missing loaded-model artifact attestation and exact reviewed acceptance/golden binding."},
+    "I": {"status": "blocked", "reason": "Missing loaded-model artifact attestation and exact reviewed acceptance/golden binding."},
+    "J": {"status": "reference_only", "reason": "Stock Ford route is a descriptive whole-route reference and must never be promoted to planner replay acceptance."}
+  }
+}

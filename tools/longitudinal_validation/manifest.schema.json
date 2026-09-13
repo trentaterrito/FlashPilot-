@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:flashpilot:longitudinal-validation:manifest:1",
+  "title": "Exact device recurrent longitudinal replay manifest",
+  "description": "Structural schema. provenance.validate_manifest, protected contracts, and runtime checks additionally enforce semantic and identity invariants. No discovery output is automatically qualified.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "source", "runtime", "evidence", "replay", "acceptance"],
+  "properties": {
+    "version": {"const": 1},
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["sha", "opendbc_sha", "submodules", "files", "schema_files"],
+      "properties": {
+        "sha": {"$ref": "#/$defs/sha1"}, "opendbc_sha": {"$ref": "#/$defs/sha1"},
+        "submodules": {"type": "object", "minProperties": 6, "additionalProperties": {"$ref": "#/$defs/sha1"}},
+        "files": {"$ref": "#/$defs/hashMap"}, "schema_files": {"$ref": "#/$defs/hashMap"}
+      }
+    },
+    "runtime": {
+      "type": "object", "additionalProperties": false,
+      "required": ["system", "machine", "python_version", "python_executable_sha256", "packages", "solver_files", "acados_configuration"],
+      "properties": {
+        "system": {"const": "Linux"}, "machine": {"enum": ["aarch64", "arm64"]},
+        "python_version": {"$ref": "#/$defs/text"}, "python_executable_sha256": {"$ref": "#/$defs/sha256"},
+        "packages": {
+          "type": "object", "required": ["numpy", "casadi", "pycapnp", "comma-deps-acados"],
+          "additionalProperties": {
+            "type": "object", "additionalProperties": false, "required": ["installed", "version"],
+            "properties": {"installed": {"type": "boolean"}, "version": {"type": ["string", "null"]}}
+          }
+        },
+        "solver_files": {"$ref": "#/$defs/hashMap"},
+        "acados_configuration": {"type": "object", "minProperties": 1}
+      }
+    },
+    "evidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["route_id", "recorded_sha", "segments", "car_params_sha256", "fingerprint", "actuator_delay", "model_identity", "personalities", "feature_flags", "bookmarks"],
+      "properties": {
+        "route_id": {"$ref": "#/$defs/text"}, "recorded_sha": {"$ref": "#/$defs/sha1"},
+        "segments": {
+          "type": "array", "minItems": 1,
+          "items": {"type": "object", "additionalProperties": false, "required": ["id", "path", "sha256"],
+            "properties": {"id": {"type": "integer", "minimum": 0}, "path": {"$ref": "#/$defs/path"}, "sha256": {"$ref": "#/$defs/sha256"}}}
+        },
+        "car_params_sha256": {"$ref": "#/$defs/sha256"}, "fingerprint": {"const": "FORD_F_150_LIGHTNING_MK1"},
+        "actuator_delay": {"type": "number", "exclusiveMinimum": 0},
+        "model_identity": {
+          "type": "object", "additionalProperties": false, "required": ["name", "sha256", "evidence"],
+          "properties": {
+            "name": {"$ref": "#/$defs/text"}, "sha256": {"$ref": "#/$defs/sha256"},
+            "evidence": {"type": "object", "additionalProperties": false, "required": ["path", "sha256", "kind"],
+              "properties": {"path": {"$ref": "#/$defs/path"}, "sha256": {"$ref": "#/$defs/sha256"}, "kind": {"const": "recorded-loaded-artifact-attestation-v1"}}}
+          }
+        },
+        "personalities": {"type": "array", "minItems": 1, "items": {"enum": ["aggressive", "standard", "relaxed"]}},
+        "feature_flags": {"type": "object", "minProperties": 1},
+        "bookmarks": {"type": "array", "minItems": 1,
+          "items": {"type": "object", "additionalProperties": false, "required": ["label", "t_ns"],
+            "properties": {"label": {"$ref": "#/$defs/text"}, "t_ns": {"type": "integer", "minimum": 0}}}}
+      }
+    },
+    "replay": {
+      "type": "object", "additionalProperties": false,
+      "required": ["case_id", "segment_ids", "score_start_ns", "score_end_ns", "dt", "join_policy", "initialization", "schedule_sha256", "tick_count", "first_tick_ns", "last_tick_ns"],
+      "properties": {
+        "case_id": {"enum": ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]},
+        "segment_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "integer", "minimum": 0}},
+        "score_start_ns": {"type": "integer", "minimum": 0}, "score_end_ns": {"type": "integer", "minimum": 1},
+        "dt": {"const": 0.05}, "join_policy": {"const": "recorded-plan-trigger/latest-before-plan-v1"},
+        "initialization": {"const": "fresh-planner/full-listed-segment-preroll"},
+        "schedule_sha256": {"$ref": "#/$defs/sha256"}, "tick_count": {"type": "integer", "minimum": 1},
+        "first_tick_ns": {"type": "integer", "minimum": 0}, "last_tick_ns": {"type": "integer", "minimum": 1}
+      }
+    },
+    "acceptance": {
+      "type": "object", "additionalProperties": false, "required": ["rmse_max", "source_agreement_min", "braking_onset_error_s_max", "evidence"],
+      "properties": {
+        "rmse_max": {"type": "number", "minimum": 0}, "source_agreement_min": {"type": "number", "minimum": 0, "maximum": 1},
+        "braking_onset_error_s_max": {"type": "number", "minimum": 0}, "evidence": {"$ref": "#/$defs/text"}
+      }
+    }
+  },
+  "$defs": {
+    "sha1": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "text": {"type": "string", "minLength": 1},
+    "path": {"type": "string", "pattern": "^/"},
+    "hashMap": {"type": "object", "minProperties": 1, "additionalProperties": {"$ref": "#/$defs/sha256"}}
+  }
+}
