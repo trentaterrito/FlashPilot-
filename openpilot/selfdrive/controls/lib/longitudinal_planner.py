@@ -82,6 +82,14 @@ class LongitudinalPlanner:
     self.observability_danger_margin = 0.0
     self.observability_raw_mpc_accel = 0.0
 
+  @staticmethod
+  def _apply_lead_accel_cap(output_a_target, lead_accel_cap):
+    # Planner-owned accelCapV1 arbitration for lead anticipation.
+    # ACCEL_CAP_SENTINEL means no valid cap this tick.
+    if lead_accel_cap < ACCEL_CAP_SENTINEL:
+      return min(output_a_target, lead_accel_cap)
+    return output_a_target
+
   def update(self, sm):
     if len(sm['carControl'].orientationNED) == 3:
       accel_coast = get_coast_accel(sm['carControl'].orientationNED[1])
@@ -165,8 +173,7 @@ class LongitudinalPlanner:
     # self.output_should_stop, MPC internals, or the source label used for the other
     # candidates.
     lead_accel_cap = sm['radarState'].leadOne.accelCapV1
-    if lead_accel_cap < ACCEL_CAP_SENTINEL:
-      output_a_target = min(output_a_target, lead_accel_cap)
+    output_a_target = self._apply_lead_accel_cap(output_a_target, lead_accel_cap)
 
     self.output_a_target = np.clip(output_a_target, ACCEL_MIN, ACCEL_MAX)
 
