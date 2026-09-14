@@ -9,15 +9,20 @@ from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import Longi
 from openpilot.selfdrive.controls.lib.longitudinal_planner import LongitudinalPlanner, ACCEL_CAP_SENTINEL
 from openpilot.selfdrive.controls.lib.longitudinal_planner import get_cruise_accel
 from openpilot.selfdrive.controls.lib.longcontrol import LongCtrlState
-from openpilot.selfdrive.controls.radard import ACCEL_MAX
 from openpilot.selfdrive.controls.lib import longitudinal_planner
 
 
+class _FakeSM(dict):
+  @property
+  def logMonoTime(self):
+    return self['logMonoTime']
+
+
 def _sm_entry():
-  return {
+  return _FakeSM({
     'carControl': SimpleNamespace(orientationNED=[0.0, 0.0, 0.0]),
-    'carState': SimpleNamespace(vEgo=25.0, vCruise=25.0 / CV.KPH_TO_MS, standstill=False, aEgo=0.0,
-                                 stockAeb=False),
+    'carState': SimpleNamespace(vEgo=25.0, vCruise=25.0 / CV.KPH_TO_MS, steeringAngleDeg=0.0,
+                                 standstill=False, aEgo=0.0, stockAeb=False),
     'controlsState': SimpleNamespace(forceDecel=False, longControlState=LongCtrlState.pid),
     'modelV2': SimpleNamespace(
       meta=SimpleNamespace(disengagePredictions=SimpleNamespace(gasPressProbs=[0.0, 1.0])),
@@ -52,7 +57,7 @@ def _sm_entry():
                                       experimentalMode=False),
     'vehicleParameters': SimpleNamespace(angleOffsetDeg=0.0),
     'logMonoTime': {'modelV2': 1_000_000_000},
-  }
+  })
 
 
 class _FakeMPC:
