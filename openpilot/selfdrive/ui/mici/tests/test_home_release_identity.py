@@ -32,7 +32,7 @@ def load_home():
   state = SimpleNamespace(
     params=Mock(), usb_connected=False, usb_unknown=False, chestnut_state=None,
     experimental_mode=False, CP=SimpleNamespace(alphaLongitudinalAvailable=True),
-    has_longitudinal_control=True, recording_audio=False, is_body=False,
+    has_longitudinal_control=True, experimental_mode_available=True, recording_audio=False, is_body=False,
     sm={"deviceState": SimpleNamespace(networkType=network.wifi, networkStrength=SimpleNamespace(raw=4))},
   )
   namespace = {"log": SimpleNamespace(DeviceState=SimpleNamespace(NetworkType=network)),
@@ -88,6 +88,59 @@ def test_missing_metadata(home):
   assert home.MiciHomeLayout._get_version_text(None) == ("0.11.2", "flashpilot-dev", "Development Build", "")
   home.ui_state.params.get.side_effect = {}.get
   assert home.MiciHomeLayout._get_version_text(None) is None
+
+
+@pytest.mark.parametrize("experimental_available, confirmed, expected", [
+  (True, True, True),
+  (False, True, False),
+  (True, False, False),
+])
+def test_experimental_long_press_preserves_existing_gates(home, monkeypatch, experimental_available, confirmed, expected):
+  clock = [1.0]
+  monkeypatch.setattr(home.time, "monotonic", lambda: clock[0])
+  home.ui_state.experimental_mode_available = experimental_available
+  home.ui_state.experimental_mode_confirmed = confirmed
+  home.ui_state.experimental_mode = False
+
+  widget = SimpleNamespace(is_pressed=True, _is_pressed_prev=False, _mouse_down_t=None, _did_long_press=False)
+  home.MiciHomeLayout._update_state(widget)
+  clock[0] = 1.51
+  widget._is_pressed_prev = True
+  home.MiciHomeLayout._update_state(widget)
+
+  assert home.ui_state.experimental_mode is expected
+  if expected:
+    home.ui_state.params.put.assert_called_once_with("ExperimentalMode", True, block=True)
+  else:
+    home.ui_state.params.put.assert_not_called()
+
+
+def test_ui_state_exposes_experimental_availability_without_reowning_alpha_state():
+  source = (Path(__file__).parents[2] / "ui_state.py").read_text()
+  tree = ast.parse(source)
+  update_params = next(n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef) and n.name == "update_params")
+  assignment = next(n for n in ast.walk(update_params)
+                    if isinstance(n, ast.Assign) and any(isinstance(t, ast.Attribute) and
+                                                         t.attr == "experimental_mode_available" for t in n.targets))
+  expression = ast.Expression(assignment.value)
+
+  def evaluate(openpilot_long, alpha_available, alpha_enabled):
+    state = SimpleNamespace(
+      CP=SimpleNamespace(openpilotLongitudinalControl=openpilot_long,
+                         alphaLongitudinalAvailable=alpha_available),
+      params=SimpleNamespace(get_bool=lambda key: alpha_enabled if key == "AlphaLongitudinalEnabled" else False),
+      has_longitudinal_control=alpha_enabled if alpha_available else openpilot_long,
+    )
+    return eval(compile(expression, str(HOME_SOURCE), "eval"), {}, {"self": state})
+
+  assert evaluate(True, True, False)
+  assert evaluate(True, False, False)
+  assert evaluate(False, True, True)
+  assert not evaluate(False, True, False)
+  assert not evaluate(False, False, True)
+
+  source_segment = ast.get_source_segment(source, update_params)
+  assert "self.has_longitudinal_control = self.params.get_bool(\"AlphaLongitudinalEnabled\")" in source_segment
 
 
 @pytest.mark.parametrize("subject, expected", [
