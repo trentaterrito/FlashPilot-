@@ -22,6 +22,7 @@ STATIONARY_LEAD_RELEASE_TICKS = 3
 LIGHTNING_LEAD_RELEASE_TICKS = 30
 LIGHTNING_LEAD_RELEASE_GAP = 0.5
 LIGHTNING_LEAD_RELEASE_ACCEL = 0.15
+VISION_LEAD_RELEASE_TICKS = 15  # 150 ms at controlsd's 100 Hz cadence
 LIGHTNING_DEPART_MAX_SPEED = 2.5
 LIGHTNING_DEPART_ACCEL_START = 0.8
 LIGHTNING_DEPART_ACCEL_END = 1.2
@@ -59,6 +60,7 @@ class LongControl:
     self.motion_confirm_count = 0
     self.stationary_lead_anchor = None
     self.stationary_lead_track_id = None
+    self.vision_lead_release_count = 0
     self.lightning_lead_depart_active = False
     self.is_lightning = str(getattr(CP, 'carFingerprint', '')) == 'FORD_F_150_LIGHTNING_MK1'
     self.pid = PIDController(0.0, (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
@@ -71,6 +73,7 @@ class LongControl:
     self.motion_confirm_count = 0
     self.stationary_lead_anchor = None
     self.stationary_lead_track_id = None
+    self.vision_lead_release_count = 0
     self.lightning_lead_depart_active = False
 
   def _radar_lead_one(self, long_plan, radar_state):
@@ -91,12 +94,21 @@ class LongControl:
       return False
     return abs(float(getattr(lead_one, 'vRel', 0.0) or 0.0)) <= 0.2
 
+  def _vision_lead_one(self, long_plan, radar_state):
+    if not self.is_lightning or long_plan is None or not getattr(long_plan, 'hasLead', False) or radar_state is None:
+      return None
+    lead_one = getattr(radar_state, 'leadOne', None)
+    if lead_one is None or not getattr(lead_one, 'present', False) or getattr(lead_one, 'radar', False):
+      return None
+    return lead_one
+
   def update(self, active, CS, a_target, should_stop, accel_limits, long_plan=None, radar_state=None):
     """Update longitudinal control. This updates the state machine and runs a PID loop"""
     self.pid.neg_limit = accel_limits[0]
     self.pid.pos_limit = accel_limits[1]
 
     lead_one = self._radar_lead_one(long_plan, radar_state)
+    vision_lead_one = self._vision_lead_one(long_plan, radar_state)
     has_stationary_lead = self._is_stationary_lead(long_plan, radar_state)
     has_radar_lead = lead_one is not None
 
@@ -143,12 +155,29 @@ class LongControl:
         self.stationary_lead_latched = False
         self.motion_confirm_count = 0
 
+    vision_release_condition = bool(
+      self.long_control_state == LongCtrlState.stopping and
+      CS.standstill and
+      not should_stop and
+      not CS.brakePressed and
+      not CS.cruiseState.standstill and
+      vision_lead_one is not None and
+      float(getattr(vision_lead_one, 'vRel', -1.0)) >= 0.0
+    )
+    if vision_release_condition:
+      self.vision_lead_release_count += 1
+    else:
+      self.vision_lead_release_count = 0
+
+    vision_release_confirmed = vision_lead_one is None or self.vision_lead_release_count >= VISION_LEAD_RELEASE_TICKS
+
     # The anchor survives motion confirmation until the stopped-lead hold exits.
     # Require more demand to release that hold than the unchanged re-stop boundary.
     allow_stopping_to_pid = bool(
       self.long_control_state == LongCtrlState.stopping and
       CS.standstill and
       not self.stationary_lead_latched and
+      vision_release_confirmed and
       (not self.is_lightning or self.stationary_lead_anchor is None or
        a_target >= LIGHTNING_LEAD_RELEASE_ACCEL)
     )
@@ -159,6 +188,7 @@ class LongControl:
                                                        allow_stopping_to_pid=allow_stopping_to_pid)
     if self.is_lightning and previous_state == LongCtrlState.stopping and self.long_control_state == LongCtrlState.pid:
       self.lightning_lead_depart_active = True
+      self.vision_lead_release_count = 0
     if self.long_control_state == LongCtrlState.off:
       self.reset()
       output_accel = 0.

@@ -35,6 +35,10 @@ def confirm_motion(control, cs, lead):
   assert control.long_control_state == LongCtrlState.stopping
 
 
+def make_vision_lead(v_rel=0.0):
+  return SimpleNamespace(present=True, radar=False, radarTrackId=-1, dRel=8.0, vRel=v_rel)
+
+
 class TestStoppedLeadReleaseHysteresis(unittest.TestCase):
   def test_confirmed_stopped_lead_release_boundary(self):
     for target, expected in [(0.10, LongCtrlState.stopping), (0.149999, LongCtrlState.stopping),
@@ -121,3 +125,70 @@ class TestStoppedLeadReleaseHysteresis(unittest.TestCase):
     control, cs, lead = make_control()
     control.long_control_state = LongCtrlState.off
     assert tick(control, cs, lead, 0.10) == LongCtrlState.pid
+
+  def test_vision_closing_lead_does_not_release(self):
+    control, cs, _ = make_control()
+    lead = make_vision_lead(v_rel=-0.01)
+    for _ in range(30):
+      assert tick(control, cs, lead, 0.11) == LongCtrlState.stopping
+
+  def test_vision_nonnegative_twitch_does_not_release(self):
+    control, cs, _ = make_control()
+    lead = make_vision_lead(v_rel=0.01)
+    for _ in range(14):
+      assert tick(control, cs, lead, 0.11) == LongCtrlState.stopping
+
+  def test_vision_sustained_nonnegative_motion_releases(self):
+    control, cs, _ = make_control()
+    lead = make_vision_lead(v_rel=0.01)
+    for _ in range(14):
+      assert tick(control, cs, lead, 0.11) == LongCtrlState.stopping
+    assert tick(control, cs, lead, 0.11) == LongCtrlState.pid
+
+  def test_vision_confirmation_resets_on_negative_motion(self):
+    control, cs, _ = make_control()
+    lead = make_vision_lead(v_rel=0.01)
+    for _ in range(10):
+      assert tick(control, cs, lead, 0.11) == LongCtrlState.stopping
+    lead.vRel = -0.01
+    assert tick(control, cs, lead, 0.11) == LongCtrlState.stopping
+    lead.vRel = 0.01
+    for _ in range(14):
+      assert tick(control, cs, lead, 0.11) == LongCtrlState.stopping
+    assert tick(control, cs, lead, 0.11) == LongCtrlState.pid
+
+  def test_vision_confirmation_resets_when_release_condition_clears(self):
+    control, cs, _ = make_control()
+    lead = make_vision_lead(v_rel=0.01)
+    for _ in range(10):
+      assert tick(control, cs, lead, 0.11) == LongCtrlState.stopping
+    assert tick(control, cs, lead, 0.09) == LongCtrlState.stopping
+    for _ in range(14):
+      assert tick(control, cs, lead, 0.11) == LongCtrlState.stopping
+    assert tick(control, cs, lead, 0.11) == LongCtrlState.pid
+
+  def test_vision_confirmation_resets_when_lead_ceases_to_apply(self):
+    control, cs, _ = make_control()
+    lead = make_vision_lead(v_rel=0.01)
+    for _ in range(10):
+      assert tick(control, cs, lead, 0.11) == LongCtrlState.stopping
+    assert tick(control, cs, None, 0.09) == LongCtrlState.stopping
+    for _ in range(14):
+      assert tick(control, cs, lead, 0.11) == LongCtrlState.stopping
+    assert tick(control, cs, lead, 0.11) == LongCtrlState.pid
+
+  def test_radar_release_behavior_unchanged_by_vision_guard(self):
+    control, cs, lead = make_control()
+    confirm_motion(control, cs, lead)
+    assert tick(control, cs, lead, 0.15) == LongCtrlState.pid
+
+  def test_non_lightning_vision_release_behavior_unchanged(self):
+    control, cs, _ = make_control(fingerprint='OTHER_CAR')
+    lead = make_vision_lead(v_rel=-0.01)
+    assert tick(control, cs, lead, 0.10) == LongCtrlState.pid
+
+  def test_pid_to_stopping_behavior_unchanged_by_vision_guard(self):
+    control, cs, _ = make_control()
+    control.long_control_state = LongCtrlState.pid
+    lead = make_vision_lead(v_rel=0.1)
+    assert tick(control, cs, lead, 0.09) == LongCtrlState.stopping
