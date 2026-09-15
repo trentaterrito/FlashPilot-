@@ -178,6 +178,30 @@ class DangerPreservingVRelFilter:
     return self.x
 
 
+class CausalMedianVRelFilter:
+  """Fixed 3-sample causal median filter, independent of DangerPreservingVRelFilter.
+  Reads the same raw lead_v_rel_pred source but is a sibling path, not built on top
+  of the danger-preserving output. Feeds the repurposed vLeadK field (vision-only
+  leads) which long_mpc.py's obstacle construction consumes instead of vLead.
+  No tunable parameters: median(raw[t-2], raw[t-1], raw[t])."""
+  def __init__(self):
+    self.buf: deque[float] = deque(maxlen=3)
+
+  def reset(self, raw_vrel: float) -> float:
+    # Clear buffer rather than seeding fabricated history; next update() call
+    # accumulates fresh real samples from raw_vrel onward.
+    self.buf.clear()
+    return raw_vrel
+
+  def update(self, raw_vrel: float) -> float:
+    self.buf.append(raw_vrel)
+    if len(self.buf) < 3:
+      # Fewer than 3 real samples buffered: return the raw value directly
+      # rather than inventing history by repeating/padding the buffer.
+      return raw_vrel
+    return sorted(self.buf)[1]
+
+
 class LeadTrustState:
   """Lightweight [0,1] trust scalar: fast rise on sustained closing evidence,
   fast fall on any single non-evidence tick, hard reset on lead loss.
@@ -266,15 +290,20 @@ def apply_anticipation_cap(mpc_accel_candidate: float, ttc: float, ttc_deriv_smo
 
 
 def get_RadarState_from_vision(lead_msg: capnp._DynamicStructReader, v_ego: float, model_v_ego: float, lead_prob: float,
-                                vrel_filter: DangerPreservingVRelFilter | None = None):
+                                vrel_filter: DangerPreservingVRelFilter | None = None,
+                                median_filter: CausalMedianVRelFilter | None = None):
   lead_v_rel_pred = lead_msg.v[0] - model_v_ego
+  # Path 1 (safety-relevant, unchanged): danger-preserving conditioning -> published vRel.
   conditioned_vrel = vrel_filter.update(lead_v_rel_pred) if vrel_filter is not None else lead_v_rel_pred
+  # Path 2 (new, independent sibling): causal 3-sample median of the SAME raw source,
+  # not built on top of conditioned_vrel -> repurposed vLeadK for MPC obstacle construction.
+  median_vrel = median_filter.update(lead_v_rel_pred) if median_filter is not None else lead_v_rel_pred
   return {
     "dRel": float(lead_msg.x[0] - RADAR_TO_CAMERA),
     "yRel": float(-lead_msg.y[0]),
     "vRel": float(conditioned_vrel),
     "vLead": float(v_ego + conditioned_vrel),
-    "vLeadK": float(v_ego + conditioned_vrel),
+    "vLeadK": float(v_ego + median_vrel),
     "aLeadK": float(lead_msg.a[0]),   # never filtered
     "aLeadTau": 0.3,
     "modelProb": float(lead_prob),
@@ -387,7 +416,8 @@ class FordObservabilityShadow:
 
 def get_lead(v_ego: float, ready: bool, tracks: dict[int, Track], lead_msg: capnp._DynamicStructReader,
              model_v_ego: float, lead_prob: float, low_speed_override: bool = True,
-             vrel_filter: DangerPreservingVRelFilter | None = None) -> dict[str, Any]:
+             vrel_filter: DangerPreservingVRelFilter | None = None,
+             median_filter: CausalMedianVRelFilter | None = None) -> dict[str, Any]:
   # Determine leads, this is where the essential logic happens
   if len(tracks) > 0 and ready and lead_prob > .5:
     track = match_vision_to_track(v_ego, lead_msg, tracks)
@@ -396,14 +426,20 @@ def get_lead(v_ego: float, ready: bool, tracks: dict[int, Track], lead_msg: capn
 
   lead_dict = {'present': False}
   if track is not None:
-    # radar Track/KF1D path -- untouched by the V1 vision conditioning
+    # radar Track/KF1D path -- untouched by the V1 vision conditioning; vLeadK here
+    # is the genuine Kalman-filtered value, never touched by the median filter.
     lead_dict = track.get_RadarState(lead_prob)
     if vrel_filter is not None:
       vrel_filter.reset(lead_dict["vRel"])  # keep filter seeded to current truth, not stale
+    if median_filter is not None:
+      median_filter.reset(lead_dict["vRel"])  # clear buffer on radar-source switch, same call site
   elif (track is None) and ready and (lead_prob > .5):
-    lead_dict = get_RadarState_from_vision(lead_msg, v_ego, model_v_ego, lead_prob, vrel_filter)
-  elif vrel_filter is not None:
-    vrel_filter.x = None  # no lead this tick: reseed fresh next time, no stale carryover
+    lead_dict = get_RadarState_from_vision(lead_msg, v_ego, model_v_ego, lead_prob, vrel_filter, median_filter)
+  else:
+    if vrel_filter is not None:
+      vrel_filter.x = None  # no lead this tick: reseed fresh next time, no stale carryover
+    if median_filter is not None:
+      median_filter.reset(0.0)  # no lead this tick: clear buffer, no stale carryover
 
   if low_speed_override:
     low_speed_tracks = [c for c in tracks.values() if c.potential_low_speed_lead(v_ego)]
@@ -438,6 +474,9 @@ class RadarD:
 
     # Lightning Long V1: per-lead-index danger-preserving conditioning + anticipation state
     self.vrel_filters = [DangerPreservingVRelFilter() for _ in range(2)]
+    # Median stabilizer: independent sibling path off the same raw vRel source,
+    # feeding the repurposed vLeadK field for MPC obstacle construction only.
+    self.equilibrium_vrel_filters = [CausalMedianVRelFilter(), CausalMedianVRelFilter()]
     self.trust_states = [LeadTrustState() for _ in range(2)]
     self.ttc_states = [TTCWithSafeDerivative() for _ in range(2)]
     self.anticipation_cap = [ACCEL_CAP_SENTINEL, ACCEL_CAP_SENTINEL]  # published via LeadData.accelCapV1
@@ -501,9 +540,11 @@ class RadarD:
           self.lead_prob_filters[i].update(lead_prob)
 
       self.radar_state.leadOne = get_lead(self.v_ego, self.ready, self.tracks, leads_v3[0], model_v_ego, self.lead_prob_filters[0].x,
-                                           low_speed_override=True, vrel_filter=self.vrel_filters[0])
+                                           low_speed_override=True, vrel_filter=self.vrel_filters[0],
+                                           median_filter=self.equilibrium_vrel_filters[0])
       self.radar_state.leadTwo = get_lead(self.v_ego, self.ready, self.tracks, leads_v3[1], model_v_ego, self.lead_prob_filters[1].x,
-                                           low_speed_override=False, vrel_filter=self.vrel_filters[1])
+                                           low_speed_override=False, vrel_filter=self.vrel_filters[1],
+                                           median_filter=self.equilibrium_vrel_filters[1])
       self._log_source_transition(0, self.radar_state.leadOne)
       self._log_source_transition(1, self.radar_state.leadTwo)
 
