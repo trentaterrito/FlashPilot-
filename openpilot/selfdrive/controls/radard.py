@@ -268,13 +268,14 @@ def apply_anticipation_cap(mpc_accel_candidate: float, ttc: float, ttc_deriv_smo
 def get_RadarState_from_vision(lead_msg: capnp._DynamicStructReader, v_ego: float, model_v_ego: float, lead_prob: float,
                                 vrel_filter: DangerPreservingVRelFilter | None = None):
   lead_v_rel_pred = lead_msg.v[0] - model_v_ego
-  conditioned_vrel = vrel_filter.update(lead_v_rel_pred) if vrel_filter is not None else lead_v_rel_pred
+  if vrel_filter is not None:
+    vrel_filter.update(lead_v_rel_pred)
   return {
     "dRel": float(lead_msg.x[0] - RADAR_TO_CAMERA),
     "yRel": float(-lead_msg.y[0]),
-    "vRel": float(conditioned_vrel),
-    "vLead": float(v_ego + conditioned_vrel),
-    "vLeadK": float(v_ego + conditioned_vrel),
+    "vRel": float(lead_v_rel_pred),
+    "vLead": float(v_ego + lead_v_rel_pred),
+    "vLeadK": float(v_ego + lead_v_rel_pred),
     "aLeadK": float(lead_msg.a[0]),   # never filtered
     "aLeadTau": 0.3,
     "modelProb": float(lead_prob),
@@ -510,8 +511,9 @@ class RadarD:
       # Lightning Long V1: trust/TTC/anticipation-cap update, published on
       # LeadData.accelCapV1 for the planner's own min() arbitration to consume.
       for i, lead in enumerate((self.radar_state.leadOne, self.radar_state.leadTwo)):
-        trust = self.trust_states[i].update(bool(lead.present), float(lead.vRel), float(lead.dRel), float(lead.modelProb))
-        ttc, ttc_deriv = self.ttc_states[i].update(bool(lead.present), float(lead.vRel), float(lead.dRel))
+        conditioned_vrel = self.vrel_filters[i].x if lead.present and not lead.radar else float(lead.vRel)
+        trust = self.trust_states[i].update(bool(lead.present), float(conditioned_vrel), float(lead.dRel), float(lead.modelProb))
+        ttc, ttc_deriv = self.ttc_states[i].update(bool(lead.present), float(conditioned_vrel), float(lead.dRel))
         if lead.present and trust > 0.0:
           cap = A_MAX + anticipation_term(ttc, ttc_deriv, trust)
         else:
