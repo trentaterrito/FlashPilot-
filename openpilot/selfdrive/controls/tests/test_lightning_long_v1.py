@@ -1,8 +1,10 @@
+import inspect
 import math
+import os
 import random
 
 from openpilot.selfdrive.controls.radard import (
-  DangerPreservingVRelFilter, LeadTrustState, TTCWithSafeDerivative,
+  DangerPreservingVRelFilter, LeadTrustState, TTCWithSafeDerivative, CausalMedianVRelFilter,
   anticipation_term, apply_anticipation_cap, A_MAX, TTC_SENTINEL, TTC_DERIV_RC,
 )
 
@@ -147,3 +149,111 @@ def test_no_nan_or_inf_outputs():
     cap = A_MAX + anticipation_term(ttc, deriv, trust)
     for val in (v, trust, ttc, deriv, cap):
       assert not (math.isnan(val) or math.isinf(val))
+
+
+# --- vLeadK median stabilizer (Path 2: independent sibling of DangerPreservingVRelFilter) ---
+
+def test_median_suppresses_one_frame_excursion():
+  f = CausalMedianVRelFilter()
+  for _ in range(3):
+    f.update(0.0)  # prime buffer to steady state [0, 0, 0]
+  out = f.update(5.0)  # single-tick outlier
+  assert out == 0.0, f"one-frame excursion leaked through median: {out}"
+  # subsequent flat samples continue to stay suppressed / recover cleanly
+  assert f.update(0.0) == 0.0
+  assert f.update(0.0) == 0.0
+
+
+def test_median_two_frame_excursion_matches_hand_computed_values():
+  f = CausalMedianVRelFilter()
+  for _ in range(3):
+    f.update(0.0)  # buffer = [0, 0, 0]
+  # sequence: 0,0,0 (primed) -> 5,5 (2-tick excursion) -> 0,0
+  out1 = f.update(5.0)  # buf=[0,0,5] -> median 0
+  out2 = f.update(5.0)  # buf=[0,5,5] -> median 5
+  out3 = f.update(0.0)  # buf=[5,5,0] -> median 5
+  out4 = f.update(0.0)  # buf=[5,0,0] -> median 0
+  assert out1 == 0.0
+  assert out2 == 5.0
+  assert out3 == 5.0
+  assert out4 == 0.0
+
+
+def test_median_sustained_step_has_exact_one_tick_delay():
+  f = CausalMedianVRelFilter()
+  for _ in range(3):
+    f.update(0.0)  # buffer = [0, 0, 0], steady state
+  out1 = f.update(4.0)  # buf=[0,0,4] -> median 0 (not yet converged)
+  out2 = f.update(4.0)  # buf=[0,4,4] -> median 4 (converged after 1 tick delay)
+  out3 = f.update(4.0)  # buf=[4,4,4] -> median 4 (stays converged)
+  assert out1 == 0.0, "step should not appear on the same tick it starts"
+  assert out2 == 4.0, "step should be reflected exactly one tick after it starts"
+  assert out3 == 4.0
+
+
+def test_safety_path_vrel_unaffected_by_median_stabilizer():
+  # Path 1 (DangerPreservingVRelFilter) is unchanged by this task; rerun the
+  # existing Gate-1-style property to confirm zero regression on the safety feed.
+  f = DangerPreservingVRelFilter()
+  f.reset(0.0)
+  rng = random.Random(0)
+  for _ in range(2000):
+    raw = rng.uniform(-6.0, 6.0)
+    prev = f.x
+    out = f.update(raw)
+    if raw <= prev:
+      assert out <= raw + 1e-12, f"worsening tick understated danger: raw={raw} prev={prev} out={out}"
+
+
+def test_ttc_and_trust_consume_vrel_not_vleadk():
+  # Static call-site check: LeadTrustState/TTCWithSafeDerivative must be driven by
+  # lead.vRel (path 1's conditioned output), never by the new lead.vLeadK.
+  from openpilot.selfdrive.controls import radard
+  src = inspect.getsource(radard.RadarD.update)
+  calls = [l for l in src.splitlines() if "trust_states[i].update" in l or "ttc_states[i].update" in l]
+  assert len(calls) == 2
+  for line in calls:
+    assert "lead.vRel" in line, f"trust/TTC call site does not read lead.vRel: {line}"
+    assert "vLeadK" not in line, f"trust/TTC call site unexpectedly reads vLeadK: {line}"
+
+
+def test_mpc_process_lead_reads_vleadk_not_vlead():
+  # Avoid importing long_mpc.py directly: it pulls in the acados-generated
+  # solver module which is not built in this test environment. Read the
+  # source text directly to check the exact obstacle-construction line.
+  import openpilot.selfdrive.controls.lib.longitudinal_mpc_lib as pkg
+  long_mpc_path = os.path.join(os.path.dirname(pkg.__file__), "long_mpc.py")
+  with open(long_mpc_path) as f:
+    src = f.read()
+  process_lead_src = src.split("def process_lead(self, lead):")[1].split("\n\n  def ")[0]
+  v_lead_line = [l for l in process_lead_src.splitlines() if l.strip().startswith("v_lead = lead.")][0]
+  assert "lead.vLeadK" in v_lead_line, f"process_lead did not switch to vLeadK: {v_lead_line}"
+  assert "lead.vLead " not in v_lead_line and not v_lead_line.strip().endswith("lead.vLead")
+
+
+def test_radar_backed_lead_vleadk_is_kalman_not_median():
+  # Construct a radar-Track-path lead and confirm its vLeadK comes from KF1D,
+  # not from the new median filter, which must only apply to the vision-only branch.
+  from openpilot.selfdrive.controls.radard import Track, KalmanParams
+  from openpilot.common.realtime import DT_MDL
+  kalman_params = KalmanParams(DT_MDL)
+  track = Track(identifier=0, v_lead=20.0, kalman_params=kalman_params)
+  for _ in range(10):
+    track.update(d_rel=40.0, y_rel=0.0, v_rel=-2.0, v_lead=18.0)
+  state = track.get_RadarState(model_prob=1.0)
+  # The Kalman-filtered speed state is the authoritative vLeadK for radar-backed leads.
+  assert math.isclose(state["vLeadK"], float(track.kf.x[0][0]), rel_tol=1e-9)
+  # Sanity: this is a real Kalman estimate, not merely echoing the raw measurement.
+  assert state["vLeadK"] != 20.0
+
+
+def test_median_buffer_resets_cleanly_on_lead_loss():
+  # Mirrors the existing vrel_filter reset-on-lead-loss pattern: no stale samples
+  # from a prior unrelated lead should influence the filter after reacquisition.
+  f = CausalMedianVRelFilter()
+  for v in (10.0, 10.0, 10.0):
+    f.update(v)  # buffer full of a prior lead's high-closing-rate history
+  f.reset(0.0)  # simulate get_lead()'s no-lead / source-switch branch
+  assert len(f.buf) == 0, "reset did not clear the median buffer"
+  out = f.update(-1.0)  # first real sample of a newly-acquired, unrelated lead
+  assert out == -1.0, f"stale samples from prior lead leaked into new lead: {out}"
