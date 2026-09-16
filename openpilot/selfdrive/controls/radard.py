@@ -19,6 +19,31 @@ from openpilot.selfdrive.pandad import can_capnp_to_list
 # Default lead acceleration decay set to 50% at 1s
 _LEAD_ACCEL_TAU = 1.5
 
+# Number of consecutive model frames abs(aLeadK) must stay below 0.5 before the
+# existing instant reset (aLeadTau.x = _LEAD_ACCEL_TAU) is allowed to fire. This
+# suppresses reset chatter from brief noisy threshold crossings without altering
+# the reset value, the active-branch target, or the FirstOrderFilter dynamics.
+_LEAD_ACCEL_RESET_CONFIRM_FRAMES = 3
+
+
+def update_lead_accel_tau(a_lead_tau: FirstOrderFilter, a_lead_k: float, sub_threshold_frames: int) -> int:
+  """Debounced version of the existing aLeadTau reset/active-branch logic.
+
+  Behavior is identical to the prior unconditional `if abs(aLeadK) < 0.5: reset
+  else: update(0.0)` except the reset only fires after
+  _LEAD_ACCEL_RESET_CONFIRM_FRAMES consecutive sub-threshold frames. Any frame
+  with abs(aLeadK) >= 0.5 immediately clears the counter and takes the existing
+  active-branch path unchanged. Returns the updated sub_threshold_frames counter.
+  """
+  if abs(a_lead_k) < 0.5:
+    sub_threshold_frames += 1
+    if sub_threshold_frames >= _LEAD_ACCEL_RESET_CONFIRM_FRAMES:
+      a_lead_tau.x = _LEAD_ACCEL_TAU
+  else:
+    sub_threshold_frames = 0
+    a_lead_tau.update(0.0)
+  return sub_threshold_frames
+
 # radar tracks
 SPEED, ACCEL = 0, 1     # Kalman filter states enum
 
@@ -55,6 +80,7 @@ class Track:
     self.identifier = identifier
     self.cnt = 0
     self.aLeadTau = FirstOrderFilter(_LEAD_ACCEL_TAU, 0.45, DT_MDL)
+    self._sub_threshold_frames = 0
     self.K_A = kalman_params.A
     self.K_C = kalman_params.C
     self.K_K = kalman_params.K
@@ -75,10 +101,7 @@ class Track:
     self.aLeadK = float(self.kf.x[ACCEL][0])
 
     # Learn if constant acceleration
-    if abs(self.aLeadK) < 0.5:
-      self.aLeadTau.x = _LEAD_ACCEL_TAU
-    else:
-      self.aLeadTau.update(0.0)
+    self._sub_threshold_frames = update_lead_accel_tau(self.aLeadTau, self.aLeadK, self._sub_threshold_frames)
 
     self.cnt += 1
 

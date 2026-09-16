@@ -257,3 +257,99 @@ def test_median_buffer_resets_cleanly_on_lead_loss():
   assert len(f.buf) == 0, "reset did not clear the median buffer"
   out = f.update(-1.0)  # first real sample of a newly-acquired, unrelated lead
   assert out == -1.0, f"stale samples from prior lead leaked into new lead: {out}"
+
+
+# --- aLeadTau reset-debounce (3-frame confirmation) ---
+
+def _make_tau_filter(x0=1.5):
+  from openpilot.common.filter_simple import FirstOrderFilter
+  from openpilot.common.realtime import DT_MDL
+  return FirstOrderFilter(x0, 0.45, DT_MDL)
+
+
+def test_one_frame_dip_does_not_reset():
+  from openpilot.selfdrive.controls.radard import update_lead_accel_tau
+  tau = _make_tau_filter(x0=0.2)  # simulate an already-decayed, persistent tau
+  frames = 0
+  frames = update_lead_accel_tau(tau, a_lead_k=0.1, sub_threshold_frames=frames)  # 1 sub-threshold frame
+  assert frames == 1
+  assert tau.x == 0.2, f"single sub-threshold frame reset tau early: {tau.x}"
+
+
+def test_two_frame_dip_does_not_reset():
+  from openpilot.selfdrive.controls.radard import update_lead_accel_tau
+  tau = _make_tau_filter(x0=0.2)
+  frames = 0
+  for a in (0.1, -0.2):  # 2 consecutive sub-threshold frames
+    frames = update_lead_accel_tau(tau, a_lead_k=a, sub_threshold_frames=frames)
+  assert frames == 2
+  assert tau.x == 0.2, f"two-frame dip reset tau before confirmation: {tau.x}"
+
+
+def test_three_consecutive_frames_resets_exactly_to_1_5():
+  from openpilot.selfdrive.controls.radard import update_lead_accel_tau, _LEAD_ACCEL_TAU
+  tau = _make_tau_filter(x0=0.2)
+  frames = 0
+  for a in (0.1, -0.2, 0.3):  # 3rd consecutive sub-threshold frame confirms the reset
+    frames = update_lead_accel_tau(tau, a_lead_k=a, sub_threshold_frames=frames)
+  assert frames == 3
+  assert tau.x == _LEAD_ACCEL_TAU, f"reset did not fire exactly on the 3rd confirmed frame: {tau.x}"
+
+
+def test_above_threshold_frame_clears_confirmation_counter():
+  from openpilot.selfdrive.controls.radard import update_lead_accel_tau
+  tau = _make_tau_filter(x0=0.2)
+  frames = 0
+  for a in (0.1, -0.2):  # 2 sub-threshold frames, one short of confirming reset
+    frames = update_lead_accel_tau(tau, a_lead_k=a, sub_threshold_frames=frames)
+  assert frames == 2
+  frames = update_lead_accel_tau(tau, a_lead_k=0.9, sub_threshold_frames=frames)  # clears counter
+  assert frames == 0, "above-threshold frame did not clear the confirmation counter"
+  assert tau.x != 1.5, "counter-clearing frame incorrectly performed a reset"
+
+
+def test_sustained_above_threshold_behavior_remains_update_toward_zero():
+  from openpilot.selfdrive.controls.radard import update_lead_accel_tau
+  tau = _make_tau_filter(x0=1.5)
+  frames = 0
+  prev = tau.x
+  for _ in range(80):  # sustained |aLeadK| >= 0.5
+    frames = update_lead_accel_tau(tau, a_lead_k=1.2, sub_threshold_frames=frames)
+    assert tau.x <= prev + 1e-12, "active branch is not monotonically decaying toward 0"
+    prev = tau.x
+    assert frames == 0, "confirmation counter should stay cleared while active"
+  assert tau.x < 0.05, f"sustained active branch failed to approach its existing target of 0: {tau.x}"
+
+
+def test_behavior_stable_after_confirmed_reset():
+  from openpilot.selfdrive.controls.radard import update_lead_accel_tau, _LEAD_ACCEL_TAU
+  tau = _make_tau_filter(x0=0.1)
+  frames = 0
+  for a in (0.1, 0.1, 0.1):  # confirm the reset
+    frames = update_lead_accel_tau(tau, a_lead_k=a, sub_threshold_frames=frames)
+  assert tau.x == _LEAD_ACCEL_TAU
+  for a in (0.1, 0.05, 0.2, 0.0):  # continued sub-threshold frames after confirmation
+    frames = update_lead_accel_tau(tau, a_lead_k=a, sub_threshold_frames=frames)
+    assert tau.x == _LEAD_ACCEL_TAU, "tau drifted away from the existing reset value after confirmation"
+
+
+def test_vision_median_path_unaffected_by_tau_debounce():
+  # The median equilibrium path (vLeadK for vision-only leads) never touches the
+  # new reset-debounce helper; the pre-existing hardcoded "aLeadTau": 0.3 literal
+  # for vision-only leads (no radar Track/Kalman filter runs for this branch) is
+  # unrelated and unchanged by this candidate.
+  import inspect
+  from openpilot.selfdrive.controls import radard
+  src = inspect.getsource(radard.get_RadarState_from_vision)
+  assert "update_lead_accel_tau" not in src
+  assert '"aLeadTau": 0.3' in src, "pre-existing vision aLeadTau literal must remain unchanged"
+
+
+def test_ttc_trust_unaffected_by_tau_debounce():
+  # TTC/trust/accelCapV1 machinery must not reference the radar Track's
+  # aLeadTau debounce in any way; it only ever consumes the safety vRel path.
+  import inspect
+  from openpilot.selfdrive.controls import radard
+  for fn in (radard.anticipation_term, radard.apply_anticipation_cap, radard.TTCWithSafeDerivative.update, radard.LeadTrustState.update):
+    src = inspect.getsource(fn)
+    assert "update_lead_accel_tau" not in src and "aLeadTau" not in src, f"{fn.__name__} unexpectedly references the lead-tau debounce"
