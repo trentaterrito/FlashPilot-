@@ -294,7 +294,11 @@ class LongitudinalMpc:
     v_ego = self.x0[1]
     if lead is not None and lead.status:
       x_lead = lead.dRel
-      v_lead = lead.vLead
+      # FlashPilot: consume the causal-median-stabilized vLeadK for MPC obstacle
+      # construction (ported from V1 SHA b8226fe9). vLead remains the danger-preserving
+      # safety feed used elsewhere (e.g. TTC/trust); this substitution is scoped to the
+      # MPC's own equilibrium/obstacle-distance calculation only.
+      v_lead = lead.vLeadK
       a_lead = lead.aLeadK
       a_lead_tau = lead.aLeadTau
     else:
