@@ -3,7 +3,10 @@
   url = ../../commaai/panda.git
 [submodule "opendbc"]
   path = opendbc_repo
-  url = ../../commaai/opendbc.git
+  url = https://github.com/trentaterrito/flashpilot-opendbc.git
+  # FlashPilot: repointed from ../../commaai/opendbc.git to carry the
+  # F-150 Lightning fingerprint patch and V2-1 actuator-delay commit
+  # (5d0839d1), neither of which exist on commaai/opendbc directly.
 [submodule "msgq"]
   path = msgq_repo
   url = ../../commaai/msgq.git
