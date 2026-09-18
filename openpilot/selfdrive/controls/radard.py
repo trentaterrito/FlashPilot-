@@ -133,14 +133,78 @@ def match_vision_to_track(v_ego: float, lead: capnp._DynamicStructReader, tracks
     return None
 
 
-def get_RadarState_from_vision(lead_msg: capnp._DynamicStructReader, v_ego: float, model_v_ego: float, lead_prob: float):
+# FlashPilot: accepted vision velocity conditioning (ported unchanged from
+# V1 SHA b8226fe98b24759f60f7299ba935bca9f7d4caba). Applies only to the
+# vision-only lead branch (radar=False); the radar Track/KF1D path is untouched.
+# aLeadK is never filtered. Physically validated: worsening/more-negative vRel
+# remains immediate (never smoothed away); the causal 3-sample median materially
+# reduced highway rubberband reversal amplitude without material braking/catch-up
+# regression. Do not retune RC_SLOW or the median window without new physical
+# validation.
+RC_SLOW = 0.15  # s; vRel recovery-direction EMA time constant
+
+
+class DangerPreservingVRelFilter:
+  """Asymmetric vRel conditioner: worsening (more negative / more closing) samples
+  pass through immediately (never smoothed away), recovery samples are EMA-smoothed."""
+  def __init__(self):
+    self.x: float | None = None
+
+  def reset(self, raw_vrel: float) -> float:
+    self.x = raw_vrel
+    return self.x
+
+  def update(self, raw_vrel: float, dt: float = DT_MDL) -> float:
+    if self.x is None:
+      return self.reset(raw_vrel)
+    if raw_vrel <= self.x:
+      # worsening/equal: more-negative wins => never less protective than raw
+      self.x = min(raw_vrel, self.x)
+    else:
+      alpha = dt / (RC_SLOW + dt)
+      self.x = (1.0 - alpha) * self.x + alpha * raw_vrel
+    return self.x
+
+
+class CausalMedianVRelFilter:
+  """Fixed 3-sample causal median filter, independent of DangerPreservingVRelFilter.
+  Reads the same raw lead_v_rel_pred source but is a sibling path, not built on top
+  of the danger-preserving output. Feeds the repurposed vLeadK field (vision-only
+  leads) which long_mpc.py's obstacle construction consumes instead of vLead.
+  No tunable parameters: median(raw[t-2], raw[t-1], raw[t])."""
+  def __init__(self):
+    self.buf: deque[float] = deque(maxlen=3)
+
+  def reset(self, raw_vrel: float) -> float:
+    # Clear buffer rather than seeding fabricated history; next update() call
+    # accumulates fresh real samples from raw_vrel onward.
+    self.buf.clear()
+    return raw_vrel
+
+  def update(self, raw_vrel: float) -> float:
+    self.buf.append(raw_vrel)
+    if len(self.buf) < 3:
+      # Fewer than 3 real samples buffered: return the raw value directly
+      # rather than inventing history by repeating/padding the buffer.
+      return raw_vrel
+    return sorted(self.buf)[1]
+
+
+def get_RadarState_from_vision(lead_msg: capnp._DynamicStructReader, v_ego: float, model_v_ego: float, lead_prob: float,
+                                vrel_filter: DangerPreservingVRelFilter | None = None,
+                                median_filter: CausalMedianVRelFilter | None = None):
   lead_v_rel_pred = lead_msg.v[0] - model_v_ego
+  # Path 1 (safety-relevant, unchanged): danger-preserving conditioning -> published vRel.
+  conditioned_vrel = vrel_filter.update(lead_v_rel_pred) if vrel_filter is not None else lead_v_rel_pred
+  # Path 2 (independent sibling): causal 3-sample median of the SAME raw source,
+  # not built on top of conditioned_vrel -> repurposed vLeadK for MPC obstacle construction.
+  median_vrel = median_filter.update(lead_v_rel_pred) if median_filter is not None else lead_v_rel_pred
   return {
     "dRel": float(lead_msg.x[0] - RADAR_TO_CAMERA),
     "yRel": float(-lead_msg.y[0]),
-    "vRel": float(lead_v_rel_pred),
-    "vLead": float(v_ego + lead_v_rel_pred),
-    "vLeadK": float(v_ego + lead_v_rel_pred),
+    "vRel": float(conditioned_vrel),
+    "vLead": float(v_ego + conditioned_vrel),
+    "vLeadK": float(v_ego + median_vrel),
     "aLeadK": float(lead_msg.a[0]),
     "aLeadTau": 0.3,
     "modelProb": float(lead_prob),
@@ -151,7 +215,9 @@ def get_RadarState_from_vision(lead_msg: capnp._DynamicStructReader, v_ego: floa
 
 
 def get_lead(v_ego: float, ready: bool, tracks: dict[int, Track], lead_msg: capnp._DynamicStructReader,
-             model_v_ego: float, lead_prob: float, low_speed_override: bool = True) -> dict[str, Any]:
+             model_v_ego: float, lead_prob: float, low_speed_override: bool = True,
+             vrel_filter: DangerPreservingVRelFilter | None = None,
+             median_filter: CausalMedianVRelFilter | None = None) -> dict[str, Any]:
   # Determine leads, this is where the essential logic happens
   if len(tracks) > 0 and ready and lead_prob > .5:
     track = match_vision_to_track(v_ego, lead_msg, tracks)
@@ -161,8 +227,17 @@ def get_lead(v_ego: float, ready: bool, tracks: dict[int, Track], lead_msg: capn
   lead_dict = {'present': False}
   if track is not None:
     lead_dict = track.get_RadarState(lead_prob)
+    if vrel_filter is not None:
+      vrel_filter.reset(lead_dict["vRel"])  # keep filter seeded to current truth, not stale
+    if median_filter is not None:
+      median_filter.reset(lead_dict["vRel"])  # clear buffer on radar-source switch, same call site
   elif (track is None) and ready and (lead_prob > .5):
-    lead_dict = get_RadarState_from_vision(lead_msg, v_ego, model_v_ego, lead_prob)
+    lead_dict = get_RadarState_from_vision(lead_msg, v_ego, model_v_ego, lead_prob, vrel_filter, median_filter)
+  else:
+    if vrel_filter is not None:
+      vrel_filter.x = None  # no lead this tick: reseed fresh next time, no stale carryover
+    if median_filter is not None:
+      median_filter.reset(0.0)  # no lead this tick: clear buffer, no stale carryover
 
   if low_speed_override:
     low_speed_tracks = [c for c in tracks.values() if c.potential_low_speed_lead(v_ego)]
@@ -190,6 +265,9 @@ class RadarD:
     self.radar_state_valid = False
 
     self.ready = False
+
+    self.vrel_filters = [DangerPreservingVRelFilter() for _ in range(2)]
+    self.equilibrium_vrel_filters = [CausalMedianVRelFilter(), CausalMedianVRelFilter()]
 
   def update(self, sm: messaging.SubMaster, rr: car.RadarData):
     self.ready = sm.seen['modelV2']
@@ -238,8 +316,12 @@ class RadarD:
         else:
           self.lead_prob_filters[i].update(lead_prob)
 
-      self.radar_state.leadOne = get_lead(self.v_ego, self.ready, self.tracks, leads_v3[0], model_v_ego, self.lead_prob_filters[0].x, low_speed_override=True)
-      self.radar_state.leadTwo = get_lead(self.v_ego, self.ready, self.tracks, leads_v3[1], model_v_ego, self.lead_prob_filters[1].x, low_speed_override=False)
+      self.radar_state.leadOne = get_lead(self.v_ego, self.ready, self.tracks, leads_v3[0], model_v_ego, self.lead_prob_filters[0].x,
+                                           low_speed_override=True, vrel_filter=self.vrel_filters[0],
+                                           median_filter=self.equilibrium_vrel_filters[0])
+      self.radar_state.leadTwo = get_lead(self.v_ego, self.ready, self.tracks, leads_v3[1], model_v_ego, self.lead_prob_filters[1].x,
+                                           low_speed_override=False, vrel_filter=self.vrel_filters[1],
+                                           median_filter=self.equilibrium_vrel_filters[1])
 
   def publish(self, pm: messaging.PubMaster):
     assert self.radar_state is not None

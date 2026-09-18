@@ -288,7 +288,9 @@ class LongitudinalMpc:
     v_ego = self.x0[1]
     if lead is not None and lead.present:
       x_lead = lead.dRel
-      v_lead = lead.vLead
+      # FlashPilot: vLeadK is the causal 3-sample median of raw vision vRel for
+      # vision-only leads (radar-backed vLeadK is the genuine KF1D value, untouched).
+      v_lead = lead.vLeadK
       a_lead = lead.aLeadK
       a_lead_tau = lead.aLeadTau
     else:
