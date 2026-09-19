@@ -567,10 +567,12 @@ struct PandaState @0xa7649e2575e4591e {
   voltage @0 :UInt32;
   current @1 :UInt32;
 
-  # these fields are not used by openpilot, but they're
-  # reserved for forks building alternate experiences.
-  controlsAllowedRESERVED1 @38 :Bool;
-  controlsAllowedRESERVED2 @39 :Bool;
+  # FlashPilot V2-5: independent lateral authorization is distinct from the
+  # ordinary longitudinal controlsAllowed permission.
+  controlsAllowedLateral @38 :Bool;
+  madsSafetyEnabled @39 :Bool;
+  lateralRevocationReason @40 :UInt8;
+  lateralAuthorizationGates @41 :UInt16;
 
   enum FaultStatus {
     none @0;
@@ -877,6 +879,11 @@ struct ControlsState @0x97ff69c53601abf1 {
   curvature @37 :Float32;  # path curvature from vehicle model
   desiredCurvature @61 :Float32;  # lag adjusted curvatures used by lateral controllers
   forceDecel @51 :Bool;
+  # FlashPilot V2-5 host-to-Panda lateral-only authorization heartbeat.
+  # These fields must never be used to derive longitudinal control state.
+  madsSession @67 :Bool;
+  madsAuthorized @68 :Bool;
+  madsEligible @69 :Bool;
 
   lateralControlState :union {
     pidState @53 :LateralPIDState;
