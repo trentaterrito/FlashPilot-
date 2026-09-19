@@ -11,6 +11,7 @@ from openpilot.common.realtime import config_realtime_process, DT_CTRL, Priority
 from openpilot.common.swaglog import cloudlog
 
 from opendbc.car.car_helpers import interfaces
+from opendbc.car.ford.values import CAR
 from opendbc.car.vehicle_model import VehicleModel
 from openpilot.selfdrive.controls.lib.drive_helpers import clip_curvature
 from openpilot.selfdrive.controls.lib.latcontrol import LatControl
@@ -19,6 +20,7 @@ from openpilot.selfdrive.controls.lib.latcontrol_angle import LatControlAngle, S
 from openpilot.selfdrive.controls.lib.latcontrol_curvature import LatControlCurvature
 from openpilot.selfdrive.controls.lib.latcontrol_torque import LatControlTorque
 from openpilot.selfdrive.controls.lib.longcontrol import LongControl
+from openpilot.selfdrive.controls.lib.flashpilot_aol import AlwaysOnLateralHost, AlwaysOnLateralResult, lateral_sources_healthy
 from openpilot.selfdrive.modeld.modeld import LAT_SMOOTH_SECONDS
 from openpilot.selfdrive.locationd.helpers import PoseCalibrator, Pose
 
@@ -40,12 +42,15 @@ class Controls:
 
     self.sm = messaging.SubMaster(['lateralDelay', 'vehicleParameters', 'lateralTorqueParameters', 'modelV2', 'selfdriveState',
                                    'extrinsicsCalibration', 'deviceMotion', 'longitudinalPlan', 'lateralManeuverPlan', 'carState', 'carOutput',
-                                   'driverMonitoringState', 'onroadEvents', 'driverAssistance', 'radarState'], poll='selfdriveState')
+                                   'driverMonitoringState', 'onroadEvents', 'driverAssistance', 'radarState', 'pandaStates', 'deviceState'],
+                                  poll='selfdriveState')
     self.pm = messaging.PubMaster(['carControl', 'controlsState'])
 
     self.steer_limited_by_safety = False
     self.curvature = 0.0
     self.desired_curvature = 0.0
+    self.always_on_lateral = AlwaysOnLateralHost(self.CP.carFingerprint == CAR.FORD_F_150_LIGHTNING_MK1)
+    self.always_on_lateral_result = AlwaysOnLateralResult()
 
     self.pose_calibrator = PoseCalibrator()
     self.calibrated_pose: Pose | None = None
@@ -99,6 +104,26 @@ class Controls:
     standstill = abs(CS.vEgo) <= max(self.CP.minSteerSpeed, 0.3) or CS.standstill
     CC.latActive = self.sm['selfdriveState'].active and not CS.steerFaultTemporary and not CS.steerFaultPermanent and \
                    (not standstill or self.CP.steerAtStandstill)
+
+    # FlashPilot V2-5 only replaces lateral authorization after Panda has
+    # selected the matching Lightning safety overlay. CC.enabled, CC.longActive,
+    # and all Long inputs remain below this block and intentionally untouched.
+    pandas = self.sm['pandaStates']
+    valid_panda = (len(pandas) == 1 and str(pandas[0].safetyModel) == 'ford' and len(self.CP.safetyConfigs) == 1 and
+                   pandas[0].safetyParam == self.CP.safetyConfigs[0].safetyParam)
+    panda_enabled = valid_panda and pandas[0].madsSafetyEnabled
+    safety_ready = valid_panda and not pandas[0].safetyRxChecksInvalid and not pandas[0].faults and not pandas[0].heartbeatLost
+    driver_ready = not self.sm['driverMonitoringState'].noResponseForceDecel
+    self.always_on_lateral_result = self.always_on_lateral.update(
+      onroad=self.sm['deviceState'].started,
+      fresh=lateral_sources_healthy(self.sm),
+      eligible=safety_ready and self.always_on_lateral.vehicle_eligible(
+        CS, self.sm['onroadEvents'], driver_ready, panda_enabled=panda_enabled),
+      panda_enabled=panda_enabled,
+      panda_authorized=valid_panda and pandas[0].controlsAllowedLateral)
+    if self.always_on_lateral_result.session:
+      CC.latActive = self.always_on_lateral_result.authorized and (not standstill or self.CP.steerAtStandstill)
+
     CC.longActive = CC.enabled and not any(e.overrideLongitudinal for e in self.sm['onroadEvents']) and self.CP.openpilotLongitudinalControl
 
     actuators = CC.actuators
@@ -206,6 +231,9 @@ class Controls:
     cs.ufAccelCmd = float(self.LoC.pid.f)
     cs.forceDecel = bool(self.sm['driverMonitoringState'].noResponseForceDecel or
                          (self.sm['selfdriveState'].state == State.softDisabling))
+    cs.madsSession = self.always_on_lateral_result.session
+    cs.madsEligible = self.always_on_lateral_result.eligible
+    cs.madsAuthorized = self.always_on_lateral_result.authorized
 
     # trigger the car's stock driver monitoring escalation
     CC.driverMonitoringEscalation = cs.forceDecel

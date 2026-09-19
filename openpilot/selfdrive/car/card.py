@@ -20,6 +20,7 @@ from opendbc.car.car_helpers import get_car, interfaces
 from opendbc.car.interfaces import CarInterfaceBase, RadarInterfaceBase
 from openpilot.selfdrive.pandad import can_capnp_to_list, can_list_to_can_capnp
 from openpilot.selfdrive.car.cruise import VCruiseHelper
+from openpilot.selfdrive.car.flashpilot_aol import configure_flashpilot_aol
 
 REPLAY = "REPLAY" in os.environ
 
@@ -116,6 +117,11 @@ class Car:
       safety_config = structs.CarParams.SafetyConfig()
       safety_config.safetyModel = structs.CarParams.SafetyModel.noOutput
       self.CP.safetyConfigs = [safety_config]
+
+    # FlashPilot V2-5: default-off, Lightning angle-only selection for the
+    # lateral authorization safety overlay. It does not alter engagement or Long.
+    configure_flashpilot_aol(self.CP, self.params.get_bool("FlashPilotMads"),
+                             os.environ.get("FLASHPILOT_ANGLE_ENABLED", "0") == "1")
 
     if self.CP.secOcRequired:
       # Copy user key if available
