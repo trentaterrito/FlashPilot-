@@ -6,6 +6,10 @@ export NUMEXPR_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
 export VECLIB_MAXIMUM_THREADS=1
 
+# FlashPilot V2-4 B-arm: inherited by manager and its card child. CarController
+# still limits the angle-domain branch to FORD_F_150_LIGHTNING_MK1.
+export FLASHPILOT_ANGLE_ENABLED=1
+
 # models get lower priority than ui
 # - ui is ~5ms
 # - modeld is 20ms
