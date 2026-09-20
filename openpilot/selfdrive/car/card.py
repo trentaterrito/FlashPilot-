@@ -20,6 +20,7 @@ from opendbc.car.car_helpers import get_car, interfaces
 from opendbc.car.interfaces import CarInterfaceBase, RadarInterfaceBase
 from openpilot.selfdrive.pandad import can_capnp_to_list, can_list_to_can_capnp
 from openpilot.selfdrive.car.cruise import VCruiseHelper
+from openpilot.selfdrive.car.ford_lateral_diagnostics import FordLateralDiagnostics
 
 REPLAY = "REPLAY" in os.environ
 
@@ -75,6 +76,8 @@ class Car:
     self.initialized_prev = False
 
     self.last_actuators_output = structs.CarControl.Actuators()
+    self._ford_lateral_diagnostics = FordLateralDiagnostics()
+    self._ford_diag_car_state_mono = 0
 
     self.params = Params()
 
@@ -214,6 +217,7 @@ class Car:
     cs_send.carState.canErrorCounter = self.can_rcv_cum_timeout_counter
     cs_send.carState.cumLagMs = -self.rk.remaining * 1000.
     self.pm.send('carState', cs_send)
+    self._ford_diag_car_state_mono = cs_send.logMonoTime
 
     if RD is not None:
       tracks_msg = messaging.new_message('radarTracks')
@@ -235,9 +239,14 @@ class Car:
       # send car controls over can
       now_nanos = self.can_log_mono_time if REPLAY else int(time.monotonic() * 1e9)
       self.last_actuators_output, can_sends = self.CI.apply(CC, now_nanos)
-      self.pm.send('sendcan', can_list_to_can_capnp(can_sends, msgtype='sendcan', valid=CS.canValid))
+      sendcan_msg = can_list_to_can_capnp(can_sends, msgtype='sendcan', valid=CS.canValid)
+      self.pm.send('sendcan', sendcan_msg)
 
       self.CC_prev = CC
+      self._ford_lateral_diagnostics.publish(
+        self.CI.CC, apply_mono_time=now_nanos, sendcan_payload=sendcan_msg,
+        car_control_mono_time=self.sm.logMonoTime['carControl'], car_state_mono_time=self._ford_diag_car_state_mono,
+        valid=bool(CS.canValid and self.sm.valid['carControl']))
 
   def step(self):
     CS, RD = self.state_update()
