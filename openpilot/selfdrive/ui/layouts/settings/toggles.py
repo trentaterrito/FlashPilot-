@@ -8,6 +8,7 @@ from openpilot.system.ui.lib.application import gui_app
 from openpilot.system.ui.lib.multilang import tr, tr_noop
 from openpilot.system.ui.widgets import DialogResult
 from openpilot.selfdrive.ui.ui_state import ui_state
+from openpilot.selfdrive.ui.layouts.settings.flashpilot_aol import is_flashpilot_aol_supported, set_flashpilot_mads
 
 PERSONALITY_TO_INT = log.LongitudinalPersonality.schema.enumerants
 
@@ -28,6 +29,9 @@ DESCRIPTIONS = {
     "without a turn signal activated while driving over 31 mph (50 km/h)."
   ),
   "AlwaysOnDM": tr_noop("Enable driver monitoring even when openpilot is not engaged."),
+  "FlashPilotMads": tr_noop(
+    "Keeps lateral steering assistance available independently of longitudinal/cruise control."
+  ),
   'RecordFront': tr_noop("Upload data from the cabin camera and help improve the driver monitoring algorithm."),
   "IsMetric": tr_noop("Display speed in km/h instead of mph."),
   "RecordAudio": tr_noop("Record and store microphone audio while driving. The audio will be included in the dashcam video in comma connect."),
@@ -71,6 +75,12 @@ class TogglesLayout(Widget):
         DESCRIPTIONS["AlwaysOnDM"],
         "monitoring.png",
         False,
+      ),
+      "FlashPilotMads": (
+        lambda: tr("Always-On Lateral"),
+        DESCRIPTIONS["FlashPilotMads"],
+        "chffr_wheel.png",
+        True,
       ),
       "RecordFront": (
         lambda: tr("Record and Upload Cabin Camera"),
@@ -193,6 +203,11 @@ class TogglesLayout(Widget):
     else:
       self._toggles["ExperimentalMode"].set_description(e2e_description)
 
+    # V2-5 only supports the Lightning path. Keep the persisted preference if
+    # the device is later used on another platform, but do not surface a
+    # setting which cannot select a supported safety configuration there.
+    self._toggles["FlashPilotMads"].set_visible(is_flashpilot_aol_supported(ui_state.CP))
+
     self._update_experimental_mode_icon()
 
     # TODO: make a param control list item so we don't need to manage internal state as much here
@@ -235,6 +250,10 @@ class TogglesLayout(Widget):
   def _toggle_callback(self, state: bool, param: str):
     if param == "ExperimentalMode":
       self._handle_experimental_mode_toggle(state)
+      return
+
+    if param == "FlashPilotMads":
+      set_flashpilot_mads(self._params, state)
       return
 
     self._params.put_bool(param, state, block=True)
