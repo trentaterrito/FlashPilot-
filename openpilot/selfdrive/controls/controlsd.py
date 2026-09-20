@@ -11,7 +11,7 @@ from openpilot.common.realtime import config_realtime_process, DT_CTRL, Priority
 from openpilot.common.swaglog import cloudlog
 
 from opendbc.car.car_helpers import interfaces
-from opendbc.car.ford.values import CAR
+from opendbc.car.ford.values import CAR, FordSafetyFlags
 from opendbc.car.vehicle_model import VehicleModel
 from openpilot.selfdrive.controls.lib.drive_helpers import clip_curvature
 from openpilot.selfdrive.controls.lib.latcontrol import LatControl
@@ -49,7 +49,14 @@ class Controls:
     self.steer_limited_by_safety = False
     self.curvature = 0.0
     self.desired_curvature = 0.0
-    self.always_on_lateral = AlwaysOnLateralHost(self.CP.carFingerprint == CAR.FORD_F_150_LIGHTNING_MK1)
+    # Keep the AOL session active through a Panda communications reset only
+    # when card selected the Lightning MADS overlay. This makes CC.latActive
+    # fail closed on Panda authorization instead of falling back to global
+    # selfdriveState.active while the Panda is still revoked.
+    aol_configured = (self.CP.carFingerprint == CAR.FORD_F_150_LIGHTNING_MK1 and
+                      any(cfg.safetyModel == car.CarParams.SafetyModel.ford and
+                          cfg.safetyParam & FordSafetyFlags.LIGHTNING_MADS for cfg in self.CP.safetyConfigs))
+    self.always_on_lateral = AlwaysOnLateralHost(aol_configured)
     self.always_on_lateral_result = AlwaysOnLateralResult()
 
     self.pose_calibrator = PoseCalibrator()

@@ -236,7 +236,19 @@ bool Panda::can_receive(std::vector<can_frame>& out_vec) {
 }
 
 void Panda::can_reset_communications() {
-  handle->control_write(0xc0, 0, 0);
+  // The reset deliberately revokes lateral safety state in Panda firmware.
+  // PandaSafety must subsequently reapply the already-selected safety mode;
+  // authorization itself is still rebuilt only by fresh normal heartbeats.
+  comms_reset_pending_ = true;
+  if (handle) {
+    handle->control_write(0xc0, 0, 0);
+  }
+}
+
+bool Panda::consume_comms_reset() {
+  const bool reset = comms_reset_pending_;
+  comms_reset_pending_ = false;
+  return reset;
 }
 
 bool Panda::unpack_can_buffer(uint8_t *data, uint32_t &size, std::vector<can_frame> &out_vec) {

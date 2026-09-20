@@ -32,8 +32,8 @@ class AlwaysOnLateralResult:
 
 class AlwaysOnLateralHost:
   """A lateral-only veto: it has no Long inputs, outputs, or side effects."""
-  def __init__(self, lightning: bool):
-    self.lightning = lightning
+  def __init__(self, configured: bool):
+    self.configured = configured
     self.previous_authorized = False
     self.await_panda_clear = True
 
@@ -47,7 +47,10 @@ class AlwaysOnLateralHost:
 
   def update(self, *, onroad: bool, fresh: bool, eligible: bool, panda_enabled: bool,
              panda_authorized: bool) -> AlwaysOnLateralResult:
-    session = bool(self.lightning and panda_enabled)
+    # Session tracks the card-selected AOL configuration, not the dynamic
+    # Panda health bit. This preserves a fail-closed host veto during a Panda
+    # communications reset: authorization is false until Panda has rebuilt it.
+    session = bool(self.configured)
     ready = bool(session and onroad and fresh and eligible)
     if not ready:
       self.await_panda_clear = True

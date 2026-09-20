@@ -3,6 +3,14 @@
 #include "common/swaglog.h"
 
 void PandaSafety::configureSafetyMode(bool is_onroad) {
+  if (panda_->consume_comms_reset()) {
+    // 0xc0 fails safe by clearing Panda's dynamic lateral state. Re-send the
+    // existing CarParams safety configuration once communications are back;
+    // this does not restore controlsAllowedLateral or bypass its fresh gates.
+    LOGW("Panda communications reset: reconfiguring safety mode");
+    safety_configured_ = false;
+  }
+
   if (is_onroad && !safety_configured_) {
     updateMultiplexingMode();
 

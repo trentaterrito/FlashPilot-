@@ -46,6 +46,7 @@ struct can_frame {
 class Panda {
 private:
   std::unique_ptr<PandaSpiHandle> handle;
+  bool comms_reset_pending_ = false;
 
 public:
   Panda(std::string serial);
@@ -84,6 +85,7 @@ public:
   void can_send(const capnp::List<cereal::CanData>::Reader &can_data_list);
   bool can_receive(std::vector<can_frame>& out_vec);
   void can_reset_communications();
+  bool consume_comms_reset();
 
 protected:
   // for unit tests

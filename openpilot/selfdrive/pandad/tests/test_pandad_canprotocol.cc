@@ -9,6 +9,7 @@ struct PandaTest : public Panda {
   void test_can_send();
   void test_can_recv(uint32_t chunk_size = 0);
   void test_chunked_can_recv();
+  void test_checksum_reset_requires_safety_reconfigure();
 
   std::map<int, std::string> test_data;
   int can_list_size = 0;
@@ -95,6 +96,23 @@ void PandaTest::test_can_recv(uint32_t rx_chunk_size) {
   }
 }
 
+void PandaTest::test_checksum_reset_requires_safety_reconfigure() {
+  std::vector<uint8_t> packed_data;
+  this->pack_can_buffer(can_data_list, [&](uint8_t *chunk, size_t size) {
+    packed_data.insert(packed_data.end(), chunk, &chunk[size]);
+  });
+  CHECK(!packed_data.empty());
+
+  // This is the same corrupted Panda CAN packet condition that invokes the
+  // normal 0xc0 communications reset path in production.
+  packed_data[sizeof(can_header)] ^= 0x01U;
+  uint32_t size = packed_data.size();
+  std::vector<can_frame> frames;
+  CHECK(!this->unpack_can_buffer(packed_data.data(), size, frames));
+  CHECK(this->consume_comms_reset());
+  CHECK(!this->consume_comms_reset());
+}
+
 void test_can_protocol() {
   for (auto hw_type : {cereal::PandaState::PandaType::DOS, cereal::PandaState::PandaType::RED_PANDA}) {
     for (int can_list_size : {1, 3, 5, 10, 30, 60, 100, 200}) {
@@ -103,6 +121,9 @@ void test_can_protocol() {
 
       PandaTest receive_test(can_list_size, hw_type);
       receive_test.test_can_recv();
+
+      PandaTest checksum_test(can_list_size, hw_type);
+      checksum_test.test_checksum_reset_requires_safety_reconfigure();
 
       PandaTest chunked_receive_test(can_list_size, hw_type);
       chunked_receive_test.test_can_recv(0x40);
