@@ -25,7 +25,9 @@ from openpilot.common.realtime import config_realtime_process, DT_MDL
 from openpilot.common.transformations.camera import DEVICE_CAMERAS
 from openpilot.system.camerad.cameras.nv12_info import get_nv12_info
 from openpilot.common.transformations.model import get_warp_matrix
-from openpilot.selfdrive.controls.lib.desire_helper import DesireHelper
+from openpilot.selfdrive.controls.lib.desire_helper import (
+  DesireHelper, NUDGELESS_CONFIRMATION_TIME, carstate_source_valid, nudgeless_lane_change_confirmation_time,
+)
 from openpilot.selfdrive.controls.lib.drive_helpers import get_accel_from_plan, should_stop, smooth_value, get_curvature_from_plan
 from openpilot.selfdrive.modeld.parse_model_outputs import Parser
 from openpilot.selfdrive.modeld.compile_modeld import make_input_queues, nv12_copy_size, MODELD_INPUTS
@@ -41,6 +43,13 @@ LAT_SMOOTH_SECONDS = 0.0
 LONG_SMOOTH_SECONDS = 0.3
 MIN_LAT_CONTROL_SPEED = 0.3
 BIG_MODEL_TIMEOUT = 60
+NUDGELESS_CARSTATE_MAX_AGE = 0.2
+
+
+def nudgeless_carstate_valid(sm, now_ns: int) -> bool:
+  age = (now_ns - sm.logMonoTime["carState"]) * 1e-9
+  return carstate_source_valid(sm.valid["carState"], sm.alive["carState"], sm.freq_ok["carState"],
+                               age, NUDGELESS_CARSTATE_MAX_AGE)
 
 
 def get_action_from_model(model_output: dict[str, np.ndarray], prev_action: log.ModelDataV2.Action,
@@ -314,7 +323,10 @@ def main(demo=False):
   # messaging
   pub_socks = ["modelV2", "drivingModelData", "cameraOdometry"] + (["chestnutState"] if CHESTNUT else [])
   pm = PubMaster(pub_socks)
-  sm = SubMaster(["deviceState", "carState", "narrowRoadCameraState", "extrinsicsCalibration", "driverMonitoringState", "carControl", "lateralDelay"])
+  # modeld samples the 100 Hz carState service at its 20 Hz model cadence.
+  # Declare that cadence so the nudgeless freshness gate can use freq_ok.
+  sm = SubMaster(["deviceState", "carState", "narrowRoadCameraState", "extrinsicsCalibration", "driverMonitoringState", "carControl", "lateralDelay"],
+                 frequency=1 / DT_MDL)
 
   publish_state = PublishState()
   params = Params()
@@ -344,7 +356,9 @@ def main(demo=False):
   long_delay = CP.longitudinalActuatorDelay + LONG_SMOOTH_SECONDS
   prev_action = log.ModelDataV2.Action()
 
-  DH = DesireHelper()
+  nudgeless_confirmation_time = nudgeless_lane_change_confirmation_time(CP, params)
+  DH = DesireHelper(nudgeless_enabled=nudgeless_confirmation_time is not None,
+                    nudgeless_confirmation_time=nudgeless_confirmation_time or NUDGELESS_CONFIRMATION_TIME)
 
   while True:
     # Keep receiving frames until we are at least 1 frame ahead of previous extra frame
@@ -460,7 +474,8 @@ def main(demo=False):
       l_lane_change_prob = desire_state[log.Desire.laneChangeLeft]
       r_lane_change_prob = desire_state[log.Desire.laneChangeRight]
       lane_change_prob = l_lane_change_prob + r_lane_change_prob
-      DH.update(sm['carState'], sm['carControl'].latActive, lane_change_prob)
+      bsm_valid = CP.enableBsm and nudgeless_carstate_valid(sm, time.monotonic_ns())
+      DH.update(sm['carState'], sm['carControl'].latActive, lane_change_prob, bsm_valid=bsm_valid)
       modelv2_send.modelV2.meta.laneChangeState = DH.lane_change_state
       modelv2_send.modelV2.meta.laneChangeDirection = DH.lane_change_direction
 

@@ -9,6 +9,8 @@ from openpilot.system.ui.lib.multilang import tr, tr_noop
 from openpilot.system.ui.widgets import DialogResult
 from openpilot.selfdrive.ui.ui_state import ui_state
 from openpilot.selfdrive.ui.layouts.settings.flashpilot_aol import is_flashpilot_aol_supported, set_flashpilot_mads
+from openpilot.selfdrive.controls.lib.desire_helper import NudgelessLaneChangeMode
+from opendbc.car.ford.values import CAR as FORD_CAR
 
 PERSONALITY_TO_INT = log.LongitudinalPersonality.schema.enumerants
 
@@ -31,6 +33,9 @@ DESCRIPTIONS = {
   "AlwaysOnDM": tr_noop("Enable driver monitoring even when openpilot is not engaged."),
   "FlashPilotMads": tr_noop(
     "Keeps lateral steering assistance available independently of longitudinal/cruise control."
+  ),
+  "FlashPilotNudgelessLaneChange": tr_noop(
+    "Start a lane change after the selected continuous turn-signal time only when the requested-side blindspot sensor is clear."
   ),
   'RecordFront': tr_noop("Upload data from the cabin camera and help improve the driver monitoring algorithm."),
   "IsMetric": tr_noop("Display speed in km/h instead of mph."),
@@ -111,6 +116,16 @@ class TogglesLayout(Widget):
       selected_index=self._params.get("LongitudinalPersonality", return_default=True),
       icon="speed_limit.png"
     )
+    self._nudgeless_lane_change_setting = multiple_button_item(
+      lambda: tr("Nudgeless Lane Change"),
+      lambda: tr(DESCRIPTIONS["FlashPilotNudgelessLaneChange"]),
+      buttons=[lambda: tr("Requires Nudge"), lambda: tr("0.5 Seconds"), lambda: tr("1.0 Second")],
+      button_width=170,
+      selected_index=self._nudgeless_mode(),
+      callback=self._set_nudgeless_lane_change,
+      icon="chffr_wheel.png",
+    )
+    self._nudgeless_lane_change_setting.action_item.set_enabled(lambda: not ui_state.engaged)
 
     self._toggles = {}
     self._locked_toggles = set()
@@ -144,6 +159,7 @@ class TogglesLayout(Widget):
       # insert longitudinal personality after NDOG toggle
       if param == "DisengageOnAccelerator":
         self._toggles["LongitudinalPersonality"] = self._long_personality_setting
+        self._toggles["FlashPilotNudgelessLaneChange"] = self._nudgeless_lane_change_setting
 
     self._update_experimental_mode_icon()
     self._scroller = Scroller(list(self._toggles.values()), line_separator=True, spacing=0)
@@ -207,6 +223,9 @@ class TogglesLayout(Widget):
     # the device is later used on another platform, but do not surface a
     # setting which cannot select a supported safety configuration there.
     self._toggles["FlashPilotMads"].set_visible(is_flashpilot_aol_supported(ui_state.CP))
+    self._nudgeless_lane_change_setting.set_visible(
+      ui_state.CP is not None and ui_state.CP.carFingerprint == FORD_CAR.FORD_F_150_LIGHTNING_MK1)
+    self._nudgeless_lane_change_setting.action_item.set_selected_button(self._nudgeless_mode())
 
     self._update_experimental_mode_icon()
 
@@ -262,3 +281,18 @@ class TogglesLayout(Widget):
 
   def _set_longitudinal_personality(self, button_index: int):
     self._params.put("LongitudinalPersonality", button_index, block=True)
+
+  def _nudgeless_mode(self) -> int:
+    try:
+      return int(NudgelessLaneChangeMode(int(self._params.get("FlashPilotNudgelessLaneChange", return_default=True) or 0)))
+    except (TypeError, ValueError):
+      return int(NudgelessLaneChangeMode.REQUIRES_NUDGE)
+
+  def _set_nudgeless_lane_change(self, mode: int):
+    # The selector is disabled while engaged; modeld reads this persistent
+    # Lightning-only preference when the next onroad session starts.
+    try:
+      selected_mode = NudgelessLaneChangeMode(mode)
+    except ValueError:
+      selected_mode = NudgelessLaneChangeMode.REQUIRES_NUDGE
+    self._params.put("FlashPilotNudgelessLaneChange", int(selected_mode), block=True)
