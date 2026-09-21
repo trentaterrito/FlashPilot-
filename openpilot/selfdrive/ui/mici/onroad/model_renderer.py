@@ -36,6 +36,11 @@ LANE_LINE_COLORS = {
 }
 
 
+def should_render_lateral_geometry(lateral_active: bool) -> bool:
+  """Lane/path geometry represents active steering, not global Long state."""
+  return lateral_active
+
+
 @dataclass
 class ModelPoints:
   raw_points: np.ndarray = field(default_factory=lambda: np.empty((0, 3), dtype=np.float32))
@@ -138,10 +143,14 @@ class ModelRenderer(Widget):
         self._update_leads(radar_state, path_x_array)
       self._transform_dirty = False
 
-    # Draw elements (hide when disengaged)
-    if ui_state.status != UIStatus.DISENGAGED:
-      self._draw_lane_lines()
-      self._draw_path(sm)
+    # Global UI status remains Long/global engagement. Geometry instead follows
+    # the final, fail-closed host lateral gate so AOL can be visible with Long
+    # OFF without presenting the UI as globally engaged.
+    lateral_active = ui_state.effective_lateral_active
+    if should_render_lateral_geometry(lateral_active):
+      lateral_only = ui_state.status == UIStatus.DISENGAGED
+      self._draw_lane_lines(lateral_only=lateral_only)
+      self._draw_path(sm, lateral_only=lateral_only)
 
     # if render_lead_indicator and radar_state:
     #   self._draw_lead_indicator()
@@ -283,7 +292,7 @@ class ModelRenderer(Widget):
 
     return LeadVehicle(glow=glow, chevron=chevron, fill_alpha=int(fill_alpha))
 
-  def _get_ll_color(self, prob: float, adjacent: bool, left: bool):
+  def _get_ll_color(self, prob: float, adjacent: bool, left: bool, *, lateral_only: bool):
     alpha = np.clip(prob, 0.0, 0.7)
     if adjacent:
       _base_color = LANE_LINE_COLORS.get(ui_state.status, LANE_LINE_COLORS[UIStatus.DISENGAGED])
@@ -301,12 +310,16 @@ class ModelRenderer(Widget):
     else:
       color = rl.Color(255, 255, 255, int(alpha * 255))
 
-    if ui_state.status == UIStatus.DISENGAGED:
+    if lateral_only:
+      # Neutral geometry makes lateral activity visible without borrowing the
+      # engaged (Long/global) color language.
+      color = rl.Color(255, 255, 255, int(alpha * 255))
+    elif ui_state.status == UIStatus.DISENGAGED:
       color = rl.Color(0, 0, 0, int(alpha * 255))
 
     return color
 
-  def _draw_lane_lines(self):
+  def _draw_lane_lines(self, *, lateral_only: bool):
     """Draw lane lines and road edges. Two closest lines should be green (lane line or road edges)."""
     offset = np.array([self._rect.x, self._rect.y], dtype=np.float32)
 
@@ -314,7 +327,7 @@ class ModelRenderer(Widget):
       if lane_line.projected_points.size == 0:
         continue
 
-      color = self._get_ll_color(float(self._lane_line_probs[i]), i in (1, 2), i in (0, 1))
+      color = self._get_ll_color(float(self._lane_line_probs[i]), i in (1, 2), i in (0, 1), lateral_only=lateral_only)
       draw_polygon(self._rect, lane_line.projected_points + offset, color)
 
     for i, road_edge in enumerate(self._road_edges):
@@ -322,10 +335,11 @@ class ModelRenderer(Widget):
         continue
 
       # if closest lane lines are not confident, make road edges green
-      color = self._get_ll_color(float(1.0 - self._road_edge_stds[i]), float(self._lane_line_probs[i + 1]) < 0.25, i == 0)
+      color = self._get_ll_color(float(1.0 - self._road_edge_stds[i]), float(self._lane_line_probs[i + 1]) < 0.25, i == 0,
+                                 lateral_only=lateral_only)
       draw_polygon(self._rect, road_edge.projected_points + offset, color)
 
-  def _draw_path(self, sm):
+  def _draw_path(self, sm, *, lateral_only: bool):
     """Draw path with dynamic coloring based on mode and throttle state."""
     if not self._path.projected_points.size:
       return
@@ -335,7 +349,9 @@ class ModelRenderer(Widget):
 
     path_pts = self._path.projected_points + np.array([self._rect.x, self._rect.y], dtype=np.float32)
 
-    if self._experimental_mode:
+    if lateral_only:
+      draw_polygon(self._rect, path_pts, rl.Color(255, 255, 255, 90))
+    elif self._experimental_mode:
       # Draw with acceleration coloring
       if ui_state.status == UIStatus.DISENGAGED:
         draw_polygon(self._rect, path_pts, rl.Color(0, 0, 0, 90))

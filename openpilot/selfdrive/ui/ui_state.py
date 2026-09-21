@@ -25,6 +25,11 @@ class UIStatus(Enum):
   OVERRIDE = "override"
 
 
+def final_lateral_presentation_active(started: bool, car_control_healthy: bool, lat_active: bool) -> bool:
+  """Fail closed before presenting active lateral steering."""
+  return bool(started and car_control_healthy and lat_active)
+
+
 class ChestnutState(Enum):
   DISCONNECTED = "disconnected"
   UNCOMPILED = "uncompiled"
@@ -125,6 +130,17 @@ class UIState:
   @property
   def engaged(self) -> bool:
     return self.started and self.sm["selfdriveState"].enabled
+
+  @property
+  def effective_lateral_active(self) -> bool:
+    """Presentation-only view of the final host lateral gate.
+
+    `carControl.latActive` is assigned after the V2-5 AOL/Panda authorization
+    gate in controlsd. Keep this separate from global `engaged`: Long OFF / Lat
+    ON is correctly globally disengaged while still having active steering.
+    """
+    return final_lateral_presentation_active(
+      self.started, self.sm.all_checks(["carControl"]), self.sm["carControl"].latActive)
 
   def is_onroad(self) -> bool:
     return self.started
