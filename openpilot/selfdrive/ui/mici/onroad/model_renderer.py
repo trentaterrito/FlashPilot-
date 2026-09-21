@@ -35,6 +35,9 @@ LANE_LINE_COLORS = {
   UIStatus.ENGAGED: rl.Color(0, 255, 64, 255),
 }
 
+ACTIVE_LATERAL_COLOR = LANE_LINE_COLORS[UIStatus.ENGAGED]
+INACTIVE_LATERAL_COLOR = LANE_LINE_COLORS[UIStatus.DISENGAGED]
+
 
 def should_render_lateral_geometry(lateral_active: bool) -> bool:
   """Lane/path geometry represents active steering, not global Long state."""
@@ -146,11 +149,12 @@ class ModelRenderer(Widget):
     # Global UI status remains Long/global engagement. Geometry instead follows
     # the final, fail-closed host lateral gate so AOL can be visible with Long
     # OFF without presenting the UI as globally engaged.
-    lateral_active = ui_state.effective_lateral_active
-    if should_render_lateral_geometry(lateral_active):
+    lateral_authorized = ui_state.effective_lateral_active
+    lateral_command_active = ui_state.effective_lateral_command_active
+    if should_render_lateral_geometry(lateral_authorized):
       lateral_only = ui_state.status == UIStatus.DISENGAGED
-      self._draw_lane_lines(lateral_only=lateral_only)
-      self._draw_path(sm, lateral_only=lateral_only)
+      self._draw_lane_lines(lateral_command_active=lateral_command_active, lateral_only=lateral_only)
+      self._draw_path(sm, lateral_command_active=lateral_command_active, lateral_only=lateral_only)
 
     # if render_lead_indicator and radar_state:
     #   self._draw_lead_indicator()
@@ -292,7 +296,8 @@ class ModelRenderer(Widget):
 
     return LeadVehicle(glow=glow, chevron=chevron, fill_alpha=int(fill_alpha))
 
-  def _get_ll_color(self, prob: float, adjacent: bool, left: bool, *, lateral_only: bool):
+  def _get_ll_color(self, prob: float, adjacent: bool, left: bool, *, lateral_command_active: bool,
+                    lateral_only: bool):
     alpha = np.clip(prob, 0.0, 0.7)
     if adjacent:
       _base_color = LANE_LINE_COLORS.get(ui_state.status, LANE_LINE_COLORS[UIStatus.DISENGAGED])
@@ -310,16 +315,17 @@ class ModelRenderer(Widget):
     else:
       color = rl.Color(255, 255, 255, int(alpha * 255))
 
-    if lateral_only:
-      # Neutral geometry makes lateral activity visible without borrowing the
-      # engaged (Long/global) color language.
-      color = rl.Color(255, 255, 255, int(alpha * 255))
+    if not lateral_command_active:
+      color = rl.Color(INACTIVE_LATERAL_COLOR.r, INACTIVE_LATERAL_COLOR.g, INACTIVE_LATERAL_COLOR.b, int(alpha * 255))
+    elif lateral_only:
+      # Reuse the existing active-lateral green without changing global chrome.
+      color = rl.Color(ACTIVE_LATERAL_COLOR.r, ACTIVE_LATERAL_COLOR.g, ACTIVE_LATERAL_COLOR.b, int(alpha * 255))
     elif ui_state.status == UIStatus.DISENGAGED:
       color = rl.Color(0, 0, 0, int(alpha * 255))
 
     return color
 
-  def _draw_lane_lines(self, *, lateral_only: bool):
+  def _draw_lane_lines(self, *, lateral_command_active: bool, lateral_only: bool):
     """Draw lane lines and road edges. Two closest lines should be green (lane line or road edges)."""
     offset = np.array([self._rect.x, self._rect.y], dtype=np.float32)
 
@@ -327,7 +333,8 @@ class ModelRenderer(Widget):
       if lane_line.projected_points.size == 0:
         continue
 
-      color = self._get_ll_color(float(self._lane_line_probs[i]), i in (1, 2), i in (0, 1), lateral_only=lateral_only)
+      color = self._get_ll_color(float(self._lane_line_probs[i]), i in (1, 2), i in (0, 1),
+                                 lateral_command_active=lateral_command_active, lateral_only=lateral_only)
       draw_polygon(self._rect, lane_line.projected_points + offset, color)
 
     for i, road_edge in enumerate(self._road_edges):
@@ -336,10 +343,10 @@ class ModelRenderer(Widget):
 
       # if closest lane lines are not confident, make road edges green
       color = self._get_ll_color(float(1.0 - self._road_edge_stds[i]), float(self._lane_line_probs[i + 1]) < 0.25, i == 0,
-                                 lateral_only=lateral_only)
+                                 lateral_command_active=lateral_command_active, lateral_only=lateral_only)
       draw_polygon(self._rect, road_edge.projected_points + offset, color)
 
-  def _draw_path(self, sm, *, lateral_only: bool):
+  def _draw_path(self, sm, *, lateral_command_active: bool, lateral_only: bool):
     """Draw path with dynamic coloring based on mode and throttle state."""
     if not self._path.projected_points.size:
       return
@@ -349,8 +356,12 @@ class ModelRenderer(Widget):
 
     path_pts = self._path.projected_points + np.array([self._rect.x, self._rect.y], dtype=np.float32)
 
-    if lateral_only:
-      draw_polygon(self._rect, path_pts, rl.Color(255, 255, 255, 90))
+    if not lateral_command_active:
+      draw_polygon(self._rect, path_pts, rl.Color(INACTIVE_LATERAL_COLOR.r, INACTIVE_LATERAL_COLOR.g,
+                                                   INACTIVE_LATERAL_COLOR.b, 90))
+    elif lateral_only:
+      draw_polygon(self._rect, path_pts, rl.Color(ACTIVE_LATERAL_COLOR.r, ACTIVE_LATERAL_COLOR.g,
+                                                   ACTIVE_LATERAL_COLOR.b, 90))
     elif self._experimental_mode:
       # Draw with acceleration coloring
       if ui_state.status == UIStatus.DISENGAGED:

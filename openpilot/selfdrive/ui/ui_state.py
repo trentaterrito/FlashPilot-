@@ -30,6 +30,13 @@ def final_lateral_presentation_active(started: bool, car_control_healthy: bool, 
   return bool(started and car_control_healthy and lat_active)
 
 
+def final_lateral_command_presentation_active(started: bool, car_control_healthy: bool,
+                                              car_output_healthy: bool, lat_active: bool,
+                                              command_active: bool) -> bool:
+  """Final UI steering state: authorization and the vehicle command must agree."""
+  return bool(started and car_control_healthy and car_output_healthy and lat_active and command_active)
+
+
 class ChestnutState(Enum):
   DISCONNECTED = "disconnected"
   UNCOMPILED = "uncompiled"
@@ -141,6 +148,13 @@ class UIState:
     """
     return final_lateral_presentation_active(
       self.started, self.sm.all_checks(["carControl"]), self.sm["carControl"].latActive)
+
+  @property
+  def effective_lateral_command_active(self) -> bool:
+    """Read-only final Ford command mode for lateral geometry presentation."""
+    return final_lateral_command_presentation_active(
+      self.started, self.sm.all_checks(["carControl"]), self.sm.all_checks(["carOutput"]),
+      self.sm["carControl"].latActive, self.sm["carOutput"].lateralCommandActive)
 
   def is_onroad(self) -> bool:
     return self.started

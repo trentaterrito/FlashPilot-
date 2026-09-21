@@ -76,6 +76,7 @@ class Car:
     self.initialized_prev = False
 
     self.last_actuators_output = structs.CarControl.Actuators()
+    self.last_lateral_command_active = False
 
     self.params = Params()
 
@@ -211,6 +212,7 @@ class Car:
     co_send = messaging.new_message('carOutput')
     co_send.valid = self.sm.all_checks(['carControl'])
     co_send.carOutput.actuatorsOutput = self.last_actuators_output
+    co_send.carOutput.lateralCommandActive = self.last_lateral_command_active
     self.pm.send('carOutput', co_send)
 
     # kick off controlsd step while we actuate the latest carControl packet
@@ -241,6 +243,10 @@ class Car:
       # send car controls over can
       now_nanos = self.can_log_mono_time if REPLAY else int(time.monotonic() * 1e9)
       self.last_actuators_output, can_sends = self.CI.apply(CC, now_nanos)
+      # Ford refines this at its final LMC2 command-mode decision. Other cars
+      # retain their existing latActive presentation semantics. This output is
+      # intentionally one-way observability and has no control consumer.
+      self.last_lateral_command_active = bool(getattr(self.CI.CC, 'lateral_command_active', CC.latActive))
       self.pm.send('sendcan', can_list_to_can_capnp(can_sends, msgtype='sendcan', valid=CS.canValid))
 
       self.CC_prev = CC
