@@ -57,6 +57,14 @@ def test_long_lateral_presentation_state_matrix_and_yield_transitions():
   assert "elif lateral_only:" in source
 
 
+def test_lateral_only_path_is_neutral_not_the_longitudinal_throttle_gradient():
+  renderer = ROOT / "selfdrive/ui/mici/onroad/model_renderer.py"
+  source = renderer.read_text()
+  assert "LATERAL_ONLY_PATH_COLOR = rl.Color(200, 200, 200, 90)" in source
+  assert "draw_polygon(self._rect, path_pts, LATERAL_ONLY_PATH_COLOR)" in source
+  assert "elif lateral_only:\n      draw_polygon(self._rect, path_pts, LATERAL_ONLY_PATH_COLOR)" in source
+
+
 def test_aol_preference_or_panda_configuration_cannot_substitute_for_lateral_activity():
   renderer = ROOT / "selfdrive/ui/mici/onroad/model_renderer.py"
   source = renderer.read_text()

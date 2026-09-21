@@ -22,6 +22,7 @@ from openpilot.selfdrive.selfdrived.events import Events, ET
 from openpilot.selfdrive.selfdrived.helpers import ExcessiveActuationCheck
 from openpilot.selfdrive.selfdrived.state import StateMachine
 from openpilot.selfdrive.selfdrived.alertmanager import AlertManager, set_offroad_alert
+from openpilot.selfdrive.selfdrived.flashpilot_aol_alert import FlashPilotAolLateralLossAlert
 
 from openpilot.common.version import get_build_metadata
 from openpilot.common.hardware import HARDWARE
@@ -113,6 +114,8 @@ class SelfdriveD:
     self.CS_prev = car.CarState.new_message()
     self.AM = AlertManager()
     self.events = Events()
+    self.flashpilot_aol_lateral_loss_alert = FlashPilotAolLateralLossAlert(
+      self.CP.carFingerprint == 'FORD_F_150_LIGHTNING_MK1')
 
     self.initialized = False
     self.enabled = False
@@ -154,6 +157,20 @@ class SelfdriveD:
     """Compute onroadEvents from carState"""
 
     self.events.clear()
+
+    # Read-only AOL driver communication. This deliberately observes the final
+    # host gate and Panda's authority bit; it cannot alter either control path.
+    panda_states = self.sm['pandaStates']
+    panda_authorized = len(panda_states) == 1 and panda_states[0].controlsAllowedLateral
+    authority_fresh = self.initialized and self.sm.all_checks(['carControl', 'pandaStates'])
+    if self.flashpilot_aol_lateral_loss_alert.update(
+        configured=self.params.get_bool('FlashPilotMads'),
+        onroad=self.sm['deviceState'].started,
+        drive=str(CS.gearShifter) == 'drive',
+        fresh=authority_fresh,
+        host_authorized=self.sm['carControl'].latActive,
+        panda_authorized=panda_authorized):
+      self.events.add(EventName.lateralControlUnavailable)
 
     if self.sm['controlsState'].lateralControlState.which() == 'debugState':
       self.events.add(EventName.joystickDebug)

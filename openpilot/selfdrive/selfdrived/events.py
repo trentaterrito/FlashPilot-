@@ -516,6 +516,17 @@ EVENTS: dict[int, dict[str, Alert | AlertCallbackType]] = {
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.prompt, 1.8),
   },
 
+  # An independent AOL lateral session can remain active after ordinary Long
+  # engagement ends. This is therefore permanent rather than tied to the
+  # global state machine's active/disabled alert types.
+  EventName.lateralControlUnavailable: {
+    ET.PERMANENT: Alert(
+      "Lateral Control Unavailable",
+      "Steer Manually",
+      AlertStatus.userPrompt, AlertSize.full,
+      Priority.HIGH, VisualAlert.steerRequired, AudibleAlert.warningSoft, 4.),
+  },
+
   EventName.driverDistracted1: {
     ET.PERMANENT: Alert(
       "Pay Attention",

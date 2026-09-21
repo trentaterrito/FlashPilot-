@@ -37,6 +37,9 @@ LANE_LINE_COLORS = {
 
 ACTIVE_LATERAL_COLOR = LANE_LINE_COLORS[UIStatus.ENGAGED]
 INACTIVE_LATERAL_COLOR = LANE_LINE_COLORS[UIStatus.DISENGAGED]
+# A fixed neutral path distinguishes lateral-only guidance from the normal
+# Long/throttle gradient. Green remains reserved for steering geometry.
+LATERAL_ONLY_PATH_COLOR = rl.Color(200, 200, 200, 90)
 
 
 def should_render_lateral_geometry(lateral_active: bool) -> bool:
@@ -360,8 +363,7 @@ class ModelRenderer(Widget):
       draw_polygon(self._rect, path_pts, rl.Color(INACTIVE_LATERAL_COLOR.r, INACTIVE_LATERAL_COLOR.g,
                                                    INACTIVE_LATERAL_COLOR.b, 90))
     elif lateral_only:
-      draw_polygon(self._rect, path_pts, rl.Color(ACTIVE_LATERAL_COLOR.r, ACTIVE_LATERAL_COLOR.g,
-                                                   ACTIVE_LATERAL_COLOR.b, 90))
+      draw_polygon(self._rect, path_pts, LATERAL_ONLY_PATH_COLOR)
     elif self._experimental_mode:
       # Draw with acceleration coloring
       if ui_state.status == UIStatus.DISENGAGED:
