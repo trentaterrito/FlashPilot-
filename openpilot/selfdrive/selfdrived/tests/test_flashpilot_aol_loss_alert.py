@@ -7,9 +7,11 @@ ROOT = Path(__file__).parents[3]
 
 
 def update(alert, *, configured=True, onroad=True, drive=True, fresh=True,
-           host_authorized=False, panda_authorized=False):
+           host_authorized=False, panda_authorized=False, cruise_available=True,
+           main_cruise_pressed=False):
   return alert.update(configured=configured, onroad=onroad, drive=drive, fresh=fresh,
-                      host_authorized=host_authorized, panda_authorized=panda_authorized)
+                      host_authorized=host_authorized, panda_authorized=panda_authorized,
+                      cruise_available=cruise_available, main_cruise_pressed=main_cruise_pressed)
 
 
 def arm(alert):
@@ -21,6 +23,37 @@ def test_14d_panda_tx_revoke_alerts_after_established_aol_authority():
   # Panda controlsAllowedLateral changed True -> False after LATERAL_REVOKE_TX.
   alert = FlashPilotAolLateralLossAlert(lightning=True)
   arm(alert)
+  assert update(alert, host_authorized=False, panda_authorized=False)
+
+
+def test_route150_event_a_main_off_suppresses_loss_with_long_already_off():
+  # Segment 29: the ACC-main edge precedes available/host/Panda loss, but
+  # no pcmDisable/userDisable event exists because global Long is already off.
+  alert = FlashPilotAolLateralLossAlert(lightning=True)
+  arm(alert)
+  assert not update(alert, host_authorized=False, panda_authorized=True,
+                    cruise_available=False, main_cruise_pressed=True)
+  assert not update(alert, host_authorized=False, panda_authorized=False, cruise_available=False)
+
+
+def test_route150_event_b_main_off_suppresses_loss_and_preserves_user_disable_path():
+  # Segment 34: the same ACC-main edge shuts both Long and lateral down.
+  alert = FlashPilotAolLateralLossAlert(lightning=True)
+  arm(alert)
+  assert not update(alert, host_authorized=False, panda_authorized=True,
+                    cruise_available=False, main_cruise_pressed=True)
+
+
+def test_vehicle_revoke_without_main_off_still_alerts():
+  alert = FlashPilotAolLateralLossAlert(lightning=True)
+  arm(alert)
+  assert update(alert, host_authorized=False, panda_authorized=False, cruise_available=False)
+
+
+def test_main_button_without_available_to_unavailable_transition_does_not_suppress():
+  alert = FlashPilotAolLateralLossAlert(lightning=True)
+  arm(alert)
+  assert not update(alert, host_authorized=True, panda_authorized=True, main_cruise_pressed=True)
   assert update(alert, host_authorized=False, panda_authorized=False)
 
 

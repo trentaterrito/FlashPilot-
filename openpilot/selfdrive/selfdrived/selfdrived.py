@@ -163,13 +163,16 @@ class SelfdriveD:
     panda_states = self.sm['pandaStates']
     panda_authorized = len(panda_states) == 1 and panda_states[0].controlsAllowedLateral
     authority_fresh = self.initialized and self.sm.all_checks(['carControl', 'pandaStates'])
+    main_cruise_pressed = any(be.type == ButtonType.mainCruise and be.pressed for be in CS.buttonEvents)
     if self.flashpilot_aol_lateral_loss_alert.update(
         configured=self.params.get_bool('FlashPilotMads'),
         onroad=self.sm['deviceState'].started,
         drive=str(CS.gearShifter) == 'drive',
         fresh=authority_fresh,
         host_authorized=self.sm['carControl'].latActive,
-        panda_authorized=panda_authorized):
+        panda_authorized=panda_authorized,
+        cruise_available=CS.cruiseState.available,
+        main_cruise_pressed=main_cruise_pressed):
       self.events.add(EventName.lateralControlUnavailable)
 
     if self.sm['controlsState'].lateralControlState.which() == 'debugState':
