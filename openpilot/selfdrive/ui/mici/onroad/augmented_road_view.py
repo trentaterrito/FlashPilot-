@@ -10,6 +10,7 @@ from openpilot.selfdrive.ui.mici.onroad.driver_state import DriverStateRenderer
 from openpilot.selfdrive.ui.mici.onroad.hud_renderer import HudRenderer
 from openpilot.selfdrive.ui.mici.onroad.model_renderer import ModelRenderer
 from openpilot.selfdrive.ui.mici.onroad.confidence_ball import ConfidenceBall
+from openpilot.selfdrive.ui.mici.onroad.flashpilot_bsm import detected_sides, draw_bsm_hue, draw_bsm_edges
 from openpilot.selfdrive.ui.mici.onroad.cameraview import CameraView
 from openpilot.system.ui.lib.application import FontWeight, gui_app, MousePos, MouseEvent, TextAlignment, TextAlignmentVertical
 from openpilot.system.ui.widgets.label import UnifiedLabel
@@ -211,6 +212,10 @@ class AugmentedRoadView(CameraView):
     # Render the base camera view
     super()._render(self._content_rect)
 
+    # BSM detection tints only the camera. Unavailable data never looks detected.
+    bsm_left, bsm_right = detected_sides(ui_state.sm, ui_state.started_frame)
+    draw_bsm_hue(self._content_rect, bsm_left, bsm_right)
+
     # Draw all UI overlays
     self._model_renderer.render(self._content_rect)
 
@@ -241,6 +246,9 @@ class AugmentedRoadView(CameraView):
     # Custom UI extension point - add custom overlays here
     # Use self._content_rect for positioning within camera bounds
     self._confidence_ball.render(self.rect)
+
+    # Keep the side edges outside the alert/model/HUD drawing region.
+    draw_bsm_edges(self._content_rect, bsm_left, bsm_right)
 
     self._bookmark_icon.render(self.rect)
 
