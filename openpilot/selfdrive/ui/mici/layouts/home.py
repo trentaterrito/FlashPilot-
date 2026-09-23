@@ -30,6 +30,23 @@ NETWORK_TYPES = {
 }
 
 
+def alpha_long_badge_visible(alpha_long_available: bool, has_longitudinal_control: bool) -> bool:
+  # V1 status: Alpha Long feature enabled, not current longitudinal engagement.
+  return alpha_long_available and has_longitudinal_control
+
+
+class AlphaLongBadge(Widget):
+  def __init__(self):
+    super().__init__()
+    self.set_rect(rl.Rectangle(0, 0, 82, 44))
+
+  def _render(self, rect):
+    rl.draw_rectangle_rounded(rect, 0.22, 8, rl.Color(15, 117, 78, 235))
+    rl.draw_rectangle_rounded_lines_ex(rect, 0.22, 8, 2, rl.Color(108, 255, 191, 255))
+    gui_label(rect, "AL-ON", font_size=24, font_weight=FontWeight.BOLD,
+              alignment=TextAlignment.CENTER, alignment_vertical=TextAlignmentVertical.MIDDLE)
+
+
 class AlertsPill(Widget):
   ICON_OFFSET = 12
   COUNT_OFFSET = 40
@@ -140,6 +157,7 @@ class MiciHomeLayout(Widget):
     self._version_text = self._get_version_text()
 
     self._experimental_icon = IconWidget("icons_mici/experimental_mode.png", (48, 48))
+    self._alpha_long_badge = AlphaLongBadge()
     self._usb_icon = IconWidget("icons_mici/usb.png", (62, 40))
     self._chestnut_icon = IconWidget("icons_mici/chestnut_green.png", (68, 40))
     self._chestnut_loading_icon = IconWidget("icons_mici/chestnut.png", (68, 40))
@@ -153,6 +171,7 @@ class MiciHomeLayout(Widget):
       IconWidget("icons_mici/settings.png", (48, 48), opacity=0.9),
       NetworkIcon(),
       self._experimental_icon,
+      self._alpha_long_badge,
       self._usb_icon,
       self._chestnut_icon,
       self._chestnut_loading_icon,
@@ -161,7 +180,7 @@ class MiciHomeLayout(Widget):
       self._mic_icon,
     ], spacing=18)
 
-    self._openpilot_label = UnifiedLabel("openpilot", font_size=96, font_weight=FontWeight.DISPLAY, max_width=480, wrap_text=False)
+    self._openpilot_label = UnifiedLabel("FlashPilot", font_size=80, font_weight=FontWeight.DISPLAY, max_width=420, wrap_text=False)
     self._version_label = UnifiedLabel("", font_size=36, font_weight=FontWeight.ROMAN, max_width=480, wrap_text=False)
     self._large_version_label = UnifiedLabel("", font_size=64, text_color=rl.GRAY, font_weight=FontWeight.ROMAN, max_width=480, wrap_text=False)
     self._date_label = UnifiedLabel("", font_size=36, text_color=rl.GRAY, font_weight=FontWeight.ROMAN, max_width=480, wrap_text=False)
@@ -225,7 +244,12 @@ class MiciHomeLayout(Widget):
   def _render(self, _):
     # TODO: why is there extra space here to get it to be flush?
     text_pos = rl.Vector2(self.rect.x - 2 + HOME_PADDING, self.rect.y - 16)
-    self._openpilot_label.set_position(text_pos.x, text_pos.y)
+    # Canonical V1 procedural bolt; no replacement branding asset.
+    bolt = [rl.Vector2(text_pos.x + x, text_pos.y + 12 + y)
+            for x, y in ((31, 0), (2, 41), (21, 41), (13, 72), (46, 28), (27, 28))]
+    for a, b, c in ((0, 1, 5), (1, 2, 5), (2, 3, 4), (2, 4, 5)):
+      rl.draw_triangle(bolt[a], bolt[b], bolt[c], rl.Color(255, 208, 40, 255))
+    self._openpilot_label.set_position(text_pos.x + 60, text_pos.y + 8)
     self._openpilot_label.render()
 
     if self._version_text is not None:
@@ -256,6 +280,8 @@ class MiciHomeLayout(Widget):
     usb_unknown = ui_state.usb_unknown
     chestnut_state = ui_state.chestnut_state
     self._experimental_icon.set_visible(ui_state.experimental_mode)
+    alpha_long_available = ui_state.CP is not None and ui_state.CP.alphaLongitudinalAvailable
+    self._alpha_long_badge.set_visible(alpha_long_badge_visible(alpha_long_available, ui_state.has_longitudinal_control))
     self._usb_icon.set_visible(usb_connected and usb_unknown)
     self._chestnut_icon.set_visible(not usb_unknown and chestnut_state not in
                                     (ChestnutState.LOADING, ChestnutState.UNCOMPILED, ChestnutState.FAILED) and
