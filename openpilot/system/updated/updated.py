@@ -30,6 +30,12 @@ FINALIZED = os.path.join(STAGING_ROOT, "finalized")
 
 OVERLAY_INIT = Path(os.path.join(BASEDIR, ".overlay_init"))
 
+# FlashPilot V2 releases are promoted to this branch on the FlashPilot fork.
+# The installed checkout may be detached, and its origin may be a developer fork.
+FLASHPILOT_UPDATE_BRANCH = "flashpilot-v2-deploy"
+FLASHPILOT_UPDATE_REMOTE = "https://github.com/trentaterrito/FlashPilot-.git"
+FLASHPILOT_UPDATE_REMOTE_NAME = "flashpilot-update"
+
 # do not allow to engage after this many hours onroad and this many routes
 HOURS_NO_CONNECTIVITY_MAX = 27
 ROUTES_NO_CONNECTIVITY_MAX = 84
@@ -236,20 +242,20 @@ class Updater:
   @property
   def target_branch(self) -> str:
     b: str | None = self.params.get("UpdaterTargetBranch")
-    if b is None:
-      b = self.get_branch(BASEDIR)
-    b = {
-      ("tizi", "release3"): "release-tizi",
-      ("tizi", "release3-staging"): "release-tizi-staging",
-      ("mici", "release3"): "release-mici",
-      ("mici", "release3-staging"): "release-mici-staging",
-    }.get((HARDWARE.get_device_type(), b), b)
-    return b
+    # UpdaterTargetBranch is cleared on manager start. A detached direct deploy
+    # used to re-infer and persist the invalid branch name "HEAD".
+    return FLASHPILOT_UPDATE_BRANCH if b in (None, "", "HEAD") else b
+
+  def validate_target_branch(self) -> str:
+    branch = self.target_branch
+    if branch != FLASHPILOT_UPDATE_BRANCH:
+      raise ValueError(f"Invalid FlashPilot update target {branch!r}; expected {FLASHPILOT_UPDATE_BRANCH}")
+    return branch
 
   @property
   def update_ready(self) -> bool:
     consistent_file = Path(os.path.join(FINALIZED, ".overlay_consistent"))
-    if consistent_file.is_file():
+    if consistent_file.is_file() and self.target_branch in self.branches:
       hash_mismatch = self.get_commit_hash(BASEDIR) != self.branches[self.target_branch]
       branch_mismatch = self.get_branch(BASEDIR) != self.target_branch
       on_target_branch = self.get_branch(FINALIZED) == self.target_branch
@@ -258,7 +264,7 @@ class Updater:
 
   @property
   def update_available(self) -> bool:
-    if os.path.isdir(OVERLAY_MERGED) and len(self.branches) > 0:
+    if os.path.isdir(OVERLAY_MERGED) and self.target_branch in self.branches:
       hash_mismatch = self.get_commit_hash(OVERLAY_MERGED) != self.branches[self.target_branch]
       branch_mismatch = self.get_branch(OVERLAY_MERGED) != self.target_branch
       return hash_mismatch or branch_mismatch
@@ -342,24 +348,20 @@ class Updater:
 
   def check_for_update(self) -> None:
     cloudlog.info("checking for updates")
-
-    excluded_branches = ('release2', 'release2-staging')
+    branch = self.validate_target_branch()
 
     try:
-      run(["git", "ls-remote", "origin", "HEAD"], OVERLAY_MERGED)
+      output = run(["git", "ls-remote", "--heads", FLASHPILOT_UPDATE_REMOTE, f"refs/heads/{branch}"], OVERLAY_MERGED)
       self._has_internet = True
     except subprocess.CalledProcessError:
       self._has_internet = False
-
-    setup_git_options(OVERLAY_MERGED)
-    output = run(["git", "ls-remote", "--heads"], OVERLAY_MERGED)
+      raise
 
     self.branches.clear()
-    for line in output.split('\n'):
-      ls_remotes_re = r'(?P<commit_sha>\b[0-9a-f]{5,40}\b)(\s+)(refs\/heads\/)(?P<branch_name>.*$)'
-      x = re.fullmatch(ls_remotes_re, line.strip())
-      if x is not None and x.group('branch_name') not in excluded_branches:
-        self.branches[x.group('branch_name')] = x.group('commit_sha')
+    match = re.fullmatch(rf"([0-9a-f]{{40}})\s+refs/heads/{re.escape(branch)}", output.strip())
+    if match is None:
+      raise ValueError(f"FlashPilot update branch {branch} is missing or invalid on {FLASHPILOT_UPDATE_REMOTE}")
+    self.branches[branch] = match.group(1)
 
     cur_branch = self.get_branch(OVERLAY_MERGED)
     cur_commit = self.get_commit_hash(OVERLAY_MERGED)
@@ -371,6 +373,9 @@ class Updater:
       cloudlog.info(f"up to date on {cur_branch} ({str(cur_commit)[:7]})")
 
   def fetch_update(self) -> None:
+    branch = self.validate_target_branch()
+    if branch not in self.branches:
+      raise ValueError(f"FlashPilot update branch {branch} has not been resolved")
     cloudlog.info("attempting git fetch inside staging overlay")
 
     self.params.put("UpdaterState", "downloading...", block=True)
@@ -381,16 +386,17 @@ class Updater:
 
     setup_git_options(OVERLAY_MERGED)
 
-    run(["git", "config", "--replace-all", "remote.origin.fetch", "+refs/heads/*:refs/remotes/origin/*"], OVERLAY_MERGED)
-
-    branch = self.target_branch
-    git_fetch_output = run(["git", "fetch", "origin", branch], OVERLAY_MERGED)
+    fetch_ref = f"+refs/heads/{branch}:refs/remotes/{FLASHPILOT_UPDATE_REMOTE_NAME}/{branch}"
+    run(["git", "config", "--replace-all", f"remote.{FLASHPILOT_UPDATE_REMOTE_NAME}.url", FLASHPILOT_UPDATE_REMOTE], OVERLAY_MERGED)
+    run(["git", "config", "--replace-all", f"remote.{FLASHPILOT_UPDATE_REMOTE_NAME}.fetch", fetch_ref], OVERLAY_MERGED)
+    git_fetch_output = run(["git", "fetch", FLASHPILOT_UPDATE_REMOTE_NAME, fetch_ref], OVERLAY_MERGED)
+    self.branches[branch] = run(["git", "rev-parse", "FETCH_HEAD"], OVERLAY_MERGED).rstrip()
     cloudlog.info("git fetch success: %s", git_fetch_output)
 
     cloudlog.info("git reset in progress")
     cmds = [
       ["git", "checkout", "--force", "--no-recurse-submodules", "-B", branch, "FETCH_HEAD"],
-      ["git", "branch", "--set-upstream-to", f"origin/{branch}"],
+      ["git", "branch", "--set-upstream-to", f"{FLASHPILOT_UPDATE_REMOTE_NAME}/{branch}"],
       ["git", "reset", "--hard"],
       ["git", "clean", "-xdff"],
       ["git", "submodule", "sync"],
@@ -449,6 +455,8 @@ def main() -> None:
       # Attempt an update
       exception = None
       try:
+        # Reject an unsupported target before initializing or modifying the overlay.
+        updater.validate_target_branch()
         # TODO: reuse overlay from previous updated instance if it looks clean
         init_overlay()
 
