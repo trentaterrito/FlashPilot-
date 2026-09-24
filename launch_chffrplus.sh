@@ -49,7 +49,9 @@ function launch {
       echo "${DIR} has been modified, skipping overlay update installation"
     else
       if [ -f "${STAGING_ROOT}/finalized/.overlay_consistent" ]; then
-        if [ ! -d /data/safe_staging/old_openpilot ]; then
+        if ! bash "$DIR/openpilot/system/updated/flashpilot_update_guard.sh" "$DIR" "${STAGING_ROOT}/finalized"; then
+          echo "Skipping non-forward or unverifiable overlay update"
+        elif [ ! -d /data/safe_staging/old_openpilot ]; then
           echo "Valid overlay update found, installing"
           LAUNCHER_LOCATION="${BASH_SOURCE[0]}"
 

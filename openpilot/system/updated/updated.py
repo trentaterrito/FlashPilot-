@@ -9,6 +9,7 @@ import fcntl
 import time
 import threading
 from collections import defaultdict
+from enum import Enum
 from pathlib import Path
 
 from openpilot.common.basedir import BASEDIR
@@ -35,6 +36,55 @@ OVERLAY_INIT = Path(os.path.join(BASEDIR, ".overlay_init"))
 FLASHPILOT_UPDATE_BRANCH = "flashpilot-v2-deploy"
 FLASHPILOT_UPDATE_REMOTE = "https://github.com/trentaterrito/FlashPilot-.git"
 FLASHPILOT_UPDATE_REMOTE_NAME = "flashpilot-update"
+
+
+class CommitRelation(Enum):
+  SAME = "same"
+  TARGET_IS_DESCENDANT = "target_is_descendant"
+  TARGET_IS_ANCESTOR = "target_is_ancestor"
+  DIVERGED = "diverged"
+  UNKNOWN = "unknown"
+
+
+def classify_commit_relation(repo: str, installed: str, target: str) -> CommitRelation:
+  """Classify Git ancestry, failing closed when objects or history are unavailable."""
+  if not re.fullmatch(r"[0-9a-f]{40}", installed) or not re.fullmatch(r"[0-9a-f]{40}", target):
+    return CommitRelation.UNKNOWN
+
+  try:
+    run(["git", "cat-file", "-e", f"{installed}^{{commit}}"], repo)
+    run(["git", "cat-file", "-e", f"{target}^{{commit}}"], repo)
+  except subprocess.CalledProcessError:
+    return CommitRelation.UNKNOWN
+
+  if installed == target:
+    return CommitRelation.SAME
+
+  def is_ancestor(older: str, newer: str) -> bool | None:
+    try:
+      run(["git", "merge-base", "--is-ancestor", older, newer], repo)
+      return True
+    except subprocess.CalledProcessError as e:
+      return False if e.returncode == 1 else None
+
+  installed_before_target = is_ancestor(installed, target)
+  if installed_before_target is None:
+    return CommitRelation.UNKNOWN
+  if installed_before_target:
+    return CommitRelation.TARGET_IS_DESCENDANT
+
+  target_before_installed = is_ancestor(target, installed)
+  if target_before_installed is None:
+    return CommitRelation.UNKNOWN
+  if target_before_installed:
+    return CommitRelation.TARGET_IS_ANCESTOR
+
+  try:
+    if run(["git", "rev-parse", "--is-shallow-repository"], repo).strip() == "true":
+      return CommitRelation.UNKNOWN
+  except subprocess.CalledProcessError:
+    return CommitRelation.UNKNOWN
+  return CommitRelation.DIVERGED
 
 # do not allow to engage after this many hours onroad and this many routes
 HOURS_NO_CONNECTIVITY_MAX = 27
@@ -256,18 +306,24 @@ class Updater:
   def update_ready(self) -> bool:
     consistent_file = Path(os.path.join(FINALIZED, ".overlay_consistent"))
     if consistent_file.is_file() and self.target_branch in self.branches:
-      hash_mismatch = self.get_commit_hash(BASEDIR) != self.branches[self.target_branch]
-      branch_mismatch = self.get_branch(BASEDIR) != self.target_branch
-      on_target_branch = self.get_branch(FINALIZED) == self.target_branch
-      return ((hash_mismatch or branch_mismatch) and on_target_branch)
+      try:
+        installed = self.get_commit_hash(BASEDIR)
+        staged = self.get_commit_hash(FINALIZED)
+        return (staged == self.branches[self.target_branch]
+                and self.get_branch(FINALIZED) == self.target_branch
+                and classify_commit_relation(FINALIZED, installed, staged) == CommitRelation.TARGET_IS_DESCENDANT)
+      except subprocess.CalledProcessError:
+        return False
     return False
 
   @property
   def update_available(self) -> bool:
     if os.path.isdir(OVERLAY_MERGED) and self.target_branch in self.branches:
-      hash_mismatch = self.get_commit_hash(OVERLAY_MERGED) != self.branches[self.target_branch]
-      branch_mismatch = self.get_branch(OVERLAY_MERGED) != self.target_branch
-      return hash_mismatch or branch_mismatch
+      try:
+        return (classify_commit_relation(OVERLAY_MERGED, self.get_commit_hash(BASEDIR), self.branches[self.target_branch])
+                == CommitRelation.TARGET_IS_DESCENDANT)
+      except subprocess.CalledProcessError:
+        return False
     return False
 
   def get_branch(self, path: str) -> str:
@@ -368,7 +424,7 @@ class Updater:
     new_branch = self.target_branch
     new_commit = self.branches[new_branch]
     if (cur_branch, cur_commit) != (new_branch, new_commit):
-      cloudlog.info(f"update available, {cur_branch} ({str(cur_commit)[:7]}) -> {new_branch} ({str(new_commit)[:7]})")
+      cloudlog.info(f"target differs, ancestry pending fetch: {cur_branch} ({str(cur_commit)[:7]}) -> {new_branch} ({str(new_commit)[:7]})")
     else:
       cloudlog.info(f"up to date on {cur_branch} ({str(cur_commit)[:7]})")
 
@@ -392,6 +448,18 @@ class Updater:
     git_fetch_output = run(["git", "fetch", FLASHPILOT_UPDATE_REMOTE_NAME, fetch_ref], OVERLAY_MERGED)
     self.branches[branch] = run(["git", "rev-parse", "FETCH_HEAD"], OVERLAY_MERGED).rstrip()
     cloudlog.info("git fetch success: %s", git_fetch_output)
+
+    installed = self.get_commit_hash(BASEDIR)
+    target = self.branches[branch]
+    relation = classify_commit_relation(OVERLAY_MERGED, installed, target)
+    if relation != CommitRelation.TARGET_IS_DESCENDANT:
+      if relation == CommitRelation.TARGET_IS_ANCESTOR:
+        cloudlog.info("FlashPilot updater: installed ahead of stable (%s > %s)", installed, target)
+      elif relation == CommitRelation.SAME:
+        cloudlog.info("FlashPilot updater: up to date on %s", installed)
+      else:
+        cloudlog.warning("FlashPilot updater: %s; manual release resolution required (%s -> %s)", relation.value, installed, target)
+      return
 
     cloudlog.info("git reset in progress")
     cmds = [
